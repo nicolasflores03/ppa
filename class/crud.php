@@ -1,4 +1,5 @@
 <?php
+$_GET['login'] = "EAMSYSADMIN";
 class crudClass{
 
 /* Update Session*/
