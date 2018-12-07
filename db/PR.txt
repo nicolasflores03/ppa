@@ -1,0 +1,48 @@
+DECLARE @req_code NVARCHAR(30),@stats NVARCHAR(4),@req_dept NVARCHAR(30),@enteredBy NVARCHAR(30),@dueDate NVARCHAR(4)
+
+SELECT @req_code = REQ_CODE,@stats = REQ_STATUS,@enteredBy = REQ_AUTH,@dueDate = YEAR(REQ_DATE) FROM dbo.R5REQUISITIONS WHERE REQ_SQLIDENTITY=:ROWID
+
+SELECT TOP 1 @req_dept = MRC_CODE FROM dbo.R5_VIEW_USERINFO WHERE USR_CODE = @enteredBy
+
+IF @stats = 'A'
+BEGIN
+
+
+	UPDATE dbo.R5_EAM_DPP_ITEMBASE_LINES SET 
+	dbo.R5_EAM_DPP_ITEMBASE_LINES.reserved = dbo.R5_EAM_DPP_ITEMBASE_LINES.reserved + (SELECT dbo.R5REQUISLINES.RQL_PRICE * dbo.R5REQUISLINES.RQL_QTY FROM dbo.R5REQUISLINES WHERE dbo.R5REQUISLINES.RQL_PART COLLATE Latin1_General_CI_AS = dbo.R5_EAM_DPP_ITEMBASE_LINES.code AND RQL_REQ = @req_code) WHERE dbo.R5_EAM_DPP_ITEMBASE_LINES.code COLLATE Latin1_General_CI_AS IN (SELECT dbo.R5REQUISLINES.RQL_PART FROM dbo.R5REQUISLINES WHERE dbo.R5REQUISLINES.RQL_REQ = @req_code) AND dbo.R5_EAM_DPP_ITEMBASE_LINES.id IN (SELECT rowid FROM dbo.R5_PR_PO_ITEM_LOOKUP WHERE status = 'Approved' AND MRC_CODE = @req_dept AND year_budget = @dueDate);  
+
+	
+--Start of Cursor for Error Message
+DECLARE @code NVARCHAR(30),@rqlReq NVARCHAR(30),@available FLOAT,@reserved FLOAT,@errorMsg NVARCHAR(100)
+DECLARE @MyCursor CURSOR
+SET @MyCursor = CURSOR FAST_FORWARD
+FOR
+
+SELECT item.code,requisition.RQL_REQ,item.available,requisition.RQL_PRICE * requisition.RQL_QTY AS reserved  
+FROM dbo.R5_EAM_DPP_ITEMBASE_LINES AS item LEFT OUTER JOIN dbo.R5REQUISLINES AS requisition ON requisition.RQL_PART COLLATE Latin1_General_CI_AS = item.code WHERE requisition.RQL_REQ = @req_code
+AND item.id IN (SELECT rowid FROM dbo.R5_PR_PO_ITEM_LOOKUP WHERE status = 'Approved' AND MRC_CODE = @req_dept AND year_budget = @dueDate);
+
+OPEN @MyCursor
+FETCH NEXT FROM @MyCursor
+INTO @code,@rqlReq,@available,@reserved
+WHILE @@FETCH_STATUS = 0
+BEGIN
+SET @errorMsg = 'Requisition Amount exceeds the budget limit for the following items:'+CHAR(13)+@code+'--'+@rqlReq+CHAR(13)
+	IF  @available < @reserved
+	BEGIN
+    	RAISERROR(@errorMsg, -- Message text.
+       	       16, -- Severity.
+       	       1 -- State.
+       	       ) WITH NOWAIT;
+    END
+FETCH NEXT FROM @MyCursor
+INTO @code,@rqlReq,@available,@reserved
+END
+CLOSE @MyCursor
+DEALLOCATE @MyCursor
+--END of Cursor for Error Message
+
+	UPDATE dbo.R5_EAM_DPP_ITEMBASE_LINES SET 
+	dbo.R5_EAM_DPP_ITEMBASE_LINES.available = dbo.R5_EAM_DPP_ITEMBASE_LINES.available - (SELECT dbo.R5REQUISLINES.RQL_PRICE * dbo.R5REQUISLINES.RQL_QTY FROM dbo.R5REQUISLINES WHERE dbo.R5REQUISLINES.RQL_PART COLLATE Latin1_General_CI_AS = dbo.R5_EAM_DPP_ITEMBASE_LINES.code AND RQL_REQ = @req_code) WHERE dbo.R5_EAM_DPP_ITEMBASE_LINES.code COLLATE Latin1_General_CI_AS IN (SELECT dbo.R5REQUISLINES.RQL_PART FROM dbo.R5REQUISLINES WHERE dbo.R5REQUISLINES.RQL_REQ = @req_code) AND dbo.R5_EAM_DPP_ITEMBASE_LINES.id IN (SELECT rowid FROM dbo.R5_PR_PO_ITEM_LOOKUP WHERE status = 'Approved' AND MRC_CODE = @req_dept AND year_budget = @dueDate);  
+END
+

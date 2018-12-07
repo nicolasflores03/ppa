@@ -1,0 +1,747 @@
+CREATE VIEW [dbo].[R5_VIEW_USERINFO]
+AS
+SELECT     user_rec.USR_CODE, user_rec.USR_DESC, org_rec.ORG_CODE, org_rec.ORG_DESC, mrc_rec.MRC_CODE, mrc_rec.MRC_DESC, 
+                      dbo.R5PERSONNEL.PER_EMAILADDRESS
+FROM         dbo.R5USERS AS user_rec FULL OUTER JOIN
+                      dbo.R5DEPARTMENTSECURITY AS dse_rec ON user_rec.USR_CODE = dse_rec.DSE_USER FULL OUTER JOIN
+                      dbo.R5MRCS AS mrc_rec ON dse_rec.DSE_MRC = mrc_rec.MRC_CODE FULL OUTER JOIN
+                      dbo.R5USERORGANIZATION AS userorg_rec ON user_rec.USR_CODE = userorg_rec.UOG_USER FULL OUTER JOIN
+                      dbo.R5ORGANIZATION AS org_rec ON userorg_rec.UOG_ORG = org_rec.ORG_CODE LEFT OUTER JOIN
+                      dbo.R5PERSONNEL ON user_rec.USR_CODE = dbo.R5PERSONNEL.PER_USER
+WHERE     (org_rec.ORG_CODE NOT LIKE '*')
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_SERVICE_UOM_INFO]
+AS
+SELECT     dbo.R5PARTS.PAR_CODE, dbo.R5PARTS.PAR_DESC, dbo.R5PARTS.PAR_BASEPRICE, dbo.R5PARTS.PAR_UDFCHAR07, dbo.R5PARTS.PAR_UDFCHAR09, 
+                      dbo.R5PARTS.PAR_COMMODITY, dbo.R5UOMS.UOM_CODE, dbo.R5UOMS.UOM_DESC, dbo.R5COMMODITIES.CMD_DESC, dbo.R5_GL_ACCOUNTS.gl, 
+                      dbo.R5_GL_ACCOUNTS.description AS gl_description, dbo.R5PARTS.PAR_LASTPRICE, dbo.R5PARTS.PAR_NOTUSED
+FROM         dbo.R5_GL_ACCOUNTS INNER JOIN
+                      dbo.R5COMMODITIES ON dbo.R5_GL_ACCOUNTS.CMD_CODE COLLATE Latin1_General_BIN = dbo.R5COMMODITIES.CMD_CODE RIGHT OUTER JOIN
+                      dbo.R5PARTS ON dbo.R5COMMODITIES.CMD_CODE = dbo.R5PARTS.PAR_COMMODITY LEFT OUTER JOIN
+                      dbo.R5UOMS ON dbo.R5PARTS.PAR_UOM = dbo.R5UOMS.UOM_CODE
+WHERE     (dbo.R5PARTS.PAR_CODE NOT LIKE '*') AND (dbo.R5PARTS.PAR_UDFCHKBOX01 NOT LIKE '-')
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_REQUISLINES]
+AS
+SELECT     TOP (100) PERCENT dbo.R5REQUISLINES.RQL_REQ, CAST(dbo.R5REQUISLINES.RQL_REQLINE AS INT) AS REQLINE, dbo.R5REQUISLINES.RQL_PART, 
+                      dbo.R5PARTS.PAR_DESC
+FROM         dbo.R5REQUISLINES INNER JOIN
+                      dbo.R5PARTS ON dbo.R5REQUISLINES.RQL_PART = dbo.R5PARTS.PAR_CODE
+ORDER BY dbo.R5REQUISLINES.RQL_REQ, dbo.R5REQUISLINES.RQL_REQLINE
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_R5COMMODITIES]
+AS
+SELECT     TOP (100) PERCENT CMD_CODE, CMD_DESC, CMD_CLASS, CMD_ORG, CMD_CLASS_ORG, CMD_UPDATECOUNT, CMD_SQLIDENTITY, CMD_NOTUSED, CMD_UOM, 
+                      CMD_EMISSIONCATEGORY
+FROM         dbo.R5COMMODITIES
+ORDER BY CMD_CODE, CMD_DESC
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_QUOTATION_DETAILS]
+AS
+SELECT     dbo.R5RFQRESPONSES.RFR_QUOTID, T2.add_text AS Vendor_Offer, dbo.R5RFQUOTATIONS.RFQ_CODE, dbo.R5REQUISLINES.RQL_PART AS PART, 
+                      dbo.R5O7_O7GET_DESC(N'EN', N'PART', dbo.R5REQUISLINES.RQL_PART + '#' + dbo.R5REQUISLINES.RQL_PART_ORG, NULL, NULL) AS DESCRIPTION, 
+                      dbo.R5REQUISLINES.RQL_REQLINE AS LINE, dbo.R5REQUISLINES.RQL_QTY AS QUANTITY, dbo.R5REQUISLINES.RQL_UOM AS UOM, 
+                      dbo.R5UOMS.UOM_DESC AS UOMDESC, dbo.R5REQUISLINES.RQL_PRICE AS PRICE, 
+                      dbo.R5REQUISLINES.RQL_QTY * dbo.R5REQUISLINES.RQL_PRICE AS AMOUNT, dbo.R5REQUISLINES.RQL_CURR AS CURRENCY, dbo.R5O7_O7GET_DESC(N'EN', 
+                      N'UCOD', dbo.R5REQUISLINES.RQL_STATUS, N'RLST', NULL) AS REQPSTATUS, dbo.R5REQUISLINES.RQL_DUE AS DUEDATE, 
+                      dbo.R5REQUISLINES.RQL_BUYER AS BUYER, rfql.RLR_PURUOM AS FINAL_UOM, rfql.RLR_PURQTY AS FINAL_QTY, rfql.RLR_PRICE AS FINALPRICE
+FROM         dbo.R5RFQUOTATIONS LEFT OUTER JOIN
+                      dbo.R5REQUISLINES ON dbo.R5REQUISLINES.RQL_REQ = dbo.R5RFQUOTATIONS.RFQ_REQUISITION LEFT OUTER JOIN
+                      dbo.R5EVENTS ON dbo.R5REQUISLINES.RQL_EVENT = dbo.R5EVENTS.EVT_CODE LEFT OUTER JOIN
+                      dbo.R5PARTS ON dbo.R5REQUISLINES.RQL_PART = dbo.R5PARTS.PAR_CODE AND 
+                      dbo.R5REQUISLINES.RQL_PART_ORG = dbo.R5PARTS.PAR_ORG LEFT OUTER JOIN
+                      dbo.R5UOMS ON dbo.R5UOMS.UOM_CODE = dbo.R5REQUISLINES.RQL_UOM LEFT OUTER JOIN
+                      dbo.R5RFQRESPONSES ON dbo.R5RFQUOTATIONS.RFQ_CODE = dbo.R5RFQRESPONSES.RFR_CODE LEFT OUTER JOIN
+                          (SELECT     add_entity, add_rentity, add_type, add_rtype, add_code, add_lang, add_line, add_print, add_text, add_created, add_user, add_updated, add_upduser, 
+                                                   add_updatecount, usr_code_upd, usr_desc_upd, usr_code_cre, usr_desc_cre, PARSENAME(REPLACE(add_code, '#', '.'), 2) AS PONUM
+                            FROM          dbo.R5COMMENTS) AS T2 ON T2.PONUM = dbo.R5RFQRESPONSES.RFR_QUOTID LEFT OUTER JOIN
+                      dbo.R5RFQLINERESPONSES AS rfql ON rfql.RLR_QUOTID = dbo.R5RFQRESPONSES.RFR_QUOTID
+WHERE     (dbo.R5REQUISLINES.RQL_PART <> 'NULL')
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_PROJECT_VERSION]
+AS
+SELECT     dbo.R5_PROJECT_VERSION.id, dbo.R5_PROJECT_VERSION.ORG_CODE, dbo.R5_PROJECT_VERSION.reference_no, dbo.R5_PROJECT_VERSION.year_budget, 
+                      dbo.R5_PROJECT_VERSION.version, dbo.R5_PROJECT_VERSION.status, dbo.R5_PROJECT_VERSION.createdAt, dbo.R5_PROJECT_VERSION.createdBy, 
+                      dbo.R5_PROJECT_VERSION.updatedAt, dbo.R5_PROJECT_VERSION.updatedBy, dbo.R5_PROJECT_VERSION.remarks, dbo.R5ORGANIZATION.ORG_DESC
+FROM         dbo.R5_PROJECT_VERSION INNER JOIN
+                      dbo.R5ORGANIZATION ON dbo.R5_PROJECT_VERSION.ORG_CODE COLLATE Latin1_General_BIN = dbo.R5ORGANIZATION.ORG_CODE
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_PROJECT_LINES_APPROVED]
+AS
+SELECT     dbo.R5_APP_VERSION.app_id, dbo.R5_APP_VERSION.status, dbo.R5_APP_VERSION_PROJECT_LINES.reference_no, 
+                      dbo.R5_PROJECT_VERSION.status AS status_dpp, dbo.R5_EAM_APP_PROJECTBASE_LINES.project_code AS PRJ_CODE, 
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES.description AS PRJ_DESC, dbo.R5_EAM_APP_PROJECTBASE_LINES.available, 
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES.allocated, dbo.R5_EAM_APP_PROJECTBASE_LINES.reserved, dbo.R5_EAM_APP_PROJECTBASE_LINES.paid, 
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES.deleted, dbo.R5_EAM_APP_PROJECTBASE_LINES.version, dbo.R5_EAM_APP_PROJECTBASE_LINES.saveFlag, 
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES.rejectFlag, dbo.R5_EAM_APP_PROJECTBASE_LINES.id, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.milestoneID, 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.budget_amount, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Jan, 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Feb, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Mar, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Apr, 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.May, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Jun, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Jul, 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Aug, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Sep, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Oct, 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Nov, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Dec, dbo.R5_APP_VERSION.ORG_CODE, 
+                      dbo.R5_APP_VERSION.year_budget, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.updatedAt, dbo.R5PROJBUDCODES.PBC_DESC AS milestone, 
+                      dbo.R5PROJBUDCODES.PBC_CODE, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.saveFlag AS mileSaveFlag, 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.available AS available2, dbo.R5_PROJECT_VERSION.version AS r5project_version, 
+                      dbo.R5_APP_VERSION.version AS r5app_version, dbo.R5_PROJECT_VERSION.id AS r5project_id
+FROM         dbo.R5PROJBUDCODES INNER JOIN
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE INNER JOIN
+                      dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE INNER JOIN
+                      dbo.R5_PROJECT_VERSION ON dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE.reference_no = dbo.R5_PROJECT_VERSION.reference_no INNER JOIN
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES ON dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE.rowid = dbo.R5_EAM_APP_PROJECTBASE_LINES.id AND 
+                      dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE.version = dbo.R5_EAM_APP_PROJECTBASE_LINES.version ON 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.id = dbo.R5_EAM_APP_PROJECTBASE_LINES.id ON 
+                      dbo.R5PROJBUDCODES.PBC_CODE = dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.milestone COLLATE Latin1_General_BIN LEFT OUTER JOIN
+                      dbo.R5_APP_VERSION LEFT OUTER JOIN
+                      dbo.R5_APP_VERSION_PROJECT_LINES ON dbo.R5_APP_VERSION.app_id = dbo.R5_APP_VERSION_PROJECT_LINES.app_id ON 
+                      dbo.R5_PROJECT_VERSION.reference_no = dbo.R5_APP_VERSION_PROJECT_LINES.reference_no
+WHERE     (dbo.R5_APP_VERSION.status = 'Approved') AND (dbo.R5_PROJECT_VERSION.status = 'Approved')
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_PROJECT_LINES]
+AS
+SELECT     dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE.reference_no, dbo.R5_EAM_APP_PROJECTBASE_LINES.project_code, 
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES.description, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.id AS milestoneid, 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.milestone, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.budget_amount, 
+                      dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE.rowid, dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE.version, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Jan, 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Feb, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Mar, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Apr, 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.May, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Jun, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Jul, 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Aug, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Sep, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Oct, 
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Nov, dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.Dec
+FROM         dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE INNER JOIN
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES ON dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE.rowid = dbo.R5_EAM_APP_PROJECTBASE_LINES.id INNER JOIN
+                      dbo.R5_EAM_APP_PROJECTBASE_MILESTONE ON dbo.R5_EAM_APP_PROJECTBASE_LINES.id = dbo.R5_EAM_APP_PROJECTBASE_MILESTONE.id
+
+GO
+CREATE VIEW [dbo].[R5_VIEW_PROJECT_HEADER_APPROVED]
+AS
+SELECT     dbo.R5_APP_VERSION.app_id, dbo.R5_APP_VERSION.status, dbo.R5_APP_VERSION_PROJECT_LINES.reference_no, 
+                      dbo.R5_PROJECT_VERSION.status AS status_dpp, dbo.R5_EAM_APP_PROJECTBASE_LINES.project_code AS PRJ_CODE, 
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES.description AS PRJ_DESC, dbo.R5_EAM_APP_PROJECTBASE_LINES.available, 
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES.allocated, dbo.R5_EAM_APP_PROJECTBASE_LINES.reserved, dbo.R5_EAM_APP_PROJECTBASE_LINES.paid, 
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES.deleted, dbo.R5_EAM_APP_PROJECTBASE_LINES.saveFlag, dbo.R5_EAM_APP_PROJECTBASE_LINES.rejectFlag, 
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES.id, dbo.R5_APP_VERSION.ORG_CODE, dbo.R5_APP_VERSION.year_budget, dbo.R5_PROJECT_VERSION.version
+FROM         dbo.R5_APP_VERSION LEFT OUTER JOIN
+                      dbo.R5_APP_VERSION_PROJECT_LINES ON dbo.R5_APP_VERSION.app_id = dbo.R5_APP_VERSION_PROJECT_LINES.app_id LEFT OUTER JOIN
+                      dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE INNER JOIN
+                      dbo.R5_PROJECT_VERSION ON dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE.reference_no = dbo.R5_PROJECT_VERSION.reference_no AND 
+                      dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE.version = dbo.R5_PROJECT_VERSION.version INNER JOIN
+                      dbo.R5_EAM_APP_PROJECTBASE_LINES ON dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE.rowid = dbo.R5_EAM_APP_PROJECTBASE_LINES.id AND 
+                      dbo.R5_EAM_DPP_PROJECTBASE_BRIDGE.version = dbo.R5_EAM_APP_PROJECTBASE_LINES.version ON 
+                      dbo.R5_APP_VERSION_PROJECT_LINES.reference_no = dbo.R5_PROJECT_VERSION.reference_no
+WHERE     (dbo.R5_APP_VERSION.status = 'Approved') AND (dbo.R5_PROJECT_VERSION.status = 'Approved')
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_PR_STJF_DOCUMENTS]
+AS
+SELECT     dbo.R5DOCENTITIES.DAE_RENTITY, dbo.R5DOCENTITIES.DAE_CODE, dbo.R5DOCUMENTS.DOC_CODE, dbo.R5DOCUMENTS.DOC_DESC, 
+                      dbo.R5DOCUMENTS.DOC_FILENAME
+FROM         dbo.R5DOCENTITIES INNER JOIN
+                      dbo.R5DOCUMENTS ON dbo.R5DOCENTITIES.DAE_DOCUMENT = dbo.R5DOCUMENTS.DOC_CODE
+WHERE     (dbo.R5DOCENTITIES.DAE_RENTITY = 'REQ')
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_PARTS_UOM_INFO]
+AS
+SELECT     dbo.R5PARTS.PAR_CODE, dbo.R5PARTS.PAR_DESC, dbo.R5PARTS.PAR_BASEPRICE, dbo.R5PARTS.PAR_UDFCHAR07, dbo.R5PARTS.PAR_UDFCHAR09, 
+                      dbo.R5PARTS.PAR_COMMODITY, dbo.R5UOMS.UOM_CODE, dbo.R5UOMS.UOM_DESC, dbo.R5COMMODITIES.CMD_DESC, dbo.R5_GL_ACCOUNTS.gl, 
+                      dbo.R5_GL_ACCOUNTS.description AS gl_description, dbo.R5PARTS.PAR_LASTPRICE, dbo.R5PARTS.PAR_NOTUSED
+FROM         dbo.R5_GL_ACCOUNTS INNER JOIN
+                      dbo.R5COMMODITIES ON dbo.R5_GL_ACCOUNTS.CMD_CODE COLLATE Latin1_General_BIN = dbo.R5COMMODITIES.CMD_CODE RIGHT OUTER JOIN
+                      dbo.R5PARTS ON dbo.R5COMMODITIES.CMD_CODE = dbo.R5PARTS.PAR_COMMODITY LEFT OUTER JOIN
+                      dbo.R5UOMS ON dbo.R5PARTS.PAR_UOM = dbo.R5UOMS.UOM_CODE
+WHERE     (dbo.R5PARTS.PAR_CODE NOT LIKE '*') AND (dbo.R5PARTS.PAR_UDFCHKBOX01 NOT LIKE '+')
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_ORDERLINES]
+AS
+SELECT     TOP (100) PERCENT dbo.R5ORDERLINES.ORL_ORDER, CAST(dbo.R5ORDERLINES.ORL_ORDLINE AS INT) AS ORDLINE, dbo.R5ORDERLINES.ORL_PART, 
+                      dbo.R5PARTS.PAR_DESC, dbo.R5ORDERLINES.ORL_COSTCODE
+FROM         dbo.R5ORDERLINES INNER JOIN
+                      dbo.R5PARTS ON dbo.R5ORDERLINES.ORL_PART = dbo.R5PARTS.PAR_CODE
+ORDER BY dbo.R5ORDERLINES.ORL_ORDER, dbo.R5ORDERLINES.ORL_ORDLINE
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_ITEMBASE_LINES]
+AS
+SELECT     app_ver.reference_no, app_rec.id, app_rec.record_id, app_rec.available, app_rec.reserved, app_rec.allocated, app_rec.paid, app_rec.version AS recVersion, 
+                      app_rec.deleted, par_rec.PAR_CATEGORY, par_rec.PAR_UDFCHAR09, par_rec.PAR_COMMODITY, uom_rec.UOM_DESC, app_rec.code, 
+                      par_rec.PAR_DESC AS Description, gl_rec.gl AS GL_Code, par_rec.PAR_UOM AS UOM, app_rec.quantity AS QTY, app_rec.foreign_curr AS Foreign_Currency, 
+                      app_rec.foreign_cost, app_rec.unit_cost AS Unit_Cost, app_rec.total_cost AS Total_Cost, par_rec.PAR_UDFCHAR07 AS Classification, month_rec.january AS Jan, 
+                      month_rec.february AS Feb, month_rec.march AS Mar, month_rec.april AS Apr, month_rec.may AS May, month_rec.june AS Jun, month_rec.july AS Jul, 
+                      month_rec.august AS Aug, month_rec.september AS Sept, month_rec.october AS Oct, month_rec.november AS Nov, month_rec.december AS Dec, app_ver.version, 
+                      app_rec.saveFlag, app_rec.adjustments
+FROM         dbo.R5_EAM_DPP_ITEMBASE_BRIDGE AS app_ver LEFT OUTER JOIN
+                      dbo.R5_EAM_DPP_ITEMBASE_LINES AS app_rec ON app_ver.rowid = app_rec.id LEFT OUTER JOIN
+                      dbo.R5_REF_ITEMBASE_BUDGET_MONTH AS month_rec ON app_rec.id = month_rec.id LEFT OUTER JOIN
+                      dbo.R5PARTS AS par_rec ON app_rec.code = par_rec.PAR_CODE COLLATE Latin1_General_CI_AS LEFT OUTER JOIN
+                      dbo.R5_GL_ACCOUNTS AS gl_rec ON par_rec.PAR_COMMODITY COLLATE Latin1_General_CI_AS = gl_rec.CMD_CODE LEFT OUTER JOIN
+                      dbo.R5UOMS AS uom_rec ON par_rec.PAR_UOM = uom_rec.UOM_CODE COLLATE Latin1_General_CI_AS
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_INVOICE]
+AS
+SELECT     dbo.R5ORDERLINES.ORL_PART, dbo.R5INVOICELINES.IVL_INVOICE, dbo.R5INVOICELINES.IVL_ORDER, dbo.R5INVOICELINES.IVL_ORDLINE, 
+                      dbo.R5INVOICELINES.IVL_EXCH, dbo.R5INVOICELINES.IVL_PRICE, dbo.R5ORDERLINES.ORL_PRICE, dbo.R5ORDERLINES.ORL_EXCH, 
+                      dbo.R5ORDERLINES.ORL_COSTCODE, dbo.R5ORDERS.ORD_DUE, dbo.R5INVOICELINES.IVL_INVQTY, dbo.R5INVOICELINES.IVL_ORDER_ORG, 
+                      dbo.R5ORDERS.ORD_PRICE, dbo.R5ORDERS.ORD_EXCH
+FROM         dbo.R5INVOICELINES INNER JOIN
+                      dbo.R5ORDERLINES ON dbo.R5INVOICELINES.IVL_ORDER = dbo.R5ORDERLINES.ORL_ORDER AND 
+                      dbo.R5INVOICELINES.IVL_ORDER_ORG = dbo.R5ORDERLINES.ORL_ORDER_ORG AND 
+                      dbo.R5INVOICELINES.IVL_ORDLINE = dbo.R5ORDERLINES.ORL_ORDLINE INNER JOIN
+                      dbo.R5ORDERS ON dbo.R5ORDERLINES.ORL_ORDER = dbo.R5ORDERS.ORD_CODE AND dbo.R5ORDERLINES.ORL_ORDER_ORG = dbo.R5ORDERS.ORD_ORG
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_GL_ACCOUNT]
+AS
+SELECT     TOP (100) PERCENT id, gl, CMD_CODE, category, description, type, isActive, createdAt, createdBy, updatedAt, updatedBy
+FROM         dbo.R5_GL_ACCOUNTS
+ORDER BY CMD_CODE
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_FUEL_NON_FUEL]
+AS
+SELECT     dbo.R5REQUISLINES.RQL_REQ, dbo.R5REQUISLINES.RQL_PART, dbo.R5PARTS.PAR_DESC, dbo.R5PARTS.PAR_COMMODITY, dbo.R5COMMODITIES.CMD_DESC, 
+                      dbo.R5CLASSES.CLS_DESC, dbo.R5CLASSES.CLS_CODE
+FROM         dbo.R5REQUISLINES LEFT OUTER JOIN
+                      dbo.R5PARTS ON dbo.R5REQUISLINES.RQL_PART = dbo.R5PARTS.PAR_CODE LEFT OUTER JOIN
+                      dbo.R5COMMODITIES ON dbo.R5PARTS.PAR_COMMODITY = dbo.R5COMMODITIES.CMD_CODE LEFT OUTER JOIN
+                      dbo.R5CLASSES ON dbo.R5COMMODITIES.CMD_CLASS = dbo.R5CLASSES.CLS_CODE
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_DPP_VERSION]
+AS
+SELECT     dbo.R5_DPP_VERSION.id, dbo.R5_DPP_VERSION.reference_no, dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, 
+                      dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.cost_center, dbo.R5_DPP_VERSION.version, dbo.R5_DPP_VERSION.status, 
+                      dbo.R5_DPP_VERSION.remarks, dbo.R5_DPP_VERSION.updatedBy, dbo.R5_DPP_VERSION.updatedAt, dbo.R5_DPP_VERSION.createdBy, 
+                      dbo.R5_DPP_VERSION.createdAt, dbo.R5MRCS.MRC_DESC, dbo.R5ORGANIZATION.ORG_DESC
+FROM         dbo.R5_DPP_VERSION LEFT OUTER JOIN
+                      dbo.R5ORGANIZATION ON dbo.R5_DPP_VERSION.ORG_CODE COLLATE Latin1_General_BIN = dbo.R5ORGANIZATION.ORG_CODE LEFT OUTER JOIN
+                      dbo.R5MRCS ON dbo.R5_DPP_VERSION.MRC_CODE COLLATE Latin1_General_BIN = dbo.R5MRCS.MRC_CODE
+
+GO
+
+
+CREATE VIEW [dbo].[R5_VIEW_DEADLINE_MAINTENANCE]
+AS
+SELECT     id, month + '-' + date + '-' + year AS expiration_date, year, isActive
+FROM         dbo.R5_DEADLINE_MAINTENANCE
+WHERE     (isActive > 0)
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_CUSTOM_ORDERLINES]
+AS
+SELECT     TOP (100) PERCENT dbo.R5ORDERLINES.ORL_ORDER, dbo.R5ORDERLINES.ORL_PART, dbo.R5REQUISLINES.RQL_REQ, 
+                      dbo.R5REQUISLINES.RQL_PRICE * dbo.R5REQUISLINES.RQL_QTY * dbo.R5REQUISLINES.RQL_EXCH AS Amount, dbo.R5ORDERLINES.ORL_ORDLINE
+FROM         dbo.R5ORDERLINES INNER JOIN
+                      dbo.R5REQUISLINES ON dbo.R5ORDERLINES.ORL_REQ = dbo.R5REQUISLINES.RQL_REQ AND 
+                      dbo.R5ORDERLINES.ORL_REQLINE = dbo.R5REQUISLINES.RQL_REQLINE
+ORDER BY dbo.R5ORDERLINES.ORL_ORDER
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_COSTCENTER]
+AS
+SELECT     dbo.R5COSTCODES.CST_SQLIDENTITY AS id, dbo.R5COSTCODES.CST_CLASS AS MRC_CODE, dbo.R5COSTCODES.CST_CODE AS cost_center, 
+                      dbo.R5MRCS.MRC_DESC, dbo.R5COSTCODES.CST_DESC
+FROM         dbo.R5COSTCODES LEFT OUTER JOIN
+                      dbo.R5MRCS ON dbo.R5COSTCODES.CST_CLASS = dbo.R5MRCS.MRC_CODE
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_COSTBASE_WORKORDER]
+AS
+SELECT     dbo.R5_APP_VERSION.app_id, dbo.R5_DPP_VERSION.version, dbo.R5_DPP_VERSION.reference_no, dbo.R5_DPP_VERSION.MRC_CODE, 
+                      dbo.R5_APP_VERSION.year_budget, dbo.R5_APP_VERSION.ORG_CODE, dbo.R5_EAM_DPP_COSTBASE_LINES.id, 
+                      dbo.R5_EAM_DPP_COSTBASE_LINES.description
+FROM         dbo.R5_APP_VERSION INNER JOIN
+                      dbo.R5_APP_VERSION_ITEMBASE_LINES ON dbo.R5_APP_VERSION.app_id = dbo.R5_APP_VERSION_ITEMBASE_LINES.app_id INNER JOIN
+                      dbo.R5_DPP_VERSION ON dbo.R5_APP_VERSION_ITEMBASE_LINES.reference_no = dbo.R5_DPP_VERSION.reference_no AND 
+                      dbo.R5_APP_VERSION_ITEMBASE_LINES.version = dbo.R5_DPP_VERSION.version INNER JOIN
+                      dbo.R5_EAM_DPP_COSTBASE_BRIDGE ON dbo.R5_DPP_VERSION.reference_no = dbo.R5_EAM_DPP_COSTBASE_BRIDGE.reference_no AND 
+                      dbo.R5_DPP_VERSION.version = dbo.R5_EAM_DPP_COSTBASE_BRIDGE.version INNER JOIN
+                      dbo.R5_EAM_DPP_COSTBASE_LINES ON dbo.R5_EAM_DPP_COSTBASE_BRIDGE.rowid = dbo.R5_EAM_DPP_COSTBASE_LINES.id
+
+
+GO
+
+
+CREATE VIEW [dbo].[R5_VIEW_COSTBASE_LINES]
+AS
+SELECT     dbo.R5_EAM_DPP_COSTBASE_BRIDGE.reference_no, dbo.R5_EAM_DPP_COSTBASE_LINES.id, dbo.R5_EAM_DPP_COSTBASE_LINES.record_id, 
+                      dbo.R5_EAM_DPP_COSTBASE_LINES.CMD_CODE, dbo.R5_EAM_DPP_COSTBASE_LINES.code, dbo.R5_EAM_DPP_COSTBASE_LINES.description, 
+                      dbo.R5_EAM_DPP_COSTBASE_LINES.type, dbo.R5_EAM_DPP_COSTBASE_LINES.budget_amount, dbo.R5_EAM_DPP_COSTBASE_LINES.classification, 
+                      dbo.R5_EAM_DPP_COSTBASE_LINES.category, dbo.R5_EAM_DPP_COSTBASE_LINES.io_number, dbo.R5_REF_COSTBASE_BUDGET_MONTH.january AS Jan, 
+                      dbo.R5_REF_COSTBASE_BUDGET_MONTH.february AS Feb, dbo.R5_REF_COSTBASE_BUDGET_MONTH.march AS Mar, 
+                      dbo.R5_REF_COSTBASE_BUDGET_MONTH.april AS Apr, dbo.R5_REF_COSTBASE_BUDGET_MONTH.may, dbo.R5_REF_COSTBASE_BUDGET_MONTH.june AS Jun, 
+                      dbo.R5_REF_COSTBASE_BUDGET_MONTH.july AS Jul, dbo.R5_REF_COSTBASE_BUDGET_MONTH.august AS Aug, 
+                      dbo.R5_REF_COSTBASE_BUDGET_MONTH.september AS Sept, dbo.R5_REF_COSTBASE_BUDGET_MONTH.october AS Oct, 
+                      dbo.R5_REF_COSTBASE_BUDGET_MONTH.november AS Nov, dbo.R5_REF_COSTBASE_BUDGET_MONTH.december AS Dec, 
+                      dbo.R5_EAM_DPP_COSTBASE_LINES.version AS recVersion, dbo.R5_EAM_DPP_COSTBASE_BRIDGE.version, dbo.R5COMMODITIES.CMD_DESC, 
+                      dbo.R5_GL_ACCOUNTS.gl, dbo.R5_EAM_DPP_COSTBASE_LINES.saveFlag, dbo.R5_EAM_DPP_COSTBASE_LINES.reserved, 
+                      dbo.R5_EAM_DPP_COSTBASE_LINES.allocated, dbo.R5_EAM_DPP_COSTBASE_LINES.paid, dbo.R5_EAM_DPP_COSTBASE_LINES.available, 
+                      dbo.R5_EAM_DPP_COSTBASE_LINES.adjustments
+FROM         dbo.R5_EAM_DPP_COSTBASE_BRIDGE INNER JOIN
+                      dbo.R5_EAM_DPP_COSTBASE_LINES ON dbo.R5_EAM_DPP_COSTBASE_BRIDGE.rowid = dbo.R5_EAM_DPP_COSTBASE_LINES.id INNER JOIN
+                      dbo.R5_REF_COSTBASE_BUDGET_MONTH ON dbo.R5_EAM_DPP_COSTBASE_LINES.id = dbo.R5_REF_COSTBASE_BUDGET_MONTH.id LEFT OUTER JOIN
+                      dbo.R5COMMODITIES ON dbo.R5_EAM_DPP_COSTBASE_LINES.CMD_CODE COLLATE Latin1_General_BIN = dbo.R5COMMODITIES.CMD_CODE LEFT OUTER JOIN
+                      dbo.R5_GL_ACCOUNTS ON dbo.R5COMMODITIES.CMD_CODE = dbo.R5_GL_ACCOUNTS.CMD_CODE COLLATE Latin1_General_BIN
+
+GO
+
+
+CREATE VIEW [dbo].[R5_VIEW_COMMODITIES_ALL]
+AS
+SELECT     dbo.R5_GL_ACCOUNTS.id, dbo.R5_GL_ACCOUNTS.gl AS GL_Code, dbo.R5_GL_ACCOUNTS.CMD_CODE, dbo.R5COMMODITIES.CMD_DESC, 
+                      dbo.R5_GL_ACCOUNTS.category, dbo.R5_GL_ACCOUNTS.description AS GL_Description, dbo.R5COMMODITIES.CMD_NOTUSED, 
+                      dbo.R5_GL_ACCOUNTS.isActive
+FROM         dbo.R5_GL_ACCOUNTS INNER JOIN
+                      dbo.R5COMMODITIES ON dbo.R5_GL_ACCOUNTS.CMD_CODE COLLATE Latin1_General_BIN = dbo.R5COMMODITIES.CMD_CODE
+
+GO
+
+
+CREATE VIEW [dbo].[R5_VIEW_COMMODITIES]
+AS
+SELECT     dbo.R5_GL_ACCOUNTS.id, dbo.R5_GL_ACCOUNTS.gl AS GL_Code, dbo.R5_GL_ACCOUNTS.CMD_CODE, dbo.R5COMMODITIES.CMD_DESC, 
+                      dbo.R5_GL_ACCOUNTS.category, dbo.R5_GL_ACCOUNTS.description AS GL_Description, dbo.R5COMMODITIES.CMD_NOTUSED
+FROM         dbo.R5_GL_ACCOUNTS INNER JOIN
+                      dbo.R5COMMODITIES ON dbo.R5_GL_ACCOUNTS.CMD_CODE COLLATE Latin1_General_BIN = dbo.R5COMMODITIES.CMD_CODE
+WHERE     (dbo.R5COMMODITIES.CMD_NOTUSED <> '+') AND (dbo.R5_GL_ACCOUNTS.isActive = 1)
+
+
+
+GO
+
+
+CREATE VIEW [dbo].[R5_VIEW_COGNOS_QUOTATION_PIVOT]
+AS
+SELECT DISTINCT 
+                      TOP (100) PERCENT dbo.R5RFQUOTATIONS.RFQ_REQUISITION AS REQUISITION_NO, dbo.R5RFQUOTATIONS.RFQ_CODE AS RFQCODE, 
+                      dbo.R5RFQRESPONSES.RFR_QUOTID AS QUOTATIONID, dbo.R5RFQRESPONSES.RFR_SUPPLIER AS SUPPLIERCODE, CONVERT(NVARCHAR(255),
+                          (SELECT     dbo.udf_StripHTML(T2.add_text) AS Expr1
+                            WHERE      (T2.add_entity = 'RFRL'))) AS Vendor_Offer, rfql.RLR_UDFCHKBOX01, dbo.R5REQUISLINES.RQL_PART, rfql.RLR_UDFCHAR02 AS REMARKS, 
+                      c.COM_DESC
+FROM         dbo.R5PERMISSIONS INNER JOIN
+                      dbo.R5RFQUOTATIONS LEFT OUTER JOIN
+                      dbo.R5REQUISLINES ON dbo.R5REQUISLINES.RQL_REQ = dbo.R5RFQUOTATIONS.RFQ_REQUISITION LEFT OUTER JOIN
+                      dbo.R5EVENTS ON dbo.R5REQUISLINES.RQL_EVENT = dbo.R5EVENTS.EVT_CODE LEFT OUTER JOIN
+                      dbo.R5PARTS ON dbo.R5REQUISLINES.RQL_PART = dbo.R5PARTS.PAR_CODE AND 
+                      dbo.R5REQUISLINES.RQL_PART_ORG = dbo.R5PARTS.PAR_ORG LEFT OUTER JOIN
+                      dbo.R5UOMS ON dbo.R5UOMS.UOM_CODE = dbo.R5REQUISLINES.RQL_UOM LEFT OUTER JOIN
+                      dbo.R5RFQRESPONSES ON dbo.R5RFQUOTATIONS.RFQ_CODE = dbo.R5RFQRESPONSES.RFR_CODE LEFT OUTER JOIN
+                          (SELECT     add_entity, add_rentity, add_type, add_rtype, add_code, add_lang, add_line, add_print, add_text, add_created, add_user, add_updated, add_upduser, 
+                                                   add_updatecount, usr_code_upd, usr_desc_upd, usr_code_cre, usr_desc_cre, PARSENAME(REPLACE(add_code, '#', '.'), 2) AS PONUM
+                            FROM          dbo.R5COMMENTS) AS T2 ON T2.PONUM = dbo.R5RFQRESPONSES.RFR_QUOTID LEFT OUTER JOIN
+                      dbo.R5RFQLINERESPONSES AS rfql ON rfql.RLR_QUOTID = dbo.R5RFQRESPONSES.RFR_QUOTID INNER JOIN
+                      dbo.R5RFQSUPPLIERS ON dbo.R5RFQRESPONSES.RFR_CODE = dbo.R5RFQSUPPLIERS.RFS_CODE AND 
+                      dbo.R5RFQRESPONSES.RFR_ORG = dbo.R5RFQSUPPLIERS.RFS_ORG AND dbo.R5RFQRESPONSES.RFR_SUPPLIER = dbo.R5RFQSUPPLIERS.RFS_SUPPLIER AND 
+                      dbo.R5RFQRESPONSES.RFR_SUPPLIER_ORG = dbo.R5RFQSUPPLIERS.RFS_SUPPLIER_ORG INNER JOIN
+                      dbo.R5COMPANIES AS c ON dbo.R5RFQRESPONSES.RFR_SUPPLIER = c.COM_CODE AND dbo.R5RFQRESPONSES.RFR_SUPPLIER_ORG = c.COM_ORG INNER JOIN
+                      dbo.R5USERORGANIZATION ON dbo.R5RFQRESPONSES.RFR_ORG = dbo.R5USERORGANIZATION.UOG_ORG ON 
+                      dbo.R5PERMISSIONS.PRM_GROUP = dbo.R5USERORGANIZATION.UOG_GROUP
+WHERE     (dbo.R5RFQRESPONSES.RFR_CODE = dbo.R5RFQUOTATIONS.RFQ_CODE) AND (dbo.R5RFQRESPONSES.RFR_ORG = dbo.R5RFQUOTATIONS.RFQ_ORG) AND 
+                      (dbo.R5PERMISSIONS.PRM_SELECT = '?') AND (dbo.R5PERMISSIONS.PRM_FUNCTION = 'PSRFQR')
+ORDER BY RFQCODE, QUOTATIONID
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_COGNOS_MOVEMENT]
+AS
+SELECT     TOP (100) PERCENT app_id, ORG_CODE, FR_MRC_CODE, TO_MRC_CODE, fr_table, fr_code, to_table, to_code, amount, fr_available_amount, to_available_amount, 
+                      year_budget, type, status, remarks, createdAt, createdBy, updatedAt, cost_center, fr_cost_center, to_description, reason, CASE rbm.fr_table WHEN 'cb' THEN
+                          (SELECT DISTINCT rvcl.description COLLATE database_default
+                            FROM          R5_VIEW_COSTBASE_LINES rvcl
+                            WHERE      rvcl.id = rbm.fr_code) ELSE
+                          (SELECT DISTINCT Description
+                            FROM          R5_VIEW_ITEMBASE_LINES rvil
+                            WHERE      rvil.id = rbm.fr_code) END AS FROM_ITEM, CASE rbm.fr_table WHEN 'cb' THEN
+                          (SELECT DISTINCT rvcl.code
+                            FROM          R5_VIEW_COSTBASE_LINES rvcl
+                            WHERE      rvcl.id = rbm.fr_code) ELSE
+                          (SELECT DISTINCT code
+                            FROM          R5_VIEW_ITEMBASE_LINES rvil
+                            WHERE      rvil.id = rbm.fr_code) END AS FROM_ITEM_CODE, CASE rbm.fr_table WHEN 'cb' THEN
+                          (SELECT     TOP 1 rav.updatedAt a
+                            FROM          R5_APP_VERSION rav INNER JOIN
+                                                   R5_APP_VERSION_ITEMBASE_LINES ravil ON (ravil.app_id = rav.app_id) INNER JOIN
+                                                   R5_DPP_VERSION rdv ON (rdv.reference_no = ravil.reference_no AND rdv.version = ravil.version) LEFT OUTER JOIN
+                                                   R5_VIEW_COSTBASE_LINES rvcl ON (rvcl.reference_no = rdv.reference_no AND rvcl.version = rdv.version AND rvcl.id = rbm.fr_code)) ELSE
+                          (SELECT     TOP 1 rav.updatedAt a
+                            FROM          R5_APP_VERSION rav INNER JOIN
+                                                   R5_APP_VERSION_ITEMBASE_LINES ravil ON (ravil.app_id = rav.app_id) INNER JOIN
+                                                   R5_DPP_VERSION rdv ON (rdv.reference_no = ravil.reference_no AND rdv.version = ravil.version) LEFT OUTER JOIN
+                                                   R5_VIEW_ITEMBASE_LINES rvil ON (rvil.reference_no = rdv.reference_no AND rvil.version = rdv.version AND rvil.id = rbm.fr_code)) 
+                      END AS FROM_UPDATEAT, CASE rbm.to_table WHEN 'cb' THEN
+                          (SELECT DISTINCT rvcl.description COLLATE database_default
+                            FROM          R5_VIEW_COSTBASE_LINES rvcl
+                            WHERE      rvcl.id = rbm.to_code) ELSE
+                          (SELECT DISTINCT Description
+                            FROM          R5_VIEW_ITEMBASE_LINES rvil
+                            WHERE      rvil.id = rbm.to_code) END AS TO_ITEM, CASE rbm.to_table WHEN 'cb' THEN
+                          (SELECT DISTINCT rvcl.code
+                            FROM          R5_VIEW_COSTBASE_LINES rvcl
+                            WHERE      rvcl.id = rbm.to_code) ELSE
+                          (SELECT DISTINCT code
+                            FROM          R5_VIEW_ITEMBASE_LINES rvil
+                            WHERE      rvil.id = rbm.to_code) END AS TO_ITEM_CODE, CASE rbm.to_table WHEN 'cb' THEN
+                          (SELECT     TOP 1 rav.updatedAt a
+                            FROM          R5_APP_VERSION rav INNER JOIN
+                                                   R5_APP_VERSION_ITEMBASE_LINES ravil ON (ravil.app_id = rav.app_id) INNER JOIN
+                                                   R5_DPP_VERSION rdv ON (rdv.reference_no = ravil.reference_no AND rdv.version = ravil.version) LEFT OUTER JOIN
+                                                   R5_VIEW_COSTBASE_LINES rvcl ON (rvcl.reference_no = rdv.reference_no AND rvcl.version = rdv.version AND rvcl.id = rbm.fr_code)) ELSE
+                          (SELECT     TOP 1 rav.updatedAt a
+                            FROM          R5_APP_VERSION rav INNER JOIN
+                                                   R5_APP_VERSION_ITEMBASE_LINES ravil ON (ravil.app_id = rav.app_id) INNER JOIN
+                                                   R5_DPP_VERSION rdv ON (rdv.reference_no = ravil.reference_no AND rdv.version = ravil.version) LEFT OUTER JOIN
+                                                   R5_VIEW_ITEMBASE_LINES rvil ON (rvil.reference_no = rdv.reference_no AND rvil.version = rdv.version AND rvil.id = rbm.fr_code)) 
+                      END AS TO_UPDATEAT, CASE rbm.fr_table WHEN 'cb' THEN
+                          (SELECT DISTINCT rvcl.available
+                            FROM          R5_VIEW_COSTBASE_LINES rvcl
+                            WHERE      rvcl.id = rbm.fr_code) ELSE
+                          (SELECT DISTINCT available
+                            FROM          R5_VIEW_ITEMBASE_LINES rvil
+                            WHERE      rvil.id = rbm.fr_code) END AS FROM_AVAILABLE, CASE rbm.to_table WHEN 'cb' THEN
+                          (SELECT DISTINCT rvcl.available
+                            FROM          R5_VIEW_COSTBASE_LINES rvcl
+                            WHERE      rvcl.id = rbm.to_code) ELSE
+                          (SELECT DISTINCT available
+                            FROM          R5_VIEW_ITEMBASE_LINES rvil
+                            WHERE      rvil.id = rbm.to_code) END AS TO_AVAILABLE, SUBSTRING(CONVERT(varchar(50), updatedAt, 120), 1, CHARINDEX(' ', CONVERT(varchar(50), updatedAt, 
+                      120))) AS TO_DATE
+FROM         dbo.R5_BUDGET_MOVEMENT AS rbm
+ORDER BY createdAt DESC
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_COGNOS_GOODRECEIPT]
+AS
+SELECT DISTINCT 
+                      rp.PSL_LINE, rp.PSL_DELUOM AS UOM, r.DCK_CODE AS RECEIPTCODE, r.DCK_UPDUSER AS UPDATEDBY, r.DCK_DESC AS RECEIPTDESCRIPTION, 
+                      rp.PSL_PART AS PART,
+                          (SELECT     PAR_DESC
+                            FROM          dbo.R5PARTS AS rpr
+                            WHERE      (PAR_CODE = rp.PSL_PART)) AS PARTDESC, r.DCK_ORG AS RECEIPTORGANIZATION, r.DCK_SUPPLIER AS SUPPLIERCODE, 
+                      r.DCK_ORDER AS PURCHASEORDERCODE, r.DCK_DOCKID AS STORECODE, r.DCK_CLASS AS CLASSCODE, dbo.R5O7_O7GET_DESC(N'EN', N'UCOD', r.DCK_STATUS,
+                       N'DKST', NULL) AS PORECEIPTSTATUSDESCRIPTION, r.DCK_RECVDATE AS DATERECEIVED, r.DCK_RECEIVER AS RECEIVEDBY, r.DCK_SHIPVIA AS SHIPVIA, 
+                      r.DCK_REFERENCE AS REFERENCENUMBER, rp.PSL_DELQTY AS DeliveryQTY, rp.PSL_RECVQTY AS ReceivedQTY,
+                          (SELECT     ORL_PRICE
+                            FROM          dbo.R5ORDERLINES AS rls
+                            WHERE      (ORL_ORDER = rp.PSL_ORDER) AND (ORL_PART = rp.PSL_PART)) AS PRICE,
+                          (SELECT     ORL_RECVVALUE
+                            FROM          dbo.R5ORDERLINES AS rls
+                            WHERE      (ORL_ORDER = rp.PSL_ORDER) AND (ORL_PART = rp.PSL_PART)) AS TOTALPRICE,
+                          (SELECT     ORL_CURR
+                            FROM          dbo.R5ORDERLINES AS rls
+                            WHERE      (ORL_ORDER = rp.PSL_ORDER) AND (ORL_PART = rp.PSL_PART)) AS CURRENCY, rod.ORD_DATE AS ORDERDATE, 
+                      rod.ORD_DUE AS ORDERDUEDATE
+FROM         dbo.R5DOCKRECEIPTS AS r LEFT OUTER JOIN
+                      dbo.R5PACKINGSLIP AS rp ON r.DCK_CODE = rp.PSL_DOCK LEFT OUTER JOIN
+                      dbo.R5ORDERLINES AS ro ON ro.ORL_ORDER = r.DCK_ORDER LEFT OUTER JOIN
+                      dbo.R5ORDERS AS rod ON rod.ORD_CODE = r.DCK_ORDER LEFT OUTER JOIN
+                      dbo.R5DOCKLINES AS dl ON dl.DKL_DCKCODE = r.DCK_CODE
+WHERE     (dl.DKL_LINERSTATUS = 'A')
+
+GO
+
+
+CREATE VIEW [dbo].[R5_VIEW_COGNOS_AWARDED]
+AS
+SELECT DISTINCT 
+                      dbo.R5RFQLINERESPONSES.RLR_RSTATUS AS QUOTLINERSTATUS, dbo.R5O7_O7GET_DESC(N'EN', N'UCOD', dbo.R5RFQLINERESPONSES.RLR_STATUS, 
+                      N'REST', NULL) AS QUOTLINESTATUS_DISPLAY, dbo.R5RFQLINES.RLI_PART AS PART, dbo.R5RFQRESPONSES.RFR_SUPPLIER AS SUPPLIER, 
+                      dbo.R5RFQRESPONSES.RFR_QUOTID AS QUOTATION
+FROM         dbo.R5RFQUOTATIONS INNER JOIN
+                      dbo.R5RFQLINERESPONSES INNER JOIN
+                      dbo.R5PARTS INNER JOIN
+                      dbo.R5RFQLINES LEFT OUTER JOIN
+                      dbo.R5EVENTS ON dbo.R5RFQLINES.RLI_EVENT = dbo.R5EVENTS.EVT_CODE ON dbo.R5PARTS.PAR_CODE = dbo.R5RFQLINES.RLI_PART AND 
+                      dbo.R5PARTS.PAR_ORG = dbo.R5RFQLINES.RLI_PART_ORG ON dbo.R5RFQLINERESPONSES.RLR_RFQ = dbo.R5RFQLINES.RLI_RFQ AND 
+                      dbo.R5RFQLINERESPONSES.RLR_RFQ_ORG = dbo.R5RFQLINES.RLI_ORG AND 
+                      dbo.R5RFQLINERESPONSES.RLR_RFQLINE = dbo.R5RFQLINES.RLI_RFQLINE INNER JOIN
+                      dbo.R5RFQRESPONSES ON dbo.R5RFQLINERESPONSES.RLR_QUOTID = dbo.R5RFQRESPONSES.RFR_QUOTID ON 
+                      dbo.R5RFQUOTATIONS.RFQ_CODE = dbo.R5RFQLINES.RLI_RFQ AND dbo.R5RFQUOTATIONS.RFQ_ORG = dbo.R5RFQLINES.RLI_ORG INNER JOIN
+                      dbo.R5COMPANIES AS c ON dbo.R5RFQRESPONSES.RFR_SUPPLIER = c.COM_CODE AND dbo.R5RFQRESPONSES.RFR_SUPPLIER_ORG = c.COM_ORG CROSS JOIN
+                      dbo.R5TABPERMISSIONS CROSS JOIN
+                      dbo.R5USERORGANIZATION
+WHERE     (dbo.R5TABPERMISSIONS.TRP_TAB = 'SEL') AND (dbo.R5RFQLINERESPONSES.RLR_PRICE IS NOT NULL) AND 
+                      (COALESCE (dbo.R5RFQLINERESPONSES.RLR_NOTOFFERED, '-') = '-') AND (dbo.R5RFQRESPONSES.RFR_RSTATUS = 'R') AND 
+                      (dbo.R5RFQLINES.RLI_RTYPE IN ('PS', 'PD', 'RE')) AND (COALESCE (dbo.R5RFQLINERESPONSES.RLR_RSTATUS, '-N') <> N'N')
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_BUDGET_MOVEMENT_PROJECT]
+AS
+SELECT     id, app_id, project_id, project_description, ORG_CODE,
+                          (SELECT     TOP (1) milestone
+                            FROM          dbo.R5_VIEW_PROJECT_LINES_APPROVED
+                            WHERE      (milestoneID = dbo.R5_BUDGET_MOVEMENT_PROJECT.fr_code)) AS Source, fr_code, to_code,
+                          (SELECT     TOP (1) milestone
+                            FROM          dbo.R5_VIEW_PROJECT_LINES_APPROVED AS R5_VIEW_PROJECT_LINES_APPROVED_1
+                            WHERE      (milestoneID = dbo.R5_BUDGET_MOVEMENT_PROJECT.to_code)) AS Destination, amount, to_available_amount, fr_available_amount, type, 
+                      year_budget, status, reason, updatedAt
+FROM         dbo.R5_BUDGET_MOVEMENT_PROJECT
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_BUDGET_MOVEMENT_COST]
+AS
+SELECT     id, app_id, ORG_CODE,
+                          (SELECT     TOP (1) MRC_DESC
+                            FROM          dbo.R5MRCS
+                            WHERE      (MRC_CODE COLLATE Latin1_General_CI_AS = dbo.R5_BUDGET_MOVEMENT_COST.FR_MRC_CODE)) AS Source_Department, FR_MRC_CODE,
+                          (SELECT     TOP (1) MRC_DESC
+                            FROM          dbo.R5MRCS AS R5MRCS_1
+                            WHERE      (MRC_CODE COLLATE Latin1_General_CI_AS = dbo.R5_BUDGET_MOVEMENT_COST.TO_MRC_CODE)) AS Destination_Department, TO_MRC_CODE,
+                          (SELECT     TOP (1) description
+                            FROM          dbo.R5_VIEW_COSTBASE_LINES
+                            WHERE      (id = dbo.R5_BUDGET_MOVEMENT_COST.fr_code)) AS Source, fr_code, ISNULL
+                          ((SELECT     TOP (1) description
+                              FROM         dbo.R5_VIEW_COSTBASE_LINES AS R5_VIEW_COSTBASE_LINES_1
+                              WHERE     (id = dbo.R5_BUDGET_MOVEMENT_COST.to_code)), to_description) AS Destination, to_code, amount, to_available_amount, fr_available_amount, type, 
+                      year_budget, fr_cost_center, cost_center, status, reason
+FROM         dbo.R5_BUDGET_MOVEMENT_COST
+
+GO
+
+CREATE VIEW [dbo].[R5_VIEW_BUDGET_MOVEMENT]
+AS
+SELECT     id, app_id, ORG_CODE, to_table, fr_table,
+                          (SELECT     TOP (1) MRC_DESC
+                            FROM          dbo.R5MRCS
+                            WHERE      (MRC_CODE COLLATE Latin1_General_CI_AS = dbo.R5_BUDGET_MOVEMENT.FR_MRC_CODE)) AS Source_Department, FR_MRC_CODE,
+                          (SELECT     TOP (1) MRC_DESC
+                            FROM          dbo.R5MRCS AS R5MRCS_1
+                            WHERE      (MRC_CODE COLLATE Latin1_General_CI_AS = dbo.R5_BUDGET_MOVEMENT.TO_MRC_CODE)) AS Destination_Department, TO_MRC_CODE, 
+                      CASE fr_table WHEN 'IB' THEN
+                          (SELECT     TOP (1) Description COLLATE Latin1_General_CI_AS
+                            FROM          dbo.R5_VIEW_ITEMBASE_LINES
+                            WHERE      (id = dbo.R5_BUDGET_MOVEMENT.fr_code)) ELSE
+                          (SELECT     TOP (1) description
+                            FROM          dbo.R5_VIEW_COSTBASE_LINES
+                            WHERE      (id = dbo.R5_BUDGET_MOVEMENT.fr_code)) END AS Source, fr_code, CASE to_table WHEN 'IB' THEN
+                          ((SELECT     TOP (1) Description COLLATE Latin1_General_CI_AS
+                              FROM         dbo.R5_VIEW_ITEMBASE_LINES AS R5_VIEW_ITEMBASE_LINES_1
+                              WHERE     (id = dbo.R5_BUDGET_MOVEMENT.to_code))) ELSE
+                          ((SELECT     TOP (1) description
+                              FROM         dbo.R5_VIEW_COSTBASE_LINES AS R5_VIEW_ITEMBASE_LINES_1
+                              WHERE     (id = dbo.R5_BUDGET_MOVEMENT.to_code))) END AS Destination, to_code, amount, to_available_amount, fr_available_amount, type, year_budget, 
+                      fr_cost_center, cost_center, status, reason, updatedAt
+FROM         dbo.R5_BUDGET_MOVEMENT
+
+GO
+
+CREATE VIEW [dbo].[R5_PR_PO_ITEM_LOOKUP]
+AS
+SELECT     dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.status, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.ORG_CODE, 
+                      dbo.R5_EAM_DPP_ITEMBASE_BRIDGE.rowid, dbo.R5_DPP_VERSION.cost_center, dbo.R5_DPP_VERSION.version, 
+                      dbo.R5_EAM_DPP_ITEMBASE_BRIDGE.version AS line_version
+FROM         dbo.R5_DPP_VERSION INNER JOIN
+                      dbo.R5_EAM_DPP_ITEMBASE_BRIDGE ON dbo.R5_DPP_VERSION.reference_no = dbo.R5_EAM_DPP_ITEMBASE_BRIDGE.reference_no AND 
+                      dbo.R5_DPP_VERSION.version = dbo.R5_EAM_DPP_ITEMBASE_BRIDGE.version
+WHERE     (dbo.R5_DPP_VERSION.status = 'Approved')
+
+GO
+
+CREATE VIEW [dbo].[R5_PR_PO_COST_LOOKUP]
+AS
+SELECT     dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.status, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.ORG_CODE, 
+                      dbo.R5_EAM_DPP_COSTBASE_BRIDGE.rowid, dbo.R5_DPP_VERSION.cost_center
+FROM         dbo.R5_DPP_VERSION INNER JOIN
+                      dbo.R5_EAM_DPP_COSTBASE_BRIDGE ON dbo.R5_DPP_VERSION.reference_no = dbo.R5_EAM_DPP_COSTBASE_BRIDGE.reference_no AND 
+                      dbo.R5_DPP_VERSION.version = dbo.R5_EAM_DPP_COSTBASE_BRIDGE.version
+WHERE     (dbo.R5_DPP_VERSION.status = 'Approved')
+
+GO
+
+CREATE VIEW [dbo].[R5_ENDORSED_APP_TYPE_PROJECTBASE]
+AS
+SELECT     dbo.R5_PROJECT_VERSION.ORG_CODE, dbo.R5_PROJECT_VERSION.reference_no, dbo.R5_VIEW_PROJECT_LINES.description, 
+                      dbo.R5_VIEW_PROJECT_LINES.milestone AS Milestone, dbo.R5_VIEW_PROJECT_LINES.budget_amount AS Amount, dbo.R5_VIEW_PROJECT_LINES.rowid, 
+                      dbo.R5_VIEW_PROJECT_LINES.project_code, dbo.R5_PROJECT_VERSION.id AS headerID, dbo.R5_PROJECT_VERSION.version
+FROM         dbo.R5_PROJECT_VERSION LEFT OUTER JOIN
+                      dbo.R5_VIEW_PROJECT_LINES ON dbo.R5_PROJECT_VERSION.version = dbo.R5_VIEW_PROJECT_LINES.version AND 
+                      dbo.R5_PROJECT_VERSION.reference_no = dbo.R5_VIEW_PROJECT_LINES.reference_no
+
+
+
+GO
+
+CREATE VIEW [dbo].[R5_ENDORSED_APP_TYPE_ITEMBASE]
+AS
+SELECT     dbo.R5_DPP_VERSION.reference_no, SUM(dbo.R5_VIEW_ITEMBASE_LINES.Total_Cost) AS Cost, dbo.R5_VIEW_ITEMBASE_LINES.PAR_COMMODITY, 
+                      dbo.R5COMMODITIES.CMD_DESC AS Item_Type, dbo.R5_DPP_VERSION.id, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, 
+                      dbo.R5_DPP_VERSION.cost_center, dbo.R5_DPP_VERSION.version, dbo.R5_DPP_VERSION.ORG_CODE
+FROM         dbo.R5_DPP_VERSION LEFT OUTER JOIN
+                      dbo.R5_VIEW_ITEMBASE_LINES ON dbo.R5_DPP_VERSION.reference_no = dbo.R5_VIEW_ITEMBASE_LINES.reference_no LEFT OUTER JOIN
+                      dbo.R5COMMODITIES ON dbo.R5_VIEW_ITEMBASE_LINES.PAR_COMMODITY = dbo.R5COMMODITIES.CMD_CODE
+GROUP BY dbo.R5_DPP_VERSION.reference_no, dbo.R5_VIEW_ITEMBASE_LINES.PAR_COMMODITY, dbo.R5COMMODITIES.CMD_DESC, dbo.R5_DPP_VERSION.id, 
+                      dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.cost_center, dbo.R5_DPP_VERSION.version, 
+                      dbo.R5_DPP_VERSION.ORG_CODE
+
+GO
+
+CREATE VIEW [dbo].[R5_ENDORSED_APP_TYPE_COSTBASE]
+AS
+SELECT     dbo.R5_DPP_VERSION.reference_no, SUM(dbo.R5_VIEW_COSTBASE_LINES.budget_amount) AS Cost, dbo.R5_VIEW_COSTBASE_LINES.category, 
+                      dbo.R5_DPP_VERSION.id, dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, 
+                      dbo.R5_DPP_VERSION.version
+FROM         dbo.R5_DPP_VERSION INNER JOIN
+                      dbo.R5_VIEW_COSTBASE_LINES ON dbo.R5_DPP_VERSION.reference_no = dbo.R5_VIEW_COSTBASE_LINES.reference_no
+GROUP BY dbo.R5_DPP_VERSION.reference_no, dbo.R5_VIEW_COSTBASE_LINES.category, dbo.R5_DPP_VERSION.id, dbo.R5_DPP_VERSION.ORG_CODE, 
+                      dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.version
+
+GO
+
+
+CREATE VIEW [dbo].[R5_ENDORESED_APP_PROJECTBASE]
+AS
+SELECT     dbo.R5_PROJECT_VERSION.reference_no, dbo.R5_PROJECT_VERSION.ORG_CODE, dbo.R5_PROJECT_VERSION.year_budget, dbo.R5_PROJECT_VERSION.status, 
+                      dbo.R5_PROJECT_VERSION.version, dbo.R5ORGANIZATION.ORG_DESC AS Organization, SUM(dbo.R5_VIEW_PROJECT_LINES.budget_amount) 
+                      AS Submitted_Amount, dbo.R5_PROJECT_VERSION.id
+FROM         dbo.R5_PROJECT_VERSION LEFT OUTER JOIN
+                      dbo.R5ORGANIZATION ON dbo.R5_PROJECT_VERSION.ORG_CODE COLLATE Latin1_General_BIN = dbo.R5ORGANIZATION.ORG_CODE INNER JOIN
+                      dbo.R5_VIEW_PROJECT_LINES ON dbo.R5_PROJECT_VERSION.reference_no = dbo.R5_VIEW_PROJECT_LINES.reference_no AND 
+                      dbo.R5_PROJECT_VERSION.version = dbo.R5_VIEW_PROJECT_LINES.version
+GROUP BY dbo.R5_PROJECT_VERSION.reference_no, dbo.R5_PROJECT_VERSION.ORG_CODE, dbo.R5_PROJECT_VERSION.year_budget, dbo.R5_PROJECT_VERSION.status, 
+                      dbo.R5_PROJECT_VERSION.version, dbo.R5ORGANIZATION.ORG_DESC, dbo.R5_PROJECT_VERSION.id
+
+
+
+GO
+
+CREATE VIEW [dbo].[R5_ENDORESED_APP_ITEMBASE]
+AS
+SELECT     dbo.R5_DPP_VERSION.reference_no, dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.status, 
+                      SUM(dbo.R5_VIEW_ITEMBASE_LINES.total_cost) AS Budgeted_Cost, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5MRCS.MRC_DESC AS Department, 
+                      dbo.R5_DPP_VERSION.version, dbo.R5_DPP_VERSION.id, dbo.R5_DPP_VERSION.cost_center
+FROM         dbo.R5_DPP_VERSION INNER JOIN
+                      dbo.R5MRCS ON dbo.R5_DPP_VERSION.MRC_CODE = dbo.R5MRCS.MRC_CODE COLLATE Latin1_General_CI_AS LEFT OUTER JOIN
+                      dbo.R5_VIEW_ITEMBASE_LINES ON dbo.R5_DPP_VERSION.reference_no = dbo.R5_VIEW_ITEMBASE_LINES.reference_no
+GROUP BY dbo.R5_DPP_VERSION.reference_no, dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.status, 
+                      dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5MRCS.MRC_DESC, dbo.R5_DPP_VERSION.version, dbo.R5_DPP_VERSION.id, dbo.R5_DPP_VERSION.cost_center
+
+GO
+
+CREATE VIEW [dbo].[R5_ENDORESED_APP_COSTBASE]
+AS
+SELECT     dbo.R5_DPP_VERSION.id, dbo.R5_DPP_VERSION.reference_no, dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.year_budget, 
+                      dbo.R5_DPP_VERSION.status, SUM(dbo.R5_VIEW_COSTBASE_LINES.budget_amount) AS Budget_Amount, dbo.R5_DPP_VERSION.MRC_CODE, 
+                      dbo.R5MRCS.MRC_DESC AS Department, dbo.R5_DPP_VERSION.version, dbo.R5_DPP_VERSION.cost_center
+FROM         dbo.R5_DPP_VERSION INNER JOIN
+                      dbo.R5MRCS ON dbo.R5_DPP_VERSION.MRC_CODE = dbo.R5MRCS.MRC_CODE COLLATE Latin1_General_CI_AS LEFT OUTER JOIN
+                      dbo.R5_VIEW_COSTBASE_LINES ON dbo.R5_DPP_VERSION.reference_no = dbo.R5_VIEW_COSTBASE_LINES.reference_no
+GROUP BY dbo.R5_DPP_VERSION.reference_no, dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.status, 
+                      dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5MRCS.MRC_DESC, dbo.R5_DPP_VERSION.version, dbo.R5_DPP_VERSION.id, dbo.R5_DPP_VERSION.cost_center
+
+GO
+
+CREATE VIEW [dbo].[R5_ENDORESED_APP]
+AS
+SELECT     dbo.R5_ENDORESED_APP_COSTBASE.reference_no, dbo.R5_ENDORESED_APP_COSTBASE.ORG_CODE, dbo.R5ORGANIZATION.ORG_DESC AS Organization, 
+                      dbo.R5_ENDORESED_APP_COSTBASE.MRC_CODE, dbo.R5_ENDORESED_APP_COSTBASE.Department, dbo.R5_ENDORESED_APP_COSTBASE.year_budget, 
+                      ISNULL(dbo.R5_ENDORESED_APP_COSTBASE.Budget_Amount, 0) + ISNULL(dbo.R5_ENDORESED_APP_ITEMBASE.Budgeted_Cost, 0) AS Budgeted_Cost, 
+                      dbo.R5_ENDORESED_APP_COSTBASE.cost_center, dbo.R5_ENDORESED_APP_COSTBASE.status, dbo.R5_ENDORESED_APP_COSTBASE.id
+FROM         dbo.R5_ENDORESED_APP_COSTBASE INNER JOIN
+                      dbo.R5ORGANIZATION ON dbo.R5_ENDORESED_APP_COSTBASE.ORG_CODE COLLATE Latin1_General_BIN = dbo.R5ORGANIZATION.ORG_CODE LEFT OUTER JOIN
+                      dbo.R5_ENDORESED_APP_ITEMBASE ON dbo.R5_ENDORESED_APP_COSTBASE.cost_center = dbo.R5_ENDORESED_APP_ITEMBASE.cost_center AND 
+                      dbo.R5_ENDORESED_APP_COSTBASE.id = dbo.R5_ENDORESED_APP_ITEMBASE.id AND 
+                      dbo.R5_ENDORESED_APP_COSTBASE.version = dbo.R5_ENDORESED_APP_ITEMBASE.version AND 
+                      dbo.R5_ENDORESED_APP_COSTBASE.reference_no = dbo.R5_ENDORESED_APP_ITEMBASE.reference_no AND 
+                      dbo.R5_ENDORESED_APP_COSTBASE.ORG_CODE = dbo.R5_ENDORESED_APP_ITEMBASE.ORG_CODE AND 
+                      dbo.R5_ENDORESED_APP_COSTBASE.MRC_CODE = dbo.R5_ENDORESED_APP_ITEMBASE.MRC_CODE AND 
+                      dbo.R5_ENDORESED_APP_COSTBASE.year_budget = dbo.R5_ENDORESED_APP_ITEMBASE.year_budget
+
+GO
+
+CREATE VIEW [dbo].[R5_DPP_APPROVED_DEPT]
+AS
+SELECT     dbo.R5MRCS.MRC_CODE, dbo.R5MRCS.MRC_DESC, dbo.R5_DPP_VERSION.status, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.ORG_CODE, 
+                      dbo.R5_DPP_VERSION.cost_center
+FROM         dbo.R5MRCS INNER JOIN
+                      dbo.R5_DPP_VERSION ON dbo.R5MRCS.MRC_CODE = dbo.R5_DPP_VERSION.MRC_CODE COLLATE Latin1_General_BIN
+WHERE     (dbo.R5_DPP_VERSION.status LIKE 'Approved')
+
+GO
+
+CREATE VIEW [dbo].[R5_BUDGET_REALLOCATION_LOOKUP_COST]
+AS
+SELECT     dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.version, 
+                      dbo.R5_DPP_VERSION.reference_no, dbo.R5_EAM_DPP_COSTBASE_BRIDGE.rowid, dbo.R5_EAM_DPP_COSTBASE_LINES.description, 
+                      dbo.R5_DPP_VERSION.status, dbo.R5_EAM_DPP_COSTBASE_LINES.available, dbo.R5_DPP_VERSION.cost_center
+FROM         dbo.R5_EAM_DPP_COSTBASE_BRIDGE INNER JOIN
+                      dbo.R5_DPP_VERSION ON dbo.R5_EAM_DPP_COSTBASE_BRIDGE.reference_no = dbo.R5_DPP_VERSION.reference_no AND 
+                      dbo.R5_EAM_DPP_COSTBASE_BRIDGE.version = dbo.R5_DPP_VERSION.version INNER JOIN
+                      dbo.R5_EAM_DPP_COSTBASE_LINES ON dbo.R5_EAM_DPP_COSTBASE_BRIDGE.rowid = dbo.R5_EAM_DPP_COSTBASE_LINES.id 
+GROUP BY dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.version, 
+                      dbo.R5_DPP_VERSION.reference_no, dbo.R5_EAM_DPP_COSTBASE_BRIDGE.rowid, 
+                      dbo.R5_DPP_VERSION.status, dbo.R5_EAM_DPP_COSTBASE_LINES.available, dbo.R5_DPP_VERSION.cost_center, dbo.R5_EAM_DPP_COSTBASE_LINES.description
+
+
+GO
+
+CREATE VIEW [dbo].[R5_BUDGET_REALLOCATION_LOOKUP]
+AS
+SELECT     dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.version, 
+                      dbo.R5_DPP_VERSION.reference_no, dbo.R5_EAM_DPP_ITEMBASE_BRIDGE.rowid, dbo.R5_EAM_DPP_ITEMBASE_LINES.code, dbo.R5PARTS.PAR_DESC, 
+                      dbo.R5_DPP_VERSION.status, dbo.R5_EAM_DPP_ITEMBASE_LINES.available, dbo.R5_DPP_VERSION.cost_center
+FROM         dbo.R5_EAM_DPP_ITEMBASE_BRIDGE INNER JOIN
+                      dbo.R5_DPP_VERSION ON dbo.R5_EAM_DPP_ITEMBASE_BRIDGE.reference_no = dbo.R5_DPP_VERSION.reference_no AND 
+                      dbo.R5_EAM_DPP_ITEMBASE_BRIDGE.version = dbo.R5_DPP_VERSION.version INNER JOIN
+                      dbo.R5_EAM_DPP_ITEMBASE_LINES ON dbo.R5_EAM_DPP_ITEMBASE_BRIDGE.rowid = dbo.R5_EAM_DPP_ITEMBASE_LINES.id INNER JOIN
+                      dbo.R5PARTS ON dbo.R5_EAM_DPP_ITEMBASE_LINES.code COLLATE Latin1_General_BIN = dbo.R5PARTS.PAR_CODE
+GROUP BY dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.version, 
+                      dbo.R5_DPP_VERSION.reference_no, dbo.R5_EAM_DPP_ITEMBASE_BRIDGE.rowid, dbo.R5_EAM_DPP_ITEMBASE_LINES.code, dbo.R5PARTS.PAR_DESC, 
+                      dbo.R5_DPP_VERSION.status, dbo.R5_EAM_DPP_ITEMBASE_LINES.available, dbo.R5_DPP_VERSION.cost_center
+
+GO
+
+CREATE VIEW [dbo].[R5_APP_VERSION_VIEW]
+AS
+SELECT     TOP (100) PERCENT dbo.R5_APP_VERSION.app_id AS APP_ID, dbo.R5ORGANIZATION.ORG_DESC AS Organization, dbo.R5_APP_VERSION.year_budget AS Year, 
+                      dbo.R5_APP_VERSION.version AS Version, dbo.R5_APP_VERSION.status AS Status, dbo.R5_APP_VERSION.ORG_CODE
+FROM         dbo.R5_APP_VERSION LEFT OUTER JOIN
+                      dbo.R5ORGANIZATION ON dbo.R5_APP_VERSION.ORG_CODE = dbo.R5ORGANIZATION.ORG_CODE COLLATE Latin1_General_CI_AS
+ORDER BY Organization, Year, Version
+
+GO
+
+
+CREATE VIEW [dbo].[R5_APP_PROJECTBASE_VERSION_LOOKUP]
+AS
+SELECT     dbo.R5_APP_VERSION_PROJECT_LINES.app_id, dbo.R5_APP_VERSION_PROJECT_LINES.reference_no, dbo.R5_APP_VERSION_PROJECT_LINES.version, 
+                      dbo.R5_PROJECT_VERSION.id, dbo.R5_PROJECT_VERSION.status
+FROM         dbo.R5_APP_VERSION_PROJECT_LINES INNER JOIN
+                      dbo.R5_PROJECT_VERSION ON dbo.R5_APP_VERSION_PROJECT_LINES.reference_no = dbo.R5_PROJECT_VERSION.reference_no
+
+GO
+
+CREATE VIEW [dbo].[R5_APP_ITEMBASE_VERSION_LOOKUP]
+AS
+SELECT     dbo.R5_APP_VERSION_ITEMBASE_LINES.app_id, dbo.R5_APP_VERSION_ITEMBASE_LINES.reference_no, dbo.R5_APP_VERSION_ITEMBASE_LINES.version, 
+                      dbo.R5_DPP_VERSION.id, dbo.R5_DPP_VERSION.status
+FROM         dbo.R5_APP_VERSION_ITEMBASE_LINES INNER JOIN
+                      dbo.R5_DPP_VERSION ON dbo.R5_APP_VERSION_ITEMBASE_LINES.reference_no = dbo.R5_DPP_VERSION.reference_no
+
+GO

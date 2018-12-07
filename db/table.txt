@@ -1,0 +1,610 @@
+CREATE TABLE [dbo].[R5_APP_VERSION](
+	[app_id] [nchar](30) NOT NULL,
+	[version] [smallint] NOT NULL,
+	[ORG_CODE] [nvarchar](30) NOT NULL,
+	[year_budget] [int] NULL,
+	[status] [nchar](30) NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[remarks] [text] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+
+CREATE TABLE [dbo].[R5_APP_VERSION_ITEMBASE_LINES](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[reference_no] [nchar](30) NOT NULL,
+	[app_id] [nchar](30) NOT NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[version] [smallint] NULL
+) ON [PRIMARY]
+
+GO
+
+CREATE TABLE [dbo].[R5_APP_VERSION_PROJECT_LINES](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[reference_no] [nchar](30) NOT NULL,
+	[app_id] [nchar](30) NOT NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[version] [smallint] NULL
+) ON [PRIMARY]
+
+GO
+
+
+CREATE TABLE [dbo].[R5_BUDGET_MOVEMENT](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[app_id] [nchar](30) NULL,
+	[ORG_CODE] [nvarchar](30) NULL,
+	[FR_MRC_CODE] [nvarchar](30) NULL,
+	[TO_MRC_CODE] [nvarchar](30) NULL,
+	[fr_table] [nchar](10) NULL,
+	[fr_code] [int] NULL,
+	[to_table] [nchar](10) NULL,
+	[to_code] [int] NULL,
+	[amount] [numeric](24, 6) NULL,
+	[fr_available_amount] [numeric](24, 6) NULL,
+	[to_available_amount] [numeric](24, 6) NULL,
+	[year_budget] [int] NULL,
+	[type] [varchar](20) NULL,
+	[status] [nvarchar](30) NULL,
+	[remarks] [varchar](max) NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[cost_center] [nchar](30) NULL,
+	[fr_cost_center] [nchar](30) NULL,
+	[to_description] [nchar](30) NULL,
+	[reason] [varchar](max) NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+CREATE TABLE [dbo].[R5_BUDGET_MOVEMENT_COST](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[app_id] [nchar](30) NULL,
+	[ORG_CODE] [nvarchar](30) NULL,
+	[FR_MRC_CODE] [nvarchar](30) NULL,
+	[TO_MRC_CODE] [nvarchar](30) NULL,
+	[fr_code] [int] NULL,
+	[to_code] [int] NULL,
+	[amount] [numeric](24, 6) NULL,
+	[fr_available_amount] [numeric](24, 6) NULL,
+	[to_available_amount] [numeric](24, 6) NULL,
+	[year_budget] [int] NULL,
+	[type] [varchar](20) NULL,
+	[status] [nvarchar](30) NULL,
+	[remarks] [varchar](max) NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[cost_center] [nchar](30) NULL,
+	[fr_cost_center] [nchar](30) NULL,
+	[to_description] [nchar](10) NULL,
+	[reason] [varchar](max) NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+CREATE TABLE [dbo].[R5_BUDGET_MOVEMENT_PROJECT](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[app_id] [nchar](30) NULL,
+	[ORG_CODE] [nvarchar](30) NULL,
+	[project_id] [int] NULL,
+	[project_description] [varchar](max) NULL,
+	[fr_code] [int] NULL,
+	[to_code] [int] NULL,
+	[amount] [numeric](24, 6) NULL,
+	[fr_available_amount] [numeric](24, 6) NULL,
+	[to_available_amount] [numeric](24, 6) NULL,
+	[year_budget] [int] NULL,
+	[type] [varchar](20) NULL,
+	[status] [nvarchar](30) NULL,
+	[remarks] [varchar](max) NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[reason] [varchar](max) NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+CREATE TABLE [dbo].[R5_COSTCENTER_ACCOUNTS](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[MRC_CODE] [nchar](30) NULL,
+	[cost_center] [nchar](30) NULL,
+	[isActive] [smallint] NULL
+) ON [PRIMARY]
+
+GO
+
+ALTER TABLE [dbo].[R5_COSTCENTER_ACCOUNTS] ADD  CONSTRAINT [DF_R5_COSTCENTER_ACCOUNTS_isActive]  DEFAULT ((1)) FOR [isActive]
+GO
+
+
+
+
+CREATE TABLE [dbo].[R5_CUSTOM_AUDIT_APP](
+	[app_id] [nvarchar](30) NULL,
+	[status_from] [nvarchar](30) NULL,
+	[status_to] [nvarchar](30) NULL,
+	[updatedBy] [nvarchar](30) NULL,
+	[updatedAt] [datetime] NULL
+) ON [PRIMARY]
+
+GO
+
+
+CREATE TABLE [dbo].[R5_CUSTOM_AUDIT_DPP](
+	[reference_no] [nvarchar](30) NULL,
+	[version] [int] NULL,
+	[status_from] [nvarchar](30) NULL,
+	[status_to] [nvarchar](30) NULL,
+	[updatedBy] [nvarchar](30) NULL,
+	[updatedAt] [datetime] NULL
+) ON [PRIMARY]
+
+GO
+
+CREATE TABLE [dbo].[R5_CUSTOM_SAM](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[USR_CODE] [nchar](30) NULL,
+	[MRC_CODE] [nchar](30) NULL,
+	[ORG_CODE] [nchar](30) NULL,
+	[BO] [smallint] NULL,
+	[FI] [smallint] NULL,
+	[DH] [smallint] NULL,
+	[CFO] [smallint] NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL
+) ON [PRIMARY]
+
+GO
+
+CREATE TABLE [dbo].[R5_DEADLINE_MAINTENANCE](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[month] [nchar](10) NULL,
+	[date] [nchar](10) NULL,
+	[year] [nchar](10) NULL,
+	[budget_year] [int] NULL,
+	[isActive] [smallint] NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL
+) ON [PRIMARY]
+
+GO
+
+ALTER TABLE [dbo].[R5_DEADLINE_MAINTENANCE] ADD  CONSTRAINT [DF_R5_DEADLINE_MAINTENANCE_isActive]  DEFAULT ((1)) FOR [isActive]
+GO
+
+
+
+CREATE TABLE [dbo].[R5_DPP_VERSION](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[reference_no] [nchar](30) NOT NULL,
+	[ORG_CODE] [nvarchar](30) NOT NULL,
+	[MRC_CODE] [nvarchar](30) NULL,
+	[year_budget] [int] NULL,
+	[cost_center] [nchar](30) NULL,
+	[version] [int] NULL,
+	[status] [nvarchar](30) NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[remarks] [varchar](max) NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+CREATE TABLE [dbo].[R5_EAM_APP_PROJECTBASE_LINES](
+	[id] [int] NOT NULL,
+	[project_code] [varchar](30) NULL,
+	[description] [nchar](80) NULL,
+	[available] [float] NULL,
+	[reserved] [float] NULL,
+	[allocated] [float] NULL,
+	[paid] [float] NULL,
+	[version] [int] NULL,
+	[deleted] [int] NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[saveFlag] [smallint] NULL,
+	[rejectFlag] [smallint] NULL,
+ CONSTRAINT [PK_R5_EAM_APP_PROJECTBASE_LINES] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+CREATE TABLE [dbo].[R5_EAM_APP_PROJECTBASE_MILESTONE](
+	[milestoneID] [int] IDENTITY(1,1) NOT NULL,
+	[id] [int] NOT NULL,
+	[milestone] [varchar](255) NULL,
+	[budget_amount] [numeric](24, 6) NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[rejectFlag] [smallint] NULL,
+	[Jan] [numeric](24, 6) NULL,
+	[Feb] [numeric](24, 6) NULL,
+	[Mar] [numeric](24, 6) NULL,
+	[Apr] [numeric](24, 6) NULL,
+	[May] [numeric](24, 6) NULL,
+	[Jun] [numeric](24, 6) NULL,
+	[Jul] [numeric](24, 6) NULL,
+	[Aug] [numeric](24, 6) NULL,
+	[Sep] [numeric](24, 6) NULL,
+	[Oct] [numeric](24, 6) NULL,
+	[Nov] [numeric](24, 6) NULL,
+	[Dec] [numeric](24, 6) NULL,
+	[available] [numeric](24, 6) NULL,
+	[reserved] [numeric](24, 6) NULL,
+	[allocated] [numeric](24, 6) NULL,
+	[paid] [numeric](24, 6) NULL,
+	[adjustments] [numeric](24, 6) NULL,
+	[saveFlag] [smallint] NULL
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+ALTER TABLE [dbo].[R5_EAM_APP_PROJECTBASE_MILESTONE]  WITH CHECK ADD  CONSTRAINT [fk_cascade_project] FOREIGN KEY([id])
+REFERENCES [dbo].[R5_EAM_APP_PROJECTBASE_LINES] ([id])
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [dbo].[R5_EAM_APP_PROJECTBASE_MILESTONE] CHECK CONSTRAINT [fk_cascade_project]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_APP_PROJECTBASE_MILESTONE]  WITH CHECK ADD  CONSTRAINT [FK_R5_EAM_APP_PROJECTBASE_MILESTONE_R5_EAM_APP_PROJECTBASE_LINES] FOREIGN KEY([id])
+REFERENCES [dbo].[R5_EAM_APP_PROJECTBASE_LINES] ([id])
+GO
+
+ALTER TABLE [dbo].[R5_EAM_APP_PROJECTBASE_MILESTONE] CHECK CONSTRAINT [FK_R5_EAM_APP_PROJECTBASE_MILESTONE_R5_EAM_APP_PROJECTBASE_LINES]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_APP_PROJECTBASE_MILESTONE] ADD  CONSTRAINT [DF_R5_EAM_APP_PROJECTBASE_MILESTONE_available]  DEFAULT ((0)) FOR [available]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_APP_PROJECTBASE_MILESTONE] ADD  CONSTRAINT [DF_R5_EAM_APP_PROJECTBASE_MILESTONE_reserved]  DEFAULT ((0)) FOR [reserved]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_APP_PROJECTBASE_MILESTONE] ADD  CONSTRAINT [DF_R5_EAM_APP_PROJECTBASE_MILESTONE_allocated]  DEFAULT ((0)) FOR [allocated]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_APP_PROJECTBASE_MILESTONE] ADD  CONSTRAINT [DF_R5_EAM_APP_PROJECTBASE_MILESTONE_paid]  DEFAULT ((0)) FOR [paid]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_APP_PROJECTBASE_MILESTONE] ADD  CONSTRAINT [DF_R5_EAM_APP_PROJECTBASE_MILESTONE_adjustments]  DEFAULT ((0)) FOR [adjustments]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_APP_PROJECTBASE_MILESTONE] ADD  CONSTRAINT [DF_R5_EAM_APP_PROJECTBASE_MILESTONE_saveFlag]  DEFAULT ((0)) FOR [saveFlag]
+GO
+
+
+
+CREATE TABLE [dbo].[R5_EAM_DPP_COSTBASE_BRIDGE](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[reference_no] [nchar](30) NOT NULL,
+	[rowid] [int] NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[version] [int] NULL
+) ON [PRIMARY]
+
+GO
+
+
+CREATE TABLE [dbo].[R5_EAM_DPP_COSTBASE_LINES](
+	[id] [int] NOT NULL,
+	[record_id] [varchar](20) NULL,
+	[CMD_CODE] [nvarchar](30) NULL,
+	[budget_amount] [numeric](24, 6) NULL,
+	[adjustments] [numeric](24, 6) NULL,
+	[description] [varchar](80) NULL,
+	[classification] [varchar](30) NULL,
+	[category] [nchar](30) NULL,
+	[io_number] [varchar](30) NULL,
+	[available] [numeric](24, 6) NULL,
+	[reserved] [numeric](24, 6) NULL,
+	[allocated] [numeric](24, 6) NULL,
+	[paid] [numeric](24, 6) NULL,
+	[version] [int] NULL,
+	[deleted] [int] NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[saveFlag] [smallint] NULL,
+	[rejectFlag] [smallint] NULL,
+	[foreign_cost] [numeric](24, 6) NULL,
+	[foreign_curr] [nvarchar](30) NULL,
+	[wo_type] [varchar](50) NULL,
+	[code] [nvarchar](30) NULL,
+	[type] [varchar](255) NULL,
+ CONSTRAINT [PK_R5_EAM_DPP_COSTBASE_LINES] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_COSTBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_COSTBASE_LINES_adjustments]  DEFAULT ((0)) FOR [adjustments]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_COSTBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_COSTBASE_LINES_available]  DEFAULT ((0)) FOR [available]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_COSTBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_COSTBASE_LINES_reserved]  DEFAULT ((0)) FOR [reserved]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_COSTBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_COSTBASE_LINES_allocated]  DEFAULT ((0)) FOR [allocated]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_COSTBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_COSTBASE_LINES_paid]  DEFAULT ((0)) FOR [paid]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_COSTBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_COSTBASE_LINES_rejectFlag]  DEFAULT ((0)) FOR [rejectFlag]
+GO
+
+
+
+
+CREATE TABLE [dbo].[R5_EAM_DPP_ITEMBASE_BRIDGE](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[reference_no] [nchar](30) NOT NULL,
+	[rowid] [int] NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[version] [int] NULL
+) ON [PRIMARY]
+
+GO
+
+CREATE TABLE [dbo].[R5_EAM_DPP_ITEMBASE_LINES](
+	[id] [int] NOT NULL,
+	[record_id] [varchar](20) NULL,
+	[code] [nvarchar](30) NULL,
+	[quantity] [int] NULL,
+	[unit_cost] [numeric](24, 6) NULL,
+	[total_cost] [numeric](24, 6) NULL,
+	[adjustments] [numeric](24, 6) NULL,
+	[available] [numeric](24, 6) NULL,
+	[reserved] [numeric](24, 6) NULL,
+	[allocated] [numeric](24, 6) NULL,
+	[paid] [numeric](24, 6) NULL,
+	[version] [int] NULL,
+	[deleted] [int] NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[saveFlag] [smallint] NULL,
+	[rejectFlag] [smallint] NULL,
+	[foreign_cost] [numeric](24, 6) NULL,
+	[foreign_curr] [nvarchar](30) NULL,
+ CONSTRAINT [PK_R5_EAM_DPP_ITEMBASE_LINES] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+) ON [PRIMARY]
+
+GO
+
+SET ANSI_PADDING OFF
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_ITEMBASE_LINES]  WITH CHECK ADD  CONSTRAINT [FK_R5_EAM_DPP_ITEMBASE_LINES_R5_EAM_DPP_ITEMBASE_LINES] FOREIGN KEY([id])
+REFERENCES [dbo].[R5_EAM_DPP_ITEMBASE_LINES] ([id])
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_ITEMBASE_LINES] CHECK CONSTRAINT [FK_R5_EAM_DPP_ITEMBASE_LINES_R5_EAM_DPP_ITEMBASE_LINES]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_ITEMBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_ITEMBASE_LINES_baseline_total_cost]  DEFAULT ((0)) FOR [adjustments]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_ITEMBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_ITEMBASE_LINES_available]  DEFAULT ((0)) FOR [available]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_ITEMBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_ITEMBASE_LINES_reserved]  DEFAULT ((0)) FOR [reserved]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_ITEMBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_ITEMBASE_LINES_allocated]  DEFAULT ((0)) FOR [allocated]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_ITEMBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_ITEMBASE_LINES_paid]  DEFAULT ((0)) FOR [paid]
+GO
+
+ALTER TABLE [dbo].[R5_EAM_DPP_ITEMBASE_LINES] ADD  CONSTRAINT [DF_R5_EAM_DPP_ITEMBASE_LINES_rejectFlag]  DEFAULT ((0)) FOR [rejectFlag]
+GO
+
+
+
+CREATE TABLE [dbo].[R5_EAM_DPP_PROJECTBASE_BRIDGE](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[reference_no] [nchar](30) NOT NULL,
+	[rowid] [int] NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[version] [int] NULL
+) ON [PRIMARY]
+
+GO
+
+
+CREATE TABLE [dbo].[R5_EMAIL_TEMPLATE](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[subject] [nvarchar](max) NULL,
+	[body] [nvarchar](max) NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+
+CREATE TABLE [dbo].[R5_FDC_PAYMENTS](
+	[PMT_DOC_CODE] [nvarchar](30) NULL,
+	[PMT_DOC_DESC] [nvarchar](80) NULL,
+	[PMT_STATUS] [nvarchar](4) NULL,
+	[PMT_AMOUNT] [numeric](24, 6) NULL,
+	[PMT_POST_DATE] [datetime] NULL,
+	[PMT_TRANS_DATE] [datetime] NULL,
+	[PMT_TYPE] [nvarchar](30) NULL,
+	[PMT_INV_VOUCHER] [nvarchar](30) NULL,
+	[PMT_ORG] [nvarchar](15) NULL,
+	[PMT_DEPT] [nvarchar](15) NULL,
+	[PMT_COST_CODE] [nvarchar](30) NULL,
+	[PMT_IO_SAP] [nvarchar](30) NULL,
+	[PMT_SQLIDENTITY] [int] NULL,
+	[REC_CREATE_DATE] [datetime] NULL,
+	[REC_UPDATE_DATE] [datetime] NULL
+) ON [PRIMARY]
+
+GO
+
+ALTER TABLE [dbo].[R5_FDC_PAYMENTS] ADD  CONSTRAINT [DF_R5_FDC_PAYMENTS_REC_CREATE_DATE]  DEFAULT (getdate()) FOR [REC_CREATE_DATE]
+GO
+
+ALTER TABLE [dbo].[R5_FDC_PAYMENTS] ADD  CONSTRAINT [DF_R5_FDC_PAYMENTS_REC_UPDATE_DATE]  DEFAULT (getdate()) FOR [REC_UPDATE_DATE]
+GO
+
+
+CREATE TABLE [dbo].[R5_GL_ACCOUNTS](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[gl] [nchar](30) NULL,
+	[CMD_CODE] [nchar](15) NULL,
+	[category] [nchar](30) NULL,
+	[description] [nchar](255) NULL,
+	[type] [nchar](10) NULL,
+	[isActive] [smallint] NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL
+) ON [PRIMARY]
+
+GO
+
+ALTER TABLE [dbo].[R5_GL_ACCOUNTS] ADD  CONSTRAINT [DF_R5_GL_ACCOUNTS_isActive]  DEFAULT ((1)) FOR [isActive]
+GO
+
+CREATE TABLE [dbo].[R5_PROJECT_VERSION](
+	[id] [int] IDENTITY(1,1) NOT NULL,
+	[reference_no] [nchar](30) NOT NULL,
+	[ORG_CODE] [nvarchar](30) NOT NULL,
+	[year_budget] [int] NULL,
+	[version] [int] NULL,
+	[status] [nchar](30) NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[remarks] [text] NULL
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+GO
+
+
+CREATE TABLE [dbo].[R5_REF_COSTBASE_BUDGET_MONTH](
+	[id] [int] NOT NULL,
+	[january] [int] NOT NULL,
+	[february] [int] NOT NULL,
+	[march] [int] NOT NULL,
+	[april] [int] NOT NULL,
+	[may] [int] NOT NULL,
+	[june] [int] NOT NULL,
+	[july] [int] NOT NULL,
+	[august] [int] NOT NULL,
+	[september] [int] NOT NULL,
+	[october] [int] NOT NULL,
+	[november] [int] NOT NULL,
+	[december] [int] NOT NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL
+) ON [PRIMARY]
+
+GO
+
+ALTER TABLE [dbo].[R5_REF_COSTBASE_BUDGET_MONTH]  WITH CHECK ADD  CONSTRAINT [fk_delete_cascade] FOREIGN KEY([id])
+REFERENCES [dbo].[R5_EAM_DPP_COSTBASE_LINES] ([id])
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [dbo].[R5_REF_COSTBASE_BUDGET_MONTH] CHECK CONSTRAINT [fk_delete_cascade]
+GO
+
+
+CREATE TABLE [dbo].[R5_REF_ITEMBASE_BUDGET_MONTH](
+	[id] [int] NOT NULL,
+	[january] [int] NOT NULL,
+	[february] [int] NOT NULL,
+	[march] [int] NOT NULL,
+	[april] [int] NOT NULL,
+	[may] [int] NOT NULL,
+	[june] [int] NOT NULL,
+	[july] [int] NOT NULL,
+	[august] [int] NOT NULL,
+	[september] [int] NOT NULL,
+	[october] [int] NOT NULL,
+	[november] [int] NOT NULL,
+	[december] [int] NOT NULL,
+	[updatedAt] [datetime] NULL,
+	[updatedBy] [nchar](30) NULL,
+	[createdAt] [datetime] NULL,
+	[createdBy] [nchar](30) NULL
+) ON [PRIMARY]
+
+GO
+
+ALTER TABLE [dbo].[R5_REF_ITEMBASE_BUDGET_MONTH]  WITH CHECK ADD  CONSTRAINT [fk_cascade] FOREIGN KEY([id])
+REFERENCES [dbo].[R5_EAM_DPP_ITEMBASE_LINES] ([id])
+ON DELETE CASCADE
+GO
+
+ALTER TABLE [dbo].[R5_REF_ITEMBASE_BUDGET_MONTH] CHECK CONSTRAINT [fk_cascade]
+GO
+
+ALTER TABLE [dbo].[R5_REF_ITEMBASE_BUDGET_MONTH]  WITH CHECK ADD  CONSTRAINT [FK_R5_REF_ITEMBASE_BUDGET_MONTH_R5_EAM_DPP_ITEMBASE_LINES] FOREIGN KEY([id])
+REFERENCES [dbo].[R5_EAM_DPP_ITEMBASE_LINES] ([id])
+GO
+
+ALTER TABLE [dbo].[R5_REF_ITEMBASE_BUDGET_MONTH] CHECK CONSTRAINT [FK_R5_REF_ITEMBASE_BUDGET_MONTH_R5_EAM_DPP_ITEMBASE_LINES]
+GO
+
+

@@ -1,0 +1,74 @@
+DECLARE @req_code NVARCHAR(30),@stats NVARCHAR(4),@req_dept NVARCHAR(30),@enteredBy NVARCHAR(30),@dueDate NVARCHAR(4)
+SELECT TOP 1 @req_code = ORD_CODE,@stats = ORD_STATUS,@enteredBy = ORD_AUTH,@dueDate = YEAR(ORD_DUE) FROM dbo.R5ORDERS WHERE ORD_SQLIDENTITY = :ROWID
+
+SELECT TOP 1 @req_dept = MRC_CODE FROM dbo.R5_VIEW_USERINFO WHERE USR_CODE = @enteredBy
+PRINT @dueDate;
+IF @stats = 'A'
+BEGIN
+	--Start of Cursor for Error Message
+	DECLARE @id NVARCHAR(30),@code NVARCHAR(30),@orlOrder NVARCHAR(30),@available FLOAT,@allocated FLOAT,@allocated2 FLOAT,@errorMsg NVARCHAR(100),@amountfromPR FLOAT,@amountfromPO FLOAT,@amountforAvailable FLOAT
+	DECLARE @MyCursor CURSOR
+	SET @MyCursor = CURSOR FAST_FORWARD
+	FOR
+	SELECT item.id,item.code,orderlines.ORL_ORDER,item.available,orderlines.ORL_PRICE * orderlines.ORL_ORDQTY AS allocated   
+	FROM dbo.R5_EAM_DPP_ITEMBASE_LINES AS item LEFT OUTER JOIN dbo.R5ORDERLINES AS orderlines ON orderlines.ORL_PART COLLATE Latin1_General_CI_AS = item.code WHERE orderlines.ORL_ORDER = @req_code AND item.id IN (SELECT rowid FROM dbo.R5_PR_PO_ITEM_LOOKUP WHERE status = 'Approved' AND MRC_CODE = @req_dept AND year_budget = @dueDate)
+	OPEN @MyCursor
+	FETCH NEXT FROM @MyCursor
+	INTO @id,@code,@orlOrder,@available,@allocated
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+	
+	SET @errorMsg = 'Allocated Amount exceeds the budget limit for the following items:'+CHAR(13)+@code+'--'+@orlOrder+CHAR(13)
+
+	SELECT @amountfromPR = dbo.R5_VIEW_CUSTOM_ORDERLINES.Amount FROM dbo.R5_VIEW_CUSTOM_ORDERLINES WHERE dbo.R5_VIEW_CUSTOM_ORDERLINES.ORL_PART COLLATE Latin1_General_CI_AS = @code AND dbo.R5_VIEW_CUSTOM_ORDERLINES.ORL_ORDER = @req_code;
+	
+		--RESERVED
+		UPDATE dbo.R5_EAM_DPP_ITEMBASE_LINES SET 
+		dbo.R5_EAM_DPP_ITEMBASE_LINES.reserved = dbo.R5_EAM_DPP_ITEMBASE_LINES.reserved - ISNULL((@amountfromPR),0) WHERE dbo.R5_EAM_DPP_ITEMBASE_LINES.id = @id;
+		
+		--ALLOCATED
+		UPDATE dbo.R5_EAM_DPP_ITEMBASE_LINES SET 
+		dbo.R5_EAM_DPP_ITEMBASE_LINES.allocated = dbo.R5_EAM_DPP_ITEMBASE_LINES.allocated + (@allocated) WHERE dbo.R5_EAM_DPP_ITEMBASE_LINES.id = @id;	
+				
+		--START CONDITION FOR PO
+		IF @allocated < @amountfromPR
+		BEGIN 
+			SET @amountforAvailable = @amountfromPR - @allocated; --SET Amount available
+			--AVAILABLE
+			UPDATE dbo.R5_EAM_DPP_ITEMBASE_LINES SET 
+			dbo.R5_EAM_DPP_ITEMBASE_LINES.available = dbo.R5_EAM_DPP_ITEMBASE_LINES.available + @amountforAvailable WHERE dbo.R5_EAM_DPP_ITEMBASE_LINES.id = @id
+		END
+		ELSE IF @allocated > @amountfromPR
+		BEGIN
+			SET @allocated2 = @allocated - @amountfromPR; 
+			IF  @available < @allocated2
+				BEGIN
+				RAISERROR (@errorMsg, -- Message text.
+					16, -- Severity.
+					1 -- State.
+					);
+				END
+				ELSE
+					SET @amountforAvailable = @allocated - @amountfromPR; --SET Amount available	
+					--AVAILABLE
+					UPDATE dbo.R5_EAM_DPP_ITEMBASE_LINES SET 
+					dbo.R5_EAM_DPP_ITEMBASE_LINES.available = dbo.R5_EAM_DPP_ITEMBASE_LINES.available - @amountforAvailable WHERE dbo.R5_EAM_DPP_ITEMBASE_LINES.id = @id
+		END
+		ELSE -- NO PR
+				IF  @available < @allocated
+				BEGIN
+				RAISERROR (@errorMsg, -- Message text.
+					16, -- Severity.
+					1 -- State.
+					);
+				END
+				ELSE
+				--AVAILABLE
+				UPDATE dbo.R5_EAM_DPP_ITEMBASE_LINES SET 
+				dbo.R5_EAM_DPP_ITEMBASE_LINES.available = dbo.R5_EAM_DPP_ITEMBASE_LINES.available - @allocated WHERE dbo.R5_EAM_DPP_ITEMBASE_LINES.id = @id			
+	FETCH NEXT FROM @MyCursor
+	INTO @id,@code,@orlOrder,@available,@allocated
+	END
+	CLOSE @MyCursor
+	DEALLOCATE @MyCursor
+END
