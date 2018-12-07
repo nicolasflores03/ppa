@@ -38,7 +38,7 @@ $code = $value['code'];
 $desc = $value['desc'];
 //$codes = str_replace(" ","@",$code);
 //$descs = str_replace(" ","-",$desc);
-$tableView .= "<tr id='tbitem'>";
+$tableView .= "<tr class='tbitem'>";
 $tableView .= "<td>".$code."</td>";
 $tableView .= "<td>".$desc."</td>";
 $tableView .= "</tr>";
@@ -72,28 +72,28 @@ $type = $_POST['type'];
 		$descs = str_replace(" ","-",$desc);
 			if ($type == "eq"){
 				if (strtolower($views["$fieldname"]) == $value){
-					$tableView .= "<tr id='tbitem'>";
+					$tableView .= "<tr class='tbitem'>";
 					$tableView .= "<td>".$code."</td>";
 					$tableView .= "<td>".$desc."</td>";
 					$tableView .="</tr>";
 				}
 			}else if ($type == "co"){
 				if (strpos(strtolower($views["$fieldname"]),strtolower($value)) !== false){
-					$tableView .= "<tr id='tbitem'>";
+					$tableView .= "<tr class='tbitem'>";
 					$tableView .= "<td>".$code."</td>";
 					$tableView .= "<td>".$desc."</td>";
 					$tableView .="</tr>";
 				}				
 			}else if ($type == "sw"){
 				if (0 === strpos(strtolower($views["$fieldname"]), strtolower($value))){
-					$tableView .= "<tr id='tbitem'>";
+					$tableView .= "<tr class='tbitem'>";
 					$tableView .= "<td>".$code."</td>";
 					$tableView .= "<td>".$desc."</td>";
 					$tableView .="</tr>";
 				}				
 			}else if ($type == "ew"){
 				if (stripos(strrev(strtolower($views["$fieldname"])), strrev(strtolower($value))) === 0){
-					$tableView .= "<tr id='tbitem'>";
+					$tableView .= "<tr class='tbitem'>";
 					$tableView .= "<td>".$code."</td>";
 					$tableView .= "<td>".$desc."</td>";
 					$tableView .="</tr>";
@@ -116,7 +116,8 @@ $type = $_POST['type'];
 <script src="js/jquery.min.js"></script>
 <script type='text/javascript'>  
 $(document).ready(function(){
-	$("tr#tbitem").click(function() {        // function_tr
+	$("tr.tbitem").click(function() {        // function_tr
+	debugger;
 		var id = $(this).find("td").eq(0).text();
 		var name = $(this).find("td").eq(1).text();
 		//name = name.replace(/-/g, ' ');
