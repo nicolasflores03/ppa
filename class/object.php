@@ -445,10 +445,15 @@ class filterClass{
 		$content .= '<table width="100%" cellspacing="0" cellpadding="0" border="1" class="list">';
 		$content .= '<tr>';
 		foreach($column as $fieldName){
-		$fieldName = str_replace('_', ' ', $fieldName);
-		$fieldName = strtoupper($fieldName);
-			if ($fieldName != "ID"){//-->Remove ID from the table header
-				$content .= "<th>".$fieldName."</th>";
+			//new: can handle customize field name just make the value an array i.e. array('isactive', 'is active')
+			if ($fieldName != "id"){//-->Remove ID from the table header
+				if(is_array($fieldName)) {
+					$content .= "<th>".$fieldName[1]."</th>";
+				} else {
+					$fieldName = str_replace('_', ' ', $fieldName);
+					$fieldName = strtoupper($fieldName);
+					$content .= "<th>".$fieldName."</th>";
+				}
 			}
 		}
 		$content .= "</tr>";
@@ -458,15 +463,17 @@ class filterClass{
 				$id = $views[$code];
 				$content .= "<tr class='test' onclick=\"onclickEvent('$id');\">";
 					foreach($column as $fieldName){
-						if ($fieldName != "id"){
+						$_fieldName = is_array($fieldName) ? $fieldName[0] : $fieldName;	
+						if ($_fieldName != "id"){
 							//$fielVal = str_replace(' ', '', $views[$fieldName]);
-							$content .= "<td width='5%' class='$fieldName'>".$views[$fieldName]."</td>";
+							$content .= "<td width='5%' class='$_fieldName'>".$views[$_fieldName]."</td>";
 						}
 					}
 				$content .= "</tr>";
 			}
 		}else{
 			foreach($listView as $views){
+
 				$field = $filter[0];
 				$type = $filter[1];
 				$value = $filter[2];
@@ -477,8 +484,9 @@ class filterClass{
 				if ($type == "eq"){
 					if ($listValue == $value){
 						foreach($column as $fieldName){
-							$val = $views[$fieldName];
-							if ($fieldName != "id"){
+							$_fieldName = is_array($fieldName) ? $fieldName[0] : $fieldName;
+							$val = $views[$_fieldName];
+							if ($_fieldName != "id"){
 								$content .= "<td width='5%'>".$val."</td>";
 							}
 						}
@@ -486,21 +494,24 @@ class filterClass{
 				}else if ($type == "co"){
 					if (strpos($listValue,$value) !== false){
 						foreach($column as $fieldName){
-							$val = $views[$fieldName];
+							$_fieldName = is_array($fieldName) ? $fieldName[0] : $fieldName;
+							$val = $views[$_fieldName];
 							$content .= "<td width='5%'>".$val."</td>";
 						}
 					}				
 				}else if ($type == "sw"){
 					if (0 === strpos($listValue, $value)){
 						foreach($column as $fieldName){
-							$val = $views[$fieldName];
+							$_fieldName = is_array($fieldName) ? $fieldName[0] : $fieldName;
+							$val = $views[$_fieldName];
 							$content .= "<td width='5%'>".$val."</td>";
 						}
 					}				
 				}else if ($type == "ew"){
 					if (stripos(strrev($listValue), strrev($value)) === 0){
 						foreach($column as $fieldName){
-							$val = $views[$fieldName];
+							$_fieldName = is_array($fieldName) ? $fieldName[0] : $fieldName;
+							$val = $views[$_fieldName];
 							$content .= "<td width='5%'>".$val."</td>";
 						}
 					}				

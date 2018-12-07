@@ -30,10 +30,10 @@ $orgcode = $userinfo[0]['ORG_CODE'];
 $filter = array();
 $cnd = "";
 $column = $crudapp->readColumn($conn,"R5_DEADLINE_MAINTENANCE");
-$requiredField = array('id','month','date','year','budget_year','isActive');
-$column = array_intersect($column,$requiredField);
+$requiredField = array('id','month','date','year','budget_year', array('isActive', 'IS ACTIVE') , 'Q1', 'Q2', 'Q3', 'Q4');
+// $column = array_intersect($column,$requiredField);
 $listView = $crudapp->listTableDeadline($conn,"R5_DEADLINE_MAINTENANCE",$column,$cnd);
-$tableView = $filterapp->filterViewURLXdelete($conn,$column,$listView,$filter,"id");
+$tableView = $filterapp->filterViewURLXdelete($conn,$requiredField,$listView,$filter,"id");
 
 
 if (isset($_POST['submit'])){
@@ -115,7 +115,7 @@ if(!$errorFlag){
 <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
 <META HTTP-EQUIV="Expires" CONTENT="-1">
 <link rel="stylesheet" href="css/style.css"  media="screen" rel="stylesheet" type="text/css"/>
- <link rel="stylesheet" href="css/jquery-ui.css">
+<link rel="stylesheet" href="css/jquery-ui.css">
  
 <!--DATE-->
 <script type="text/javascript" src="js/datepickr.js"></script>
@@ -186,6 +186,10 @@ xmlhttp.onreadystatechange=function()
 	 var budget_year = json['budget_year'];	 
 	 var id = json['id'];
 	 var isActive = json['isActive'];
+	 var Q1 = json['Q1'];
+	 var Q2 = json['Q2'];
+	 var Q3 = json['Q3'];
+	 var Q4 = json['Q4'];
 	 
 	 month = month.replace(/ /g, '');
 	 date = date.replace(/ /g, '');
@@ -194,6 +198,10 @@ xmlhttp.onreadystatechange=function()
 	 $('#datepick2').val(deadline);
 	 $('#id').val(id);
 	 $('#budget_year').val(budget_year);
+	//  $('#Q1').val(Q1);
+	//  $('#Q2').val(Q2);
+	//  $('#Q3').val(Q3);
+	//  $('#Q4').val(Q4);
 	 if (isActive > 0){
 		$('#active').prop('checked', true);
 	 }else{
@@ -235,9 +243,14 @@ var user ="<?php echo $user; ?>";
 	});
 	
 	
-			new datepickr('datepick2', {
-				'dateFormat': 'm/d/y'
-			});
+	new datepickr('datepick2', {
+		'dateFormat': 'm/d/y'
+	});
+	new datepickr('q1_datepicker', {
+		'dateFormat': 'm/d/y'
+	});
+
+	// $("#q1_datepicker").datepicker();
 
 	$("#budget_year").change(function() {
 		var budget_year = $(this).val();
@@ -470,6 +483,17 @@ var user ="<?php echo $user; ?>";
 			<td class="textLabel">Is Active: <i class="required">*</i></td>
 			<td class="textField">	<input type="checkbox" name="active" id="active" value="1" checked>
 		</tr> 
+		<tr>
+			<td class="textLabel"><strong>Quarter Close</strong></td>
+		</tr> 
+		<tr>
+			<td class="textLabel">Q1:</td>
+			<td class="textField">
+				<input type="hidden" value="" id="q1" name="q1">
+				<input type="text" class="datepick2" value="" id="q1_datepicker" name="Q1">
+			</td>
+		</tr>
+		
 	</tbody>
 	</table>
 	<!--Action Button-->
@@ -484,7 +508,7 @@ var user ="<?php echo $user; ?>";
 </form>
 <script type="text/javascript">
 jQuery(function($){
-   $("#datepick2").mask("99/99/99");
+   $("#datepick2",".datepick2").mask("99/99/99");
 });
 </script>
 </body>
