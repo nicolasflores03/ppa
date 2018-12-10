@@ -289,11 +289,11 @@ xmlhttp.onreadystatechange=function()
 	 
 	 $('#unit_cost').val(unit_cost);
 	 if (unit_cost > 0){
-	   $('#unit_cost').attr('readonly', 'true'); // mark it as read only
+	//   $('#unit_cost').attr('readonly', 'true'); // mark it as read only
 	   $('#CUR_CODE').val('PHP');
 	   $('#CUR_CODE').attr('disabled', 'true'); // mark it as read only
 	 }else{
-	   $('#unit_cost').removeAttr('readonly'); // mark it as read only
+	  // $('#unit_cost').removeAttr('readonly'); // mark it as read only
 	   $('#CUR_CODE').val('PHP');
 	   $('#unit_cost').val('0.00');
 	   $('#CUR_CODE').removeAttr('disabled'); // mark it as read only	 
@@ -351,10 +351,10 @@ xmlhttp.onreadystatechange=function()
 	 $('#unit_cost').val(unit_cost);
 	 $('#CUR_CODE').val('PHP');
 	 if (unit_cost2 > 0){
-	   $('#unit_cost').attr('readonly', 'true'); // mark it as read only
+	  // $('#unit_cost').attr('readonly', 'true'); // mark it as read only
 	     $('#CUR_CODE').attr('disabled', 'true'); // mark it as read only
 	 }else if (unit_cost2 == null){
-	   $('#unit_cost').removeAttr( "readonly" ); // mark it as read only
+	  // $('#unit_cost').removeAttr( "readonly" ); // mark it as read only
 	   $('#CUR_CODE').removeAttr( "disabled" ); // mark it as read only
 	 }
 	
