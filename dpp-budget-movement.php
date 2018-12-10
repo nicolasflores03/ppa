@@ -51,10 +51,11 @@ $appinfo = $crudapp->listTable($conn,"R5_APP_VERSION",$appcolumn,$appfilter);
 $filter = array();
 $cnd = "year_budget = '$year' AND cost_center = '$cost_center' ORDER BY ID DESC";
 $column = $crudapp->readColumn($conn,"R5_VIEW_BUDGET_MOVEMENT");
-$requiredField = array('id','Source_Department','Source','Destination_Department','Destination','amount','year_budget','type','status','reason');
+$requiredField = array('id','Source_Department','Source','Destination_Department','Destination','amount','year_budget', 'target_quarter','type','status','reason');
 $column = array_intersect($column,$requiredField);
-$listView = $crudapp->listTable($conn,"R5_VIEW_BUDGET_MOVEMENT",$column,$cnd);
-$tableView = $filterapp->filterViewURLXdeleteID($conn,$column,$listView,$filter,"id");
+
+$listView = $crudapp->listTable($conn,"R5_VIEW_BUDGET_MOVEMENT",$requiredField,$cnd);
+$tableView = $filterapp->filterViewURLXdeleteID($conn,$requiredField,$listView,$filter,"id");
 
 
 if (isset($_POST['search'])){
@@ -98,6 +99,8 @@ if (isset($_POST['submit'])){
 	$source_tb = $_POST['source_tb'];
 	$destination_tb = $_POST['destination_tb'];
 	$status = $_POST['status'];
+	$target_quarter_tb = $_POST['target_quarter_tb'];
+
 
 	if ($type == ""){
 	$errorMessage .= 'Please select a movement type.\n\n';
@@ -141,9 +144,9 @@ if (isset($_POST['submit'])){
 		$today = date("m/d/Y H:i");	
 		if($id != ""){
 		if($status != "") {
-			$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>$status,"cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb);
+			$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>$status,"cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "target_quarter"=>$target_quarter_tb);
 		} else {
-			$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb);
+			$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "target_quarter"=>$target_quarter_tb);
 		}
 		
 		$result2 = $crudapp->updateRecord($conn,$data,$table,"id",$id);
@@ -152,7 +155,7 @@ if (isset($_POST['submit'])){
 		
 		$record_id = $crudapp->readID($conn,"R5_BUDGET_MOVEMENT");
 		$id = $record_id + 1;
-		$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"createdBy"=>$user,"createdAt"=>$today,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb);
+		$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"createdBy"=>$user,"createdAt"=>$today,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "target_quarter"=>$target_quarter_tb);
 		$result2 = $crudapp->insertRecord($conn,$data,$table);
 		}
 		if($result2) {
@@ -294,7 +297,10 @@ xmlhttp.onreadystatechange=function()
 	 
 	 var reason = json['reason'];
 	 var remarks = json['remarks'];
+	 var target_quarter_tb = json['target_quarter'];
 	 var responsible ='';
+
+
 	 if (status != 'Approved'){
 	  responsible = json['USR_DESC'];
 	 }else{
@@ -325,6 +331,7 @@ xmlhttp.onreadystatechange=function()
 
 	 $('#source_tb').val(fr_table);
 	 $('#destination_tb').val(to_table);
+	 $('#target_quarter_tb').val(target_quarter_tb);
 	 
 	 if (status == "RevisionRequest" || status == ""){
 	 $('#select-status').css('visibility', 'visible');
@@ -377,6 +384,7 @@ function movementType(type){
 		$('#tr_source_tb').show();
 		$('#from').show();
 		$('#tr_destination_tb').show();
+		$('#tr_target_quarter_tb').show();
 		$('#to').show();
 		$('#amount_movement').show();
 		$('#department').show();
@@ -387,6 +395,7 @@ function movementType(type){
 		$('#tr_source_tb').hide();
 		$('#to').show();
 		$('#tr_destination_tb').show();
+		$('#tr_target_quarter_tb').show();
 		$('#amount_movement').show();
 		$('#department').hide();
 		$('#fr_cost_center').hide();
@@ -395,6 +404,7 @@ function movementType(type){
 		$('#to').hide();
 		$('#tr_source_tb').hide();
 		$('#tr_destination_tb').hide();
+		$('#tr_target_quarter_tb').hide();
 		$('#amount_movement').hide();
 		$('#department').hide();
 		$('#fr_cost_center').hide();
@@ -605,6 +615,7 @@ var type = $('#movementType').val();
 		$('#tr_source_tb').show();
 		$('#to').show();
 		$('#tr_destination_tb').show();
+		$('#tr_target_quarter_tb').show();
 		$('#amount_movement').show();
 		$('#department').show();
 		$('#fr_cost_center').show();
@@ -614,6 +625,7 @@ var type = $('#movementType').val();
 		$('#tr_source_tb').hide();
 		$('#to').show();
 		$('#tr_destination_tb').show();
+		$('#tr_target_quarter_tb').show();
 		$('#amount_movement').show();
 		$('#department').hide();
 		$('#fr_cost_center').hide();
@@ -622,6 +634,7 @@ var type = $('#movementType').val();
 		$('#tr_source_tb').hide();
 		$('#to').hide();
 		$('#tr_destination_tb').hide();
+		$('#tr_target_quarter_tb').hide();
 		$('#amount_movement').hide();
 		$('#department').hide();
 		$('#fr_cost_center').hide();
@@ -682,6 +695,7 @@ var type = $('#movementType').val();
 		$('#tr_source_tb').show();
 		$('#to').show();
 		$('#tr_destination_tb').show();
+		$('#tr_target_quarter_tb').show();
 		$('#amount_movement').show();
 		$('#department').show();
 		$('#fr_cost_center').show();
@@ -691,6 +705,7 @@ var type = $('#movementType').val();
 		$('#tr_source_tb').hide();
 		$('#to').show();
 		$('#tr_destination_tb').show();
+		$('#tr_target_quarter_tb').show();
 		$('#amount_movement').show();
 		$('#department').hide();
 		$('#fr_cost_center').hide();
@@ -699,6 +714,7 @@ var type = $('#movementType').val();
 		$('#to').hide();
 		$('#tr_source_tb').hide();
 		$('#tr_destination_tb').hide();
+		$('#tr_target_quarter_tb').hide();
 		$('#amount_movement').hide();
 		$('#department').hide();
 		$('#fr_cost_center').hide();
@@ -895,7 +911,7 @@ var type = $('#movementType').val();
 		</tr>
 		<tr id="department">
 			<td class="textLabel">Department <i class="required">*</i></td>
-			<td class="textField"><input type="hidden" class="field" name="department_id" id="department_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="department_val" id="department_val" spellcheck="false" tabindex="1" readonly><button name="department" onclick="valideopenerform2()">...</button></td>
+			<td class="textField"><input type="hidden" class="field" name="department_id" id="department_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="department_val" id="department_val" spellcheck="false" tabindex="1" readonly><button name="department" onclick="valideopenerform2(); return false;">...</button></td>
 		</tr>
 		<tr id="fr_cost_center">
 			<td class="textLabel">Cost Center<i class="required">*</i></td>
@@ -917,7 +933,19 @@ var type = $('#movementType').val();
 		</tr>
 		<tr id="from">
 			<td class="textLabel">From <i class="required">*</i></td>
-			<td class="textField"><input type="hidden" class="field" name="from_id" id="from_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="from_val" id="from_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('from')">...</button></td>
+			<td class="textField"><input type="hidden" class="field" name="from_id" id="from_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="from_val" id="from_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('from'); return false;">...</button></td>
+		</tr>
+		<tr id="tr_target_quarter_tb">
+			<td class="textLabel">Target Quarter <i class="required">*</i></td>
+			<td>
+			<select name="target_quarter_tb" id="target_quarter_tb">
+				<option value="">-- Please select --</option>
+				<option value="1">Q1</option>
+				<option value="2">Q2</option>
+				<option value="3">Q3</option>
+				<option value="4">Q4</option>
+			</select>
+			</td>
 		</tr>
 		<tr id="tr_destination_tb">
 			<td class="textLabel">Destination Table <i class="required">*</i></td>
@@ -931,7 +959,7 @@ var type = $('#movementType').val();
 		</tr>
 		<tr id="to">
 			<td class="textLabel">To <i class="required">*</i></td>
-			<td class="textField"><input type="hidden" class="field" name="to_id" id="to_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="to_val" id="to_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('to')">...</button></td>
+			<td class="textField"><input type="hidden" class="field" name="to_id" id="to_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="to_val" id="to_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('to'); return false;">...</button></td>
 		</tr>
 		<tr id="amount_movement">
 			<td class="textLabel">Amount: <i class="required">*</i></td>
