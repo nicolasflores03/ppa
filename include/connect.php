@@ -10,7 +10,8 @@ $connectionInfo = array( "Database"=>"EAMDEV", "UID"=>"EAMDEV", "PWD"=>"EAMDEVpA
 $serverName = "127.0.0.1, 1433"; //serverName\instanceName, portNumber (default is 1433)
 //$connectionInfo = array( "Database"=>"EAMPRD", "UID"=>"sa", "PWD"=>"root");
 // $connectionInfo = array( "Database"=>"test");
-$connectionInfo = array( "Database"=>"EAMPRD", "UID"=>"sa", "PWD"=>"root");
+// $connectionInfo = array( "Database"=>"EAMPRD", "UID"=>"sa", "PWD"=>"root");
+$connectionInfo = array( "Database"=>"EAMPRD");
 /*
 $serverName = "localhost\SQLEXPRESS"; //serverName\instanceName, portNumber (default is 1433)
 $connectionInfo = array( "Database"=>"EAMDEV4", "UID"=>"sa", "PWD"=>"P3ople4u");
