@@ -751,9 +751,9 @@ xmlhttp.onreadystatechange=function()
 	 
 	 
 	 if (unit_cost > 0){
-	   $('#unit_cost').attr('readonly', 'true'); // mark it as read only
+	  // $('#unit_cost').attr('readonly', 'true'); // mark it as read only
 	 }else{
-	   $('#unit_cost').removeAttr('readonly'); // mark it as read only	 
+	   //$('#unit_cost').removeAttr('readonly'); // mark it as read only	 
 	 }
 	 
 	 
