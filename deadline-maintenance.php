@@ -42,7 +42,12 @@ if (isset($_POST['submit'])){
 	$budget_year = $_POST['budget_year'];
 	$id =  @$_POST['id'];
 	$active = @$_POST['active'];
-	
+
+	$Q1 = $_POST['Q1'] != "" ? date("Y-m-d",  strtotime($_POST['Q1']))  : null;
+	$Q2 = $_POST['Q2'] != "" ? date("Y-m-d",  strtotime($_POST['Q2']))  : null;
+	$Q3 = $_POST['Q3'] != "" ? date("Y-m-d",  strtotime($_POST['Q3']))  : null;
+	$Q4 = $_POST['Q4'] != "" ? date("Y-m-d",  strtotime($_POST['Q4']))  : null;
+
 //Validation
 if ($deadline == ""){
 $errorMessage .= 'Please enter budget deadline.\n\n';
@@ -83,13 +88,14 @@ if(!$errorFlag){
 	$month = $deadline[0];
 	$date = $deadline[1];
 	$year = $deadline[2];
-	$data = array("year"=>$year,"month"=>$month,"date"=>$date,"year"=>$year,"budget_year"=>$budget_year,"isActive"=>$active,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);	
-	$dataupdate = array("year"=>$year,"month"=>$month,"date"=>$date,"year"=>$year,"budget_year"=>$budget_year,"isActive"=>$active,"updatedAt"=>$today,"updatedBy"=>$user);	
+	
+	$data = array("year"=>$year,"month"=>$month,"date"=>$date,"year"=>$year,"budget_year"=>$budget_year,"isActive"=>$active,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user, "Q1"=>$Q1, "Q2"=>$Q2, "Q3"=>$Q3, "Q4"=>$Q4 );	
+	$dataupdate = array("year"=>$year,"month"=>$month,"date"=>$date,"year"=>$year,"budget_year"=>$budget_year,"isActive"=>$active,"updatedAt"=>$today,"updatedBy"=>$user, "Q1"=>$Q1, "Q2"=>$Q2, "Q3"=>$Q3, "Q4"=>$Q4);	
 		
 	if($id != ""){
-	$result = $crudapp->updateRecord($conn,$dataupdate,$table,"id",$id);
+		$result = $crudapp->updateRecord($conn,$dataupdate,$table,"id",$id);
 	}else{
-	$result = $crudapp->insertRecord($conn,$data,$table);
+		$result = $crudapp->insertRecord($conn,$data,$table);
 	}
 	
 	if($result) {
@@ -186,11 +192,17 @@ xmlhttp.onreadystatechange=function()
 	 var budget_year = json['budget_year'];	 
 	 var id = json['id'];
 	 var isActive = json['isActive'];
-	 var Q1 = json['Q1'];
-	 var Q2 = json['Q2'];
-	 var Q3 = json['Q3'];
-	 var Q4 = json['Q4'];
-	 
+
+	 var Q1 = json['Q1'] != null ? $.datepicker.formatDate('mm/dd/yy', new Date(json['Q1'].date)) : '';
+	 var Q2 = json['Q2'] != null ? $.datepicker.formatDate('mm/dd/yy', new Date(json['Q2'].date)) : '';
+	 var Q3 = json['Q3'] != null ? $.datepicker.formatDate('mm/dd/yy', new Date(json['Q3'].date)) : '';
+	 var Q4 = json['Q4'] != null ? $.datepicker.formatDate('mm/dd/yy', new Date(json['Q4'].date)) : '';
+
+	 $('#q1_datepicker').val(Q1);
+	 $('#q2_datepicker').val(Q2);
+	 $('#q3_datepicker').val(Q3);
+	 $('#q4_datepicker').val(Q4);
+
 	 month = month.replace(/ /g, '');
 	 date = date.replace(/ /g, '');
 	 year = year.replace(/ /g, '');
@@ -198,7 +210,11 @@ xmlhttp.onreadystatechange=function()
 	 $('#datepick2').val(deadline);
 	 $('#id').val(id);
 	 $('#budget_year').val(budget_year);
-	//  $('#Q1').val(Q1);
+	//  r day = date.getDate();
+//   var monthIndex = date.getMonth();
+//   var year = date.getFullYear();
+
+
 	//  $('#Q2').val(Q2);
 	//  $('#Q3').val(Q3);
 	//  $('#Q4').val(Q4);
@@ -249,6 +265,15 @@ var user ="<?php echo $user; ?>";
 	new datepickr('q1_datepicker', {
 		'dateFormat': 'm/d/y'
 	});
+	new datepickr('q2_datepicker', {
+		'dateFormat': 'm/d/y'
+	});
+	new datepickr('q3_datepicker', {
+		'dateFormat': 'm/d/y'
+	});
+	new datepickr('q4_datepicker', {
+		'dateFormat': 'm/d/y'
+	});
 
 	// $("#q1_datepicker").datepicker();
 
@@ -273,7 +298,6 @@ var user ="<?php echo $user; ?>";
 						
 					}else{
 						//$("#endorsement").click();
-						alert('here');
 						$('#budget_year').val('');
 						$('#datepick2').val('');			
 					}
@@ -484,13 +508,30 @@ var user ="<?php echo $user; ?>";
 			<td class="textField">	<input type="checkbox" name="active" id="active" value="1" checked>
 		</tr> 
 		<tr>
-			<td class="textLabel"><strong>Quarter Close</strong></td>
+			<td class="textLabel"><strong>Quarter Close:</strong></td>
 		</tr> 
 		<tr>
 			<td class="textLabel">Q1:</td>
 			<td class="textField">
-				<input type="hidden" value="" id="q1" name="q1">
 				<input type="text" class="datepick2" value="" id="q1_datepicker" name="Q1">
+			</td>
+		</tr>
+		<tr>
+			<td class="textLabel">Q2:</td>
+			<td class="textField">
+				<input type="text" class="datepick2" value="" id="q2_datepicker" name="Q2">
+			</td>
+		</tr>
+		<tr>
+			<td class="textLabel">Q3:</td>
+			<td class="textField">
+				<input type="text" class="datepick2" value="" id="q3_datepicker" name="Q3">
+			</td>
+		</tr>
+		<tr>
+			<td class="textLabel">Q4:</td>
+			<td class="textField">
+				<input type="text" class="datepick2" value="" id="q4_datepicker" name="Q4">
 			</td>
 		</tr>
 		
