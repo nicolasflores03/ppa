@@ -339,6 +339,11 @@ $rate = "";
 $foreign_cost = 0;
 $available = 0.00;
 
+$q1_total_cost = ($january + $february + $march) * $unit_cost;
+$q2_total_cost = ($april + $may + $june) * $unit_cost;
+$q3_total_cost = ($july + $august + $september) * $unit_cost;
+$q4_total_cost = ($october + $november + $december) * $unit_cost;
+
 if($CUR_CODE != "PHP" && $CUR_CODE != ""){
 $today = date("m/d/Y H:i");	
 $rate = $crudapp->checkRate($conn,"R5EXCHRATES","CRR_CURR = '$CUR_CODE' AND '$today' between CRR_START and CRR_END ORDER BY CRR_END DESC");
@@ -404,49 +409,55 @@ $today = date("m/d/Y H:i");
 		"march"=>$march,"april"=>$april,"may"=>$may,"june"=>$june,"july"=>$july,
 		"august"=>$august,"september"=>$september,"october"=>$october,"november"=>$november,"december"=>$december,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
 		$data5 = array("reference_no"=>$reference_no,"rowid"=>$record_id,"version"=>$version);	
+		$data6 = array("id"=>$record_id, "q1_total_cost"=>$q1_total_cost, "q2_total_cost"=>$q2_total_cost, "q3_total_cost"=>$q3_total_cost, "q4_total_cost"=>$q4_total_cost, "createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
 		
 		$table = "R5_EAM_DPP_ITEMBASE_LINES";
 		$table2 = "R5_REF_ITEMBASE_BUDGET_MONTH";
 		$table3 = "R5_EAM_DPP_ITEMBASE_BRIDGE";
+		$table4 = "R5_REF_ITEMBASE_BUDGET_QUARTERLY";
+		
 		if($id != ""){
-		//Check if it has previous version
-		$checkLineItemStatus = $crudapp->getLineVersionInfo($conn,$table,$id);
+			//Check if it has previous version
+			$checkLineItemStatus = $crudapp->getLineVersionInfo($conn,$table,$id);
 			if ($checkLineItemStatus > 0){
 				$recVersion = $crudapp->readVersion($conn,"R5_EAM_DPP_ITEMBASE_LINES","id = '$id'");
 				$recVersion = $recVersion + 1;
 				$dataNew = array("record_id"=>$id,"id"=>$record_id,"code"=>$code,"quantity"=>$quantity,"available"=>$available,"total_cost"=>$available,"unit_cost"=>$unit_cost,"saveFlag"=>0,"version"=>$recVersion,"foreign_curr"=>$CUR_CODE_VAL,"foreign_cost"=>$foreign_cost,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);	
 				$resultNew = $crudapp->insertRecord($conn,$dataNew,$table);
 				$result2New = $crudapp->insertRecord($conn,$data2,$table2);
+				$result4New = $crudapp->insertRecord($conn,$data6,$table4);
 				$cnd = "reference_no = '$ref_no' AND rowid = '$id' AND version =$version";
 				$result3New = $crudapp->updateRecord2($conn,$data5,$table3,$cnd);
-			}else{
+			} else {
 				$data3 = array("code"=>$code,"quantity"=>$quantity,"available"=>$available,"total_cost"=>$available,"unit_cost"=>$unit_cost,"saveFlag"=>0,"foreign_curr"=>$CUR_CODE_VAL,"foreign_cost"=>$foreign_cost,"updatedAt"=>$today,"updatedBy"=>$user);	
 				$data4 = array("january"=>$january,"february"=>$february,
 				"march"=>$march,"april"=>$april,"may"=>$may,"june"=>$june,"july"=>$july,
 				"august"=>$august,"september"=>$september,"october"=>$october,"november"=>$november,"december"=>$december,"updatedAt"=>$today,"updatedBy"=>$user);
-				
+				unset($data6["id"]);
 				$result = $crudapp->updateRecord($conn,$data3,$table,"id",$id);
 				$result2 = $crudapp->updateRecord($conn,$data4,$table2,"id",$id);
+				$result4 = $crudapp->updateRecord($conn,$data6,$table4,"id",$id);
 			}
 		
-		//Insert Record to Audit by Benjie Manalaysay 3/28/2016
-		$auditData = array("record_id"=>$id,"updatedBy"=>$user,"updatedAt"=>$today,"table_name"=>$table,"update_type"=>"Edit");	
-		$audit = $crudapp->insertRecord($conn,$auditData,"R5_CUSTOM_AUDIT_APP_LINES");
+			//Insert Record to Audit by Benjie Manalaysay 3/28/2016
+			$auditData = array("record_id"=>$id,"updatedBy"=>$user,"updatedAt"=>$today,"table_name"=>$table,"update_type"=>"Edit");	
+			$audit = $crudapp->insertRecord($conn,$auditData,"R5_CUSTOM_AUDIT_APP_LINES");
 		
-		}else{
-			$result = $crudapp->insertRecord($conn,$data,$table);
+		} else {
+			$result  = $crudapp->insertRecord($conn,$data,$table);
 			$result2 = $crudapp->insertRecord($conn,$data2,$table2);
 			$result3 = $crudapp->insertRecord($conn,$data5,$table3);
+			$result4 = $crudapp->insertRecord($conn,$data6,$table4);
 		}
 		
-			//if( $result == 1 && $result2 == 1 && $result3 == 1) {
-				sqlsrv_commit( $conn );
-				//echo "Transaction committed.<br />";
-			//} else {
-				//sqlsrv_rollback( $conn );
-				//echo "Transaction rolled back.<br />";
-			//}
-			header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=pass&msg=Record has been successfully inserted!#FormAnchor");
+		//if( $result == 1 && $result2 == 1 && $result3 == 1) {
+			sqlsrv_commit( $conn );
+			//echo "Transaction committed.<br />";
+		//} else {
+			//sqlsrv_rollback( $conn );
+			//echo "Transaction rolled back.<br />";
+		//}
+		header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=pass&msg=Record has been successfully inserted!#FormAnchor");
 	}else{
 		echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
 	}	
@@ -479,40 +490,41 @@ padding-left: 20px;
 <script>
 
 function cancel(oForm) {
+  	$('.unit_cost_td').hide();
+  	$('.quantity_td').hide();
+  	var elements = oForm.elements; 
     
-  var elements = oForm.elements; 
-    
-  oForm.reset();
+  	oForm.reset();
 
-  for(i=0; i<elements.length; i++) {
+  	for(i=0; i<elements.length; i++) {
       
-	field_type = elements[i].type.toLowerCase();
+		field_type = elements[i].type.toLowerCase();
 	
-	switch(field_type) {
-	
-		case "text": 
-		case "password": 
-		case "textarea":
-	        case "hidden":	
-			$(this).prop("defaultValue");
-			//elements[i].value = ""; 
-			break;
-        
-		case "radio":
-		case "checkbox":
-  			if (elements[i].checked) {
-   				elements[i].checked = false; 
-			}
-			break;
+		switch(field_type) {
+		
+			case "text": 
+			case "password": 
+			case "textarea":
+				case "hidden":	
+				$(this).prop("defaultValue");
+				//elements[i].value = ""; 
+				break;
+			
+			case "radio":
+			case "checkbox":
+				if (elements[i].checked) {
+					elements[i].checked = false; 
+				}
+				break;
 
-		case "select-one":
-		case "select-multi":
-            		elements[i].selectedIndex = "";
-			break;
+			case "select-one":
+			case "select-multi":
+						elements[i].selectedIndex = "";
+				break;
 
-		default: 
-			break;
-	}
+			default: 
+				break;
+		}
     }
 }
 
@@ -677,7 +689,7 @@ xmlhttp.onreadystatechange=function()
     {
 	//alert(xmlhttp.responseText);
 	 var json = $.parseJSON(xmlhttp.responseText);
-	 var unit_cost = json['PAR_BASEPRICE'];
+	 var unit_cost = "1";
 	 //Protect Unit Cost if base price is greater than 0
 	 var description = json['PAR_DESC'];
 	 var itemtype = json['CMD_DESC'];classification
@@ -693,7 +705,8 @@ xmlhttp.onreadystatechange=function()
 	 gl = "0000000";
 	 }
 	 var io_number = '<?php echo $lastDigit;?>'+gl+'<?php echo substr($cost_center, 2);?>';
-	 
+	 $('.unit_cost_td').hide();
+	 $('.quantity_td').hide();
 	 $('#unit_cost').val(unit_cost);
 	 if (unit_cost > 0){
 	 //  $('#unit_cost').attr('readonly', 'true'); // mark it as read only
@@ -736,6 +749,11 @@ xmlhttp.onreadystatechange=function()
   {
   if (xmlhttp.readyState==4 && xmlhttp.status==200)
     {
+	
+	<?php if(isset($_GET['year']) && $_GET['year'] < 2019	) { ?>
+		$('.unit_cost_td').show();
+		$('.quantity_td').show();
+	<?php } ?>
 	//alert(xmlhttp.responseText);
 	 var json = $.parseJSON(xmlhttp.responseText);
 	 var unit_cost2 = json['PAR_BASEPRICE'];
@@ -1199,7 +1217,7 @@ if(expired > 0 && version < 2){
 			<td class="textField"><input type="hidden" class="field" name="ref_no" id="ref_no" spellcheck="false" tabindex="1" value= "<?php echo $reference_no;?>"><input type="text" class="field" name="organization" id="organization" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['ORG_DESC'];?>" readonly><input type="hidden" class="field" name="ORG_CODE" id="ORG_CODE" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['ORG_CODE'];?>"></td>			
 			<td class="textLabel">Year Budget:</td>
 			<td class="textField">
-				<select name="year_budget" id="year_budget" readonly>
+				<select name="year_budget" id="year_budget" class="readonly">
 					<option value="">-- Please select --</option>
 					<option value="2014">2014</option>
 					<option value="2015">2015</option>
@@ -1293,7 +1311,7 @@ if(expired > 0 && version < 2){
 		<tbody>
 			<tr>
 				<td class="textLabel">Item Code: <i class="required">*</i></td>
-				<td class="textField"><input type="hidden" class="field" name="id" id="id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="code" id="code" spellcheck="false" tabindex="1" readonly><input type="hidden" class="field" name="item_val" id="item_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform2('R5_VIEW_PARTS_UOM_INFO')">...</button></td>			
+				<td class="textField"><input type="hidden" class="field" name="id" id="id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="code" id="code" spellcheck="false" tabindex="1" readonly><input type="hidden" class="field" name="item_val" id="item_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform2('R5_VIEW_PARTS_UOM_INFO'); return false;">...</button></td>			
 				
 				<td class="textLabel">Currency Code</td>
 				<td class="textField">
@@ -1310,16 +1328,20 @@ if(expired > 0 && version < 2){
 			<tr>
 				<td class="textLabel">Item Description: </td>
 				<td class="textField"><input type="text" class="field" name="description" id="description" spellcheck="false" tabindex="1" readonly></td>				
-				<td class="textLabel">Unit Cost:</td>
-				<td class="textField" colspan="3"><input type="text" class="field" name="unit_cost" id="unit_cost" spellcheck="false" tabindex="1" value="0.00" onkeypress="return numbersonly(this, event)" onblur="round(this,2);">
-				</td>				
+				
+
+
+				<td class="textLabel">Unit of Measure:</td>
+				<td class="textField"><input type="text" class="field" name="uom" id="uom" spellcheck="false" tabindex="1" readonly></td>						
+					
 			</tr>
 			<tr>
 				<td class="textLabel">Commodity:</td>
 				<td class="textField">
 				<input type="text" class="field" name="itemtype" id="itemtype" spellcheck="false" tabindex="1" readonly></td>								
-				<td class="textLabel">Unit of Measure:</td>
-				<td class="textField"><input type="text" class="field" name="uom" id="uom" spellcheck="false" tabindex="1" readonly></td>						
+				<td class="textLabel">Total Cost: </td>
+				<td class="textField"><input type="text" class="field" name="cost" id="cost" spellcheck="false" tabindex="1" readonly></td>								
+			
 			</tr>
 			<tr>
 				
@@ -1327,8 +1349,12 @@ if(expired > 0 && version < 2){
 				<td class="textField">
 					<input type="text" class="field" name="itemGL" id="itemGL" spellcheck="false" tabindex="1" readonly>
 				</td>	
-				<td class="textLabel">Quantity:</td>
-				<td class="textField"><input type="text" class="field" name="quantity" id="quantity" spellcheck="false" tabindex="1" value="0" readonly><input type="hidden" class="field" name="quantity_val" id="quantity_val" spellcheck="false" tabindex="1" value="0"></td>						
+				
+				
+				<td class="textLabel">Last Price:</td>
+				<td class="textField">
+				<input type="text" class="field" name="PAR_LASTPRICE" id="PAR_LASTPRICE" spellcheck="false" tabindex="1" readonly>
+				</td>
 			</tr>
 			<tr>
 				
@@ -1336,8 +1362,10 @@ if(expired > 0 && version < 2){
 				<td class="textField">
 					<input type="text" class="field" name="gl_description" id="gl_description" spellcheck="false" tabindex="1" readonly>
 				</td>	
-				<td class="textLabel">Total Cost: </td>
-				<td class="textField"><input type="text" class="field" name="cost" id="cost" spellcheck="false" tabindex="1" readonly></td>								
+
+				<td class="textLabel quantity_td" style="display:none;">Quantity:</td>
+				<td class="textField quantity_td" style="display:none;"><input type="text" class="field" name="quantity" id="quantity" spellcheck="false" tabindex="1" value="0" readonly><input type="hidden" class="field" name="quantity_val" id="quantity_val" spellcheck="false" tabindex="1" value="0"></td>						
+			
 			</tr>
 			<tr>
 				
@@ -1345,11 +1373,10 @@ if(expired > 0 && version < 2){
 				<td class="textField">
 					<input type="text" class="field" name="classification" id="classification" spellcheck="false" tabindex="1" readonly>
 				</td>	
-				<td class="textLabel">Last Price:</td>
-				<td class="textField">
-				<input type="text" class="field" name="PAR_LASTPRICE" id="PAR_LASTPRICE" spellcheck="false" tabindex="1" readonly>
-					
+				<td class="textLabel unit_cost_td" style="display:none;">Unit Cost:</td>
+				<td class="textField unit_cost_td" style="display:none;" colspan="3"><input type="text" readonly class="field" name="unit_cost" id="unit_cost" spellcheck="false" tabindex="1" value="0.00" onkeypress="return numbersonly(this, event)" onblur="round(this,2);">
 				</td>	
+				
 			</tr>
 			<tr>
 				

@@ -339,6 +339,10 @@ $type = $_POST['type'];
 $unit_cost = $_POST['unit_cost'];
 $unit_cost = str_replace(",","",$unit_cost);
 
+$q1_total_cost = ($january + $february + $march) * $unit_cost;
+$q2_total_cost = ($april + $may + $june) * $unit_cost;
+$q3_total_cost = ($july + $august + $september) * $unit_cost;
+$q4_total_cost = ($october + $november + $december) * $unit_cost;
 
 //Check if same FI > 1
 $cnd3 = "WHERE code = '$code' AND reference_no = '$ref_no' AND version = '$version'";
@@ -377,42 +381,45 @@ $today = date("m/d/Y H:i");
 		"march"=>$march,"april"=>$april,"may"=>$may,"june"=>$june,"july"=>$july,
 		"august"=>$august,"september"=>$september,"october"=>$october,"november"=>$november,"december"=>$december,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
 		$data5 = array("reference_no"=>$ref_no,"rowid"=>$record_id2,"version"=>$version);	
-		
+		$data6 = array("id"=>$record_id, "q1_total_cost"=>$q1_total_cost, "q2_total_cost"=>$q2_total_cost, "q3_total_cost"=>$q3_total_cost, "q4_total_cost"=>$q4_total_cost, "createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
+
 		$table = "R5_EAM_DPP_COSTBASE_LINES";
 		$table2 = "R5_REF_COSTBASE_BUDGET_MONTH";
 		$table3 = "R5_EAM_DPP_COSTBASE_BRIDGE";
-		
+		$table4 = "R5_REF_COSTBASE_BUDGET_QUARTERLY";
+
 		if($id != ""){
-		//Check if it has previous version
-		$checkLineItemStatus = $crudapp->getLineVersionInfo($conn,$table,$id);
+			//Check if it has previous version
+			$checkLineItemStatus = $crudapp->getLineVersionInfo($conn,$table,$id);
 			if ($checkLineItemStatus > 0){
 				$recVersion = $crudapp->readVersion($conn,"R5_EAM_DPP_COSTBASE_LINES","id = '$id'");
 				$recVersion = $recVersion + 1;
 				$dataNew = array("record_id"=>$id,"id"=>$record_id2,"CMD_CODE"=>$CMD_CODE,"description"=>$description,"budget_amount"=>$budget_amount,"available"=>$budget_amount,"classification"=>$classification_cost,"category"=>$category_cost,"saveFlag"=>0,"version"=>$recVersion,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user,"code"=>$code,"type"=>$type,"unit_cost"=>$unit_cost);	
 				$resultNew = $crudapp->insertRecord($conn,$dataNew,$table);
 				$result2New = $crudapp->insertRecord($conn,$data2,$table2);
+				$result4New = $crudapp->insertRecord($conn,$data6,$table4);			
 				$cnd = "reference_no = '$ref_no' AND rowid = '$id' AND version =$version";
 				$result3New = $crudapp->updateRecord2($conn,$data5,$table3,$cnd);
-			}else{
+			} else {
 				$data3 = array("CMD_CODE"=>$CMD_CODE,"description"=>$description,"budget_amount"=>$budget_amount,"available"=>$budget_amount,"classification"=>$classification_cost,"category"=>$category_cost,"saveFlag"=>0,"updatedAt"=>$today,"updatedBy"=>$user,"code"=>$code,"type"=>$type,"unit_cost"=>$unit_cost);	
 				$data4 = array("january"=>$january,"february"=>$february,
 				"march"=>$march,"april"=>$april,"may"=>$may,"june"=>$june,"july"=>$july,
 				"august"=>$august,"september"=>$september,"october"=>$october,"november"=>$november,"december"=>$december,"updatedAt"=>$today,"updatedBy"=>$user);
-				
-				
+				unset($data6["id"]);
 				$result = $crudapp->updateRecord($conn,$data3,$table,"id",$id);
 				$result2 = $crudapp->updateRecord($conn,$data4,$table2,"id",$id);
+				$result4 = $crudapp->updateRecord($conn,$data6,$table4,"id",$id);
 			}
 			
 		//Insert Record to Audit by Benjie Manalaysay 3/28/2016
 		$auditData = array("record_id"=>$id,"updatedBy"=>$user,"updatedAt"=>$today,"table_name"=>$table,"update_type"=>"Edit");	
 		$audit = $crudapp->insertRecord($conn,$auditData,"R5_CUSTOM_AUDIT_APP_LINES");
 		
-		}else{
-			$result = $crudapp->insertRecord($conn,$data,$table);
+		} else {
+			$result  = $crudapp->insertRecord($conn,$data,$table);
 			$result2 = $crudapp->insertRecord($conn,$data2,$table2);
 			$result3 = $crudapp->insertRecord($conn,$data5,$table3);
-		
+			$result4 = $crudapp->insertRecord($conn,$data6,$table4);
 		}
 
 			//if( $result == 1 && $result2 == 1) {
@@ -455,8 +462,9 @@ padding-left: 20px;
 <script>
 
 function cancel(oForm) {
-    
-  var elements = oForm.elements; 
+	$('.unit_cost_td').hide();
+
+  	var elements = oForm.elements; 
     
   oForm.reset();
 
@@ -560,6 +568,9 @@ xmlhttp.onreadystatechange=function()
   {
   if (xmlhttp.readyState==4 && xmlhttp.status==200)
     {
+	<?php if(isset($_GET['year']) && $_GET['year'] < 2019	) { ?>
+		$('.unit_cost_td').show();
+	<?php } ?>
 	 var json = $.parseJSON(xmlhttp.responseText);
 	 var CMD_CODE = json['CMD_CODE'];
 	 CMD_CODE = CMD_CODE.replace(/ /g,'');
@@ -730,6 +741,7 @@ xmlhttp.onreadystatechange=function()
     {
 	//alert(xmlhttp.responseText);
 	 var json = $.parseJSON(xmlhttp.responseText);
+	 var unit_cost = "1";
 	 var costCommodity = json['CMD_DESC'];
 	 var classification = json['PAR_UDFCHAR07'];
 	 var unit_cost = json['PAR_BASEPRICE'];
@@ -744,7 +756,9 @@ xmlhttp.onreadystatechange=function()
 	 }
 	 //alert(unit_cost);
 	 var io_number = '<?php echo $lastDigit;?>'+gl+'<?php echo substr($cost_center, 2);?>';
-	 
+	 $('.unit_cost_td').hide();
+
+
 	 if(unit_cost == null){
 	 unit_cost = "0.00";
 	 }
@@ -786,6 +800,9 @@ xmlhttp.onreadystatechange=function()
   {
   if (xmlhttp.readyState==4 && xmlhttp.status==200)
     {
+	<?php if(isset($_GET['year']) && $_GET['year'] < 2019	) { ?>
+		$('.unit_cost_td').show();
+	<?php } ?>
 	//alert(xmlhttp.responseText);
 	 var json = $.parseJSON(xmlhttp.responseText);
 	 var PAR_DESC = json['PAR_DESC'];
@@ -1236,7 +1253,7 @@ if(expired > 0 && version < 2){
 			<td class="textField"><input type="hidden" class="field" name="ref_no" id="ref_no" spellcheck="false" tabindex="1" value= "<?php echo $reference_no;?>"><input type="text" class="field" name="organization" id="organization" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['ORG_DESC'];?>" readonly><input type="hidden" class="field" name="ORG_CODE" id="ORG_CODE" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['ORG_CODE'];?>"></td>			
 			<td class="textLabel">Year Budget:</td>
 			<td class="textField">
-				<select name="year_budget" id="year_budget" readonly>
+				<select name="year_budget" id="year_budget" class="readonly">
 					<option value="">-- Please select --</option>
 					<option value="2014">2014</option>
 					<option value="2015">2015</option>
@@ -1331,7 +1348,7 @@ if(expired > 0 && version < 2){
 			<tr>		
 				<td class="textLabel">Cost-Based Item: <i class="required">*</i></td>
 				<td class="textField">
-				<input type="text" class="fieldLookUp" name="description_cost" id="description_cost" spellcheck="false" tabindex="1" readonly><input type="hidden" class="field" name="code" id="code" spellcheck="false" tabindex="1" readonly><button name="cmd" onclick="valideopenerform2('R5_VIEW_SERVICE_UOM_INFO')">...</button>		
+				<input type="text" class="fieldLookUp" name="description_cost" id="description_cost" spellcheck="false" tabindex="1" readonly><input type="hidden" class="field" name="code" id="code" spellcheck="false" tabindex="1" readonly><button name="cmd" onclick="valideopenerform2('R5_VIEW_SERVICE_UOM_INFO');return false;">...</button>		
 				<input type="hidden" class="field" name="id_cost" id="id_cost" spellcheck="false" tabindex="1">			
 				</td>				
 				<td class="textLabel">IO Number:</td>
@@ -1380,9 +1397,9 @@ if(expired > 0 && version < 2){
 					</select>
 				</td>
 			
-				<td class="textLabel">Unit Cost</td>
-				<td class="textField">
-				<input type="text" class="field" name="unit_cost" id="unit_cost" spellcheck="false" tabindex="1" value="0.00" onkeypress="return numbersonly(this, event)" onblur="round(this,2);">
+				<td class="textLabel unit_cost_td" style="display:none;">Unit Cost</td>
+				<td class="textField unit_cost_td" style="display:none;">
+					<input type="text" class="field" name="unit_cost" id="unit_cost" spellcheck="false" tabindex="1" value="0.00" onkeypress="return numbersonly(this, event)" onblur="round(this,2);">
 				</td>				
 			</tr>
 		</tbody>
