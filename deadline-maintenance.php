@@ -311,8 +311,6 @@ var user ="<?php echo $user; ?>";
 					$('#q2_datepicker').val(Q2);
 					$('#q3_datepicker').val(Q3);
 					$('#q4_datepicker').val(Q4);
-					console.log(new Date(2008, 3, 0));
-					
 				}
 			}
 		}
