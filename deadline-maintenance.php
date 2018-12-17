@@ -186,7 +186,15 @@ xmlhttp.onreadystatechange=function()
   if (xmlhttp.readyState==4 && xmlhttp.status==200)
     {
 	 var json = $.parseJSON(xmlhttp.responseText);
-	 var month = json['month'];
+	 insertDeadlineInfo(json);
+    }
+  }
+xmlhttp.open("GET","ajax/app-get-deadline-info.php?hash="+text+"&id="+id,true);
+xmlhttp.send();
+}
+
+function insertDeadlineInfo(json){
+	var month = json['month'];
 	 var year = json['year'];
 	 var date = json['date'];
 	 var budget_year = json['budget_year'];	 
@@ -210,25 +218,12 @@ xmlhttp.onreadystatechange=function()
 	 $('#datepick2').val(deadline);
 	 $('#id').val(id);
 	 $('#budget_year').val(budget_year);
-	//  r day = date.getDate();
-//   var monthIndex = date.getMonth();
-//   var year = date.getFullYear();
-
-
-	//  $('#Q2').val(Q2);
-	//  $('#Q3').val(Q3);
-	//  $('#Q4').val(Q4);
 	 if (isActive > 0){
 		$('#active').prop('checked', true);
 	 }else{
 		$('#active').prop('checked', false);
 	 }
-    }
-  }
-xmlhttp.open("GET","ajax/app-get-deadline-info.php?hash="+text+"&id="+id,true);
-xmlhttp.send();
 }
-
 
 function deleteRecord(id){
 var obj = 'R5_VIEW_DEADLINE_MAINTENANCE';
@@ -257,7 +252,7 @@ var user ="<?php echo $user; ?>";
 	$("#newRecord").click(function() {
 		window.location = "deadline-maintenance.php?login="+user;
 	});
-	
+
 	
 	new datepickr('datepick2', {
 		'dateFormat': 'm/d/y'
@@ -292,23 +287,38 @@ var user ="<?php echo $user; ?>";
 		if (xmlhttp.readyState==4 && xmlhttp.status==200)
 			{
 			var result = $.parseJSON(xmlhttp.responseText);
-				if(result > 0){
+				if(result != "0"){
 					var r=confirm("There is an existing budget deadline for the selected year. Do you want to change?");
 					if (r==true){
-						
+						insertDeadlineInfo(result);
 					}else{
-						//$("#endorsement").click();
+						$('#active').prop('checked', true);
 						$('#budget_year').val('');
-						$('#datepick2').val('');			
+						$('#datepick2').val('');
+						$('#q1_datepicker').val('');
+						$('#q2_datepicker').val('');
+						$('#q3_datepicker').val('');
+						$('#q4_datepicker').val('');			
 					}
+				} else {
+					$('#datepick2').val('');
+					var Q1 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 3, 0));
+					var Q2 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 6, 0));
+					var Q3 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 9, 0));
+					var Q4 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 12, 0));
+
+					$('#q1_datepicker').val(Q1);
+					$('#q2_datepicker').val(Q2);
+					$('#q3_datepicker').val(Q3);
+					$('#q4_datepicker').val(Q4);
+					console.log(new Date(2008, 3, 0));
+					
 				}
 			}
 		}
 		xmlhttp.open("GET","ajax/app-deadline.php?hash="+text+"&budget_year="+budget_year,true);
 		xmlhttp.send();
 	});
-
-	
 });
 
 
