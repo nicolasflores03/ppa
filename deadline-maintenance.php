@@ -73,14 +73,14 @@ $errorFlag = true;
 }
 
 if(!$errorFlag){
-	//UNCHECK EXISTING DEADLINE
-	$dataisActive = array("isActive"=>"0");			
-	$table = "dbo.R5_DEADLINE_MAINTENANCE";
-	$cnd = "WHERE isActive = '1' AND budget_year = '$budget_year'";
-	$crudapp->updateRecord3($conn,$dataisActive,$table,$cnd);
-	
 	if ($active != '1') {
 		$active = '0';
+	} else {
+		//UNCHECK EXISTING DEADLINE
+		$dataisActive = array("isActive"=>"0");			
+		$table = "dbo.R5_DEADLINE_MAINTENANCE";
+		$cnd = "WHERE isActive = '1' AND budget_year = '$budget_year'";
+		$crudapp->updateRecord3($conn,$dataisActive,$table,$cnd);
 	}
 	
 	$today = date("m/d/Y H:i");	
@@ -92,11 +92,11 @@ if(!$errorFlag){
 	$data = array("year"=>$year,"month"=>$month,"date"=>$date,"year"=>$year,"budget_year"=>$budget_year,"isActive"=>$active,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user, "Q1"=>$Q1, "Q2"=>$Q2, "Q3"=>$Q3, "Q4"=>$Q4 );	
 	$dataupdate = array("year"=>$year,"month"=>$month,"date"=>$date,"year"=>$year,"budget_year"=>$budget_year,"isActive"=>$active,"updatedAt"=>$today,"updatedBy"=>$user, "Q1"=>$Q1, "Q2"=>$Q2, "Q3"=>$Q3, "Q4"=>$Q4);	
 		
-	if($id != ""){
-		$result = $crudapp->updateRecord($conn,$dataupdate,$table,"id",$id);
-	}else{
+	// if($id != ""){
+	// 	$result = $crudapp->updateRecord($conn,$dataupdate,$table,"id",$id);
+	// }else{
 		$result = $crudapp->insertRecord($conn,$data,$table);
-	}
+	// }
 	
 	if($result) {
 		sqlsrv_commit( $conn );
