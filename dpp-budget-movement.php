@@ -42,6 +42,27 @@ $destination_tb =  @$_GET['destination_tb'];
 $cost_center = @$_GET['cost_center'];
 $cost_center = str_replace(" ","@",$cost_center);
 
+$current_date = new DateTime("now");
+
+$q1_deadline = new DateTime("-1 days");
+$q2_deadline = new DateTime("-1 days");
+$q3_deadline = new DateTime("-1 days");
+$q4_deadline = new DateTime("-1 days");
+
+//get closed date per quarters
+if(isset($_GET['year'])) {
+	$condition = " budget_year = '$year' AND isActive = '1'";
+	$crudapp = new crudClass();
+	$deadLineInfoColumn = array('Q1', 'Q2', 'Q3', 'Q4');
+	$quarterDeadlineInfo = $crudapp->listTable($conn,"R5_DEADLINE_MAINTENANCE",$deadLineInfoColumn,$condition);
+
+	$q1_deadline = $quarterDeadlineInfo[0]['Q1'];
+	$q2_deadline = $quarterDeadlineInfo[0]['Q2'];
+	$q3_deadline = $quarterDeadlineInfo[0]['Q3'];
+	$q4_deadline = $quarterDeadlineInfo[0]['Q4'];
+}
+// end closed date per quarters
+
 //GET status Based on reference_no,dept,org,year
 $appfilter = "year_budget = '$year' AND ORG_CODE = '$orgcode' AND status = 'Approved'";
 $appcolumn = $crudapp->readColumn($conn,"R5_APP_VERSION");
@@ -59,9 +80,9 @@ $tableView = $filterapp->filterViewURLXdeleteID($conn,$requiredField,$listView,$
 
 
 if (isset($_POST['search'])){
-$fieldname = $_POST['fieldname'];
-$value = $_POST['value'];
-$type = $_POST['type'];
+	$fieldname = $_POST['fieldname'];
+	$value = $_POST['value'];
+	$type = $_POST['type'];
 	//Form Validation
 	if ($fieldname == ""){
 	$errorMessage .= 'Please select a fieldname.\n\n';
@@ -101,7 +122,6 @@ if (isset($_POST['submit'])){
 	$status = $_POST['status'];
 	$target_quarter_tb = $_POST['target_quarter_tb'];
 
-
 	if ($type == ""){
 	$errorMessage .= 'Please select a movement type.\n\n';
 	$errorFlag = true;
@@ -140,23 +160,22 @@ if (isset($_POST['submit'])){
 	
 	if(!$errorFlag){	
 		$table = "dbo.R5_BUDGET_MOVEMENT";
-	
 		$today = date("m/d/Y H:i");	
 		if($id != ""){
-		if($status != "") {
-			$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>$status,"cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "target_quarter"=>$target_quarter_tb);
-		} else {
-			$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "target_quarter"=>$target_quarter_tb);
-		}
-		
-		$result2 = $crudapp->updateRecord($conn,$data,$table,"id",$id);
+			if($status != "") {
+				$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>$status,"cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "target_quarter"=>$target_quarter_tb);
+			} else {
+				$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "target_quarter"=>$target_quarter_tb);
+			}
+			
+			$result2 = $crudapp->updateRecord($conn,$data,$table,"id",$id);
 		
 		}else{
 		
-		$record_id = $crudapp->readID($conn,"R5_BUDGET_MOVEMENT");
-		$id = $record_id + 1;
-		$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"createdBy"=>$user,"createdAt"=>$today,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "target_quarter"=>$target_quarter_tb);
-		$result2 = $crudapp->insertRecord($conn,$data,$table);
+			$record_id = $crudapp->readID($conn,"R5_BUDGET_MOVEMENT");
+			$id = $record_id + 1;
+			$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"createdBy"=>$user,"createdAt"=>$today,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "target_quarter"=>$target_quarter_tb);
+			$result2 = $crudapp->insertRecord($conn,$data,$table);
 		}
 		if($result2) {
 			sqlsrv_commit( $conn );
@@ -297,7 +316,7 @@ xmlhttp.onreadystatechange=function()
 	 
 	 var reason = json['reason'];
 	 var remarks = json['remarks'];
-	 var target_quarter_tb = json['target_quarter'];
+	 var target_quarter_tb = json['target_quarter_value'];
 	 var responsible ='';
 
 
@@ -332,7 +351,7 @@ xmlhttp.onreadystatechange=function()
 	 $('#source_tb').val(fr_table);
 	 $('#destination_tb').val(to_table);
 	 $('#target_quarter_tb').val(target_quarter_tb);
-	 
+
 	 if (status == "RevisionRequest" || status == ""){
 	 $('#select-status').css('visibility', 'visible');
 	 $('.actionButtonCenter').show();
@@ -429,6 +448,7 @@ function valideopenerform(field){
 	var mrcdesc = $('#department_val').val();
 	var cost_center = $('#CST_CODE').val();
 	var costcenterfr = $('#costcenterfr').val();
+	var target_quarter_tb = $('#target_quarter_tb').val();
 	var login = "<?php echo $user; ?>";
 	
 	var text = "";
@@ -453,9 +473,9 @@ function valideopenerform(field){
 		}
 	}		
 		
-var popup= window.open(filename+'.php?hash='+text+'&from_id='+from_id+'&from_val='+from_val+'&field='+field+'&to_id='+to_id+'&orgcode='+orgcode+'&frmrccode='+frmrccode+'&tomrccode='+tomrccode+'&mrcdesc='+mrcdesc+''
-+'&to_val='+to_val+'&amount='+amount+'&year_budget='+year_budget+'&type='+type+'&budget='+budget+'&cost_center='+cost_center+'&costcenterfr='+costcenterfr+'&id='+id+'&login='+login+'&source_tb='+source_tb+'&destination_tb='+destination_tb+'','popup_form','location=no,menubar=no,status=no,scrollbars=yes,top=50%,left=50%,height=550,width=750'); 
-popup.focus(); 
+	var popup= window.open(filename+'.php?hash='+text+'&from_id='+from_id+'&from_val='+from_val+'&field='+field+'&to_id='+to_id+'&orgcode='+orgcode+'&frmrccode='+frmrccode+'&tomrccode='+tomrccode+'&mrcdesc='+mrcdesc+''
+	+'&to_val='+to_val+'&amount='+amount+'&year_budget='+year_budget+'&type='+type+'&budget='+budget+'&cost_center='+cost_center+'&costcenterfr='+costcenterfr+'&id='+id+'&login='+login+'&source_tb='+source_tb+'&destination_tb='+destination_tb+'','popup_form','location=no,menubar=no,status=no,scrollbars=yes,top=50%,left=50%,height=550,width=750'); 
+	popup.focus(); 
 }
 
 function valideopenerform2(){	
@@ -506,80 +526,78 @@ xmlhttp.send();
 }
 
 function setFromCostCenter(id){
-//alert(id);
 $('#costcenterfr').val(id);
 }
 
 $(document).ready(function(){
+	$("#movementType").attr("disabled", true);
+	$("#ORG_CODE").val("<?php echo $orgcode;?>");
+	$("#MRC_CODE").val("<?php echo $mrccode;?>");
+	$("#CST_CODE").val('<?php echo $cost_center; ?>');
+	$("#id").val('<?php echo $id; ?>');
+	$("#from_id").val('<?php echo $from_id; ?>');
+	$("#from_val").val('<?php echo $from_val; ?>');
+	$("#to_id").val('<?php echo $to_id; ?>');
+	$("#to_val").val('<?php echo $to_val; ?>');
+	$("#department_id").val('<?php echo $department_id; ?>');
+	$("#department_val").val('<?php echo $department_val; ?>');
+	$("#source_tb").val('<?php echo $source_tb; ?>');
+	$("#destination_tb").val('<?php echo $destination_tb; ?>');
 
-$("#movementType").attr("disabled", true);
-$("#ORG_CODE").val("<?php echo $orgcode;?>");
-$("#MRC_CODE").val("<?php echo $mrccode;?>");
-$("#CST_CODE").val('<?php echo $cost_center; ?>');
-$("#id").val('<?php echo $id; ?>');
-$("#from_id").val('<?php echo $from_id; ?>');
-$("#from_val").val('<?php echo $from_val; ?>');
-$("#to_id").val('<?php echo $to_id; ?>');
-$("#to_val").val('<?php echo $to_val; ?>');
-$("#department_id").val('<?php echo $department_id; ?>');
-$("#department_val").val('<?php echo $department_val; ?>');
-$("#source_tb").val('<?php echo $source_tb; ?>');
-$("#destination_tb").val('<?php echo $destination_tb; ?>');
-
-if($("#to_id").val() != ""){ 
-	var table = $("#destination_tb").val();
-	getFromToInfo($("#to_id").val(),"to_code",table);
-}
-
-if($("#department_id").val() != ""){ 
-	getFromCostCenter($("#department_id").val(),"<?php echo $costcenterfr; ?>");
-}
-
-$("#amount").val('<?php echo $amount; ?>');
-$("#movementType").val('<?php echo $movementType; ?>');
-$("#costcenterfr").val('<?php echo $costcenterfr; ?>');
-
-	var orgCount = $('#ORG_CODE option').size();
-	var mrcCount = $('#MRC_CODE option').size();
-	
-
-var org = $("#ORG_CODE").val();
-if (org == ""){	
-	if (orgCount == 2){
-		$("#ORG_CODE")[0].selectedIndex=1;
-		var org = $("#ORG_CODE").val();
-		window.location.href = '<?php echo $_SERVER["PHP_SELF"]."?login=$user&year=$year&ORG_CODE="; ?>'+org; 
+	if($("#to_id").val() != ""){ 
+		var table = $("#destination_tb").val();
+		getFromToInfo($("#to_id").val(),"to_code",table);
 	}
-}
 
-var mrc = $("#MRC_CODE").val();
-if (mrc == ""){	
-	if (mrcCount == 2){
-		$("#MRC_CODE")[0].selectedIndex=1;
-		var mrc = $("#MRC_CODE").val();
-		window.location.href = '<?php echo $_SERVER["PHP_SELF"]."?login=$user&cost_center=$cost_center&year=$year&ORG_CODE=$orgcode&MRC_CODE="; ?>'+mrc;
+	if($("#department_id").val() != ""){ 
+		getFromCostCenter($("#department_id").val(),"<?php echo $costcenterfr; ?>");
 	}
-}
 
+	$("#amount").val('<?php echo $amount; ?>');
+	$("#movementType").val('<?php echo $movementType; ?>');
+	$("#costcenterfr").val('<?php echo $costcenterfr; ?>');
 
-	
-var cst = $("#CST_CODE").val();
-if (cst != ""){
-$("#movementType").attr("disabled", false);
-}else{
-$("#movementType").attr("disabled", true);
-}
-//Error Message
-var res = "<?php echo @$res;?>";
-if(res !=""){
-	if (res == "pass"){
-		$('.isa_success').show();
-		$('.isa_error').hide();
-	}else {
-		$('.isa_error').show();
-		$('.isa_success').hide();
+		var orgCount = $('#ORG_CODE option').size();
+		var mrcCount = $('#MRC_CODE option').size();
+		
+
+	var org = $("#ORG_CODE").val();
+	if (org == ""){	
+		if (orgCount == 2){
+			$("#ORG_CODE")[0].selectedIndex=1;
+			var org = $("#ORG_CODE").val();
+			window.location.href = '<?php echo $_SERVER["PHP_SELF"]."?login=$user&year=$year&ORG_CODE="; ?>'+org; 
+		}
 	}
-}
+
+	var mrc = $("#MRC_CODE").val();
+	if (mrc == ""){	
+		if (mrcCount == 2){
+			$("#MRC_CODE")[0].selectedIndex=1;
+			var mrc = $("#MRC_CODE").val();
+			window.location.href = '<?php echo $_SERVER["PHP_SELF"]."?login=$user&cost_center=$cost_center&year=$year&ORG_CODE=$orgcode&MRC_CODE="; ?>'+mrc;
+		}
+	}
+
+
+		
+	var cst = $("#CST_CODE").val();
+	if (cst != ""){
+	$("#movementType").attr("disabled", false);
+	}else{
+	$("#movementType").attr("disabled", true);
+	}
+	//Error Message
+	var res = "<?php echo @$res;?>";
+	if(res !=""){
+		if (res == "pass"){
+			$('.isa_success').show();
+			$('.isa_error').hide();
+		}else {
+			$('.isa_error').show();
+			$('.isa_success').hide();
+		}
+	}
 
 	var yr = "<?php echo $year;?>";
 	$("#year_budget").val(yr);
@@ -677,6 +695,16 @@ var type = $('#movementType').val();
 			}
 		}
 	});
+
+	$("#destination_tb").change(function(e) {
+		$('#from_val').val("");
+		$('#to_val').val("");
+		$('#to_id').val("");
+		$('#from_id').val("");
+		$('#amount').val(0.00);
+		$('#budget').val("");
+		$('#budget_fr').val("");
+	});
 	
 	$('#movementType').change(function() {
 		var type = $('#movementType').val();
@@ -771,6 +799,27 @@ var type = $('#movementType').val();
 	$('#department').hide();
 	$('#fr_cost_center').hide();
 	}
+}
+
+function setBudgetValue() {
+	var quarter = $("#target_quarter_tb").val();
+	var budget = "";
+	switch(quarter){
+		case "1":
+			budget = $("#q1_budget").val();	
+		break;
+		case "2":
+			budget = $("#q2_budget").val();
+		break;
+		case "3":
+			budget = $("#q3_budget").val();
+		break;
+		case "4":
+			budget = $("#q4_budget").val();
+		break;
+
+	}
+	$("#budget").val(budget);
 }
 </script>
 </head>
@@ -938,12 +987,12 @@ var type = $('#movementType').val();
 		<tr id="tr_target_quarter_tb">
 			<td class="textLabel">Target Quarter <i class="required">*</i></td>
 			<td>
-			<select name="target_quarter_tb" id="target_quarter_tb">
+			<select name="target_quarter_tb" id="target_quarter_tb" onchange="setBudgetValue();">
 				<option value="">-- Please select --</option>
-				<option value="1">Q1</option>
-				<option value="2">Q2</option>
-				<option value="3">Q3</option>
-				<option value="4">Q4</option>
+				<option <?= $current_date > $q1_deadline ? "disabled" : "" ?> value="1">Q1 <?= $current_date > $q1_deadline ? "(Closed)" : "" ?></option>
+				<option <?= $current_date > $q2_deadline ? "disabled" : "" ?> value="2">Q2 <?= $current_date > $q2_deadline ? "(Closed)" : "" ?></option>
+				<option <?= $current_date > $q3_deadline ? "disabled" : "" ?> value="3">Q3 <?= $current_date > $q3_deadline ? "(Closed)" : "" ?></option>
+				<option <?= $current_date > $q4_deadline ? "disabled" : "" ?> value="4">Q4 <?= $current_date > $q4_deadline ? "(Closed)" : "" ?></option>
 			</select>
 			</td>
 		</tr>
@@ -969,6 +1018,12 @@ var type = $('#movementType').val();
 			<td class="textLabel" id="budgetLabel">Available Budget:</td>
 			<td class="textField"><input type="text" class="field" name="budget" id="budget" spellcheck="false" tabindex="1" readonly>
 			<input type="hidden" class="field" name="budget_fr" id="budget_fr" spellcheck="false" tabindex="1">
+
+			<input type='hidden' value='total_budget' id='total_budget' name='total_budget' />
+			<input type='hidden' value='' id='q1_budget' name='q1_budget' />
+			<input type='hidden' value='' id='q2_budget' name='q2_budget' />
+			<input type='hidden' value='' id='q3_budget' name='q3_budget' />
+			<input type='hidden' value='' id='q4_budget' name='q4_budget' />
 			<!--<input type="hidden" class="field" name="budget_to" id="budget_to" spellcheck="false" tabindex="1">-->
 			</td>			
 		</tr>
@@ -998,7 +1053,7 @@ var type = $('#movementType').val();
 	<!--Action Button-->
 	<div class="actionButtonCenter">
 				<input type="submit" class="bold" name="submit" id="submit" value=" Save ">
-				<input type="button" value=" Cancel " Onclick="cancel(this.form)">&nbsp;&nbsp;
+				<input type="button" value=" Cancel " Onclick="cancel(this.form);">&nbsp;&nbsp;
 	</div>
 	</div>
 </div>
