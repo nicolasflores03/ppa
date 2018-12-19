@@ -1,6 +1,6 @@
 USE [EAMDEV]
 GO
-  /*
+
   ALTER TABLE [dbo].[R5_DEADLINE_MAINTENANCE]
   ADD 
 	Q1 date null ,
@@ -10,8 +10,11 @@ GO
 
 	ALTER TABLE [dbo].[R5_BUDGET_MOVEMENT]
 	ADD 
-	target_quarter int null ;
-	*/
+	fr_quarter int null ,
+	to_quarter int null ;
+	
+
+
 ALTER VIEW [dbo].[R5_VIEW_BUDGET_MOVEMENT]
 AS
 SELECT     id, app_id, ORG_CODE, to_table, fr_table,
@@ -37,24 +40,45 @@ SELECT     id, app_id, ORG_CODE, to_table, fr_table,
 							  
 							  (CASE
 									WHEN
-									dbo.R5_BUDGET_MOVEMENT.target_quarter = 1
+									dbo.R5_BUDGET_MOVEMENT.to_quarter = 1
 										THEN
 										'Q1'
 									WHEN
-									dbo.R5_BUDGET_MOVEMENT.target_quarter = 2
+									dbo.R5_BUDGET_MOVEMENT.to_quarter = 2
 										THEN
 										'Q2'
 									WHEN
-									dbo.R5_BUDGET_MOVEMENT.target_quarter = 3
+									dbo.R5_BUDGET_MOVEMENT.to_quarter = 3
 										THEN
 										'Q3'
 									WHEN
-										dbo.R5_BUDGET_MOVEMENT.target_quarter = 4
-										  THEN
+										dbo.R5_BUDGET_MOVEMENT.to_quarter = 4
+										THEN
 											'Q4'
 									ELSE  
 										''
-								End ) as target_quarter, target_quarter as target_quarter_value,
+								End ) as destination_quarter,  dbo.R5_BUDGET_MOVEMENT.to_quarter,
+
+								 (CASE
+									WHEN
+									dbo.R5_BUDGET_MOVEMENT.fr_quarter = 1
+										THEN
+										'Q1'
+									WHEN
+									dbo.R5_BUDGET_MOVEMENT.fr_quarter = 2
+										THEN
+										'Q2'
+									WHEN
+									dbo.R5_BUDGET_MOVEMENT.fr_quarter = 3
+										THEN
+										'Q3'
+									WHEN
+										dbo.R5_BUDGET_MOVEMENT.fr_quarter = 4
+										THEN
+											'Q4'
+									ELSE  
+										''
+								End ) as source_quarter,  dbo.R5_BUDGET_MOVEMENT.fr_quarter,
                       fr_cost_center, cost_center, status, reason, updatedAt, remarks
 					FROM  dbo.R5_BUDGET_MOVEMENT;
 				
