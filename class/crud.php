@@ -2355,11 +2355,10 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			$quarterly_adjustments = "q" . $to_quarter ."_adjustments";
 			$quarterly_available = "q" . $to_quarter ."_available";
 			$sql2 = "";
-			// if ($saveFlag > 0) {
+			if ($saveFlag > 0) {
 				$sql2 = "UPDATE $table SET 
 				available = ? + (SELECT available FROM $table WHERE id = ?),
 				adjustments = ? + (SELECT adjustments FROM $table WHERE id = ?),
-				saveFlag = 1, 
 				WHERE id = ?";
 				$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
 	
@@ -2370,23 +2369,23 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				
 				$quarterly_params = array($amount,$to_code,$amount,$to_code,$to_code);	
 
-			// }else{
-			// 	//check why does the available amount needs to be replaced not add to existing amount
+			}else{
+				//check why does the available amount needs to be replaced not add to existing amount
 					
-			// 	$sql_quarterly_update = "UPDATE $quarterly_table SET 
-			// 	$quarterly_adjustments = ? + (SELECT $quarterly_adjustments FROM $quarterly_table WHERE id = ?), 
-			// 	$quarterly_available = ?
-			// 	WHERE id = ?";	
-			// 	$quarterly_params = array($amount,$to_code,$amount,$to_code);	
+				$sql_quarterly_update = "UPDATE $quarterly_table SET 
+				$quarterly_adjustments = ? + (SELECT $quarterly_adjustments FROM $quarterly_table WHERE id = ?), 
+				$quarterly_available = ?
+				WHERE id = ?";	
+				$quarterly_params = array($amount,$to_code,$amount,$to_code);	
 
 				
-			// 	$sql2 = "UPDATE $table SET 
-			// 	adjustments = ? + (SELECT adjustments FROM $table WHERE id = ?),
-			// 	saveFlag = 1,
-			// 	available = (SELECT (q1_available + q2_available + q3_available + q4_available ) FROM $quarterly_table WHERE id = ?)
-			// 	WHERE id = ?";	
-			// 	$params2 = array($amount,$to_code,$to_code,$to_code);
-			// }	
+				$sql2 = "UPDATE $table SET 
+				adjustments = ? + (SELECT adjustments FROM $table WHERE id = ?),
+				saveFlag = 1,
+				available = (SELECT (q1_available + q2_available + q3_available + q4_available ) FROM $quarterly_table WHERE id = ?)
+				WHERE id = ?";	
+				$params2 = array($amount,$to_code,$to_code,$to_code);
+			}	
 
 			//$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
 			$result2 = sqlsrv_query($conn,$sql2,$params2);
