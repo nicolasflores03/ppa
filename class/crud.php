@@ -1,5 +1,6 @@
 <?php
-$_GET['login'] = "EAMSYSADMIN";
+// $_GET['login'] = "EAMSYSADMIN";
+$_GET['login'] = "JLOAYON";
 class crudClass{
 
 /* Update Session*/
@@ -2317,6 +2318,8 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			$to_table= $val['to_table'];
 			$to_code= $val['to_code'];
 			$type= $val['type'];
+			$to_quarter = $val['to_quarter'];
+			$fr_quarter = $val['fr_quarter'];
 		}
 				
 		//echo $type;	
@@ -2325,12 +2328,15 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		
 		if ($type == 'supplement'){
 		$table = "";
+		$quarterly_table = "";
 			if ($to_table == 'IB'){
 			echo "here";
 				$table = "dbo.R5_EAM_DPP_ITEMBASE_LINES";
+				$quarterly_table = "dbo.R5_REF_ITEMBASE_BUDGET_QUARTERLY";
 			}else{
 			echo "here2";
 				$table = "dbo.R5_EAM_DPP_COSTBASE_LINES";
+				$quarterly_table = "dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY";
 			}
 			//TO
 			echo "SUPPLEMENT";
@@ -2340,12 +2346,14 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			$paramsItem = array($to_code);
 			$resultItem = sqlsrv_query($conn,$selectItem,$paramsItem);
 			if( $resultItem === false) {
-			die( print_r( sqlsrv_errors(), true) );
+				die( print_r( sqlsrv_errors(), true) );
 			}
 			while($valItem = sqlsrv_fetch_array($resultItem, SQLSRV_FETCH_ASSOC)){
 				$saveFlag = $valItem['saveFlag'];
 			}
 		
+			$quarterly_adjustments = "q" . $to_quarter ."_adjustments";
+			$quarterly_available = "q" . $to_quarter ."_available";
 			$sql2 = "";
 			if ($saveFlag > 0){
 				$sql2 = "UPDATE $table SET 
@@ -2353,19 +2361,33 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				adjustments = ? + (SELECT adjustments FROM $table WHERE id = ?)
 				WHERE id = ?";
 				$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
+
+				$sql_quarterly_update = "UPDATE $table SET 
+				$quarterly_available = ? + (SELECT $quarterly_available  FROM $table WHERE id = ?),
+				$quarterly_adjustments = ? + (SELECT $quarterly_adjustments  FROM $table WHERE id = ?)
+				WHERE id = ?";	
+				
+				$quarterly_params = array($amount,$to_code,$amount,$to_code);	
+
 			}else{
 				$sql2 = "UPDATE $table SET 
 				adjustments = ? + (SELECT adjustments FROM $table WHERE id = ?),
 				saveFlag = 1,
 				available = ?
 				WHERE id = ?";	
-				$params2 = array($amount,$to_code,$amount,$to_code);				
+				$params2 = array($amount,$to_code,$amount,$to_code);	
+				
+				$sql_quarterly_update = "UPDATE $quarterly_table SET 
+				$quarterly_adjustments = ? + (SELECT $quarterly_adjustments FROM $quarterly_table WHERE id = ?)
+				$quarterly_available = ?
+				WHERE id = ?";	
+				$quarterly_params = array($amount,$to_code,$amount,$to_code);	
 			}
-			
 			//$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
 			$result2 = sqlsrv_query($conn,$sql2,$params2);
+			$result3 = sqlsrv_query($conn,$sql_quarterly_update,$quarterly_params);
 			
-			if( $result2 === false) {
+			if( $result2 === false || $result3 === false) {
 				die( print_r( sqlsrv_errors(), true) );
 			}
 
