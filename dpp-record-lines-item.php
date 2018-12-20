@@ -339,10 +339,6 @@ $rate = "";
 $foreign_cost = 0;
 $available = 0.00;
 
-$q1_total_cost = ($january + $february + $march) * $unit_cost;
-$q2_total_cost = ($april + $may + $june) * $unit_cost;
-$q3_total_cost = ($july + $august + $september) * $unit_cost;
-$q4_total_cost = ($october + $november + $december) * $unit_cost;
 
 if($CUR_CODE != "PHP" && $CUR_CODE != ""){
 $today = date("m/d/Y H:i");	
@@ -365,16 +361,21 @@ $errorFlag = true;
 
 //Validation
 if ($CUR_CODE != "PHP" && $CUR_CODE != " " && $rate == "none"){
-$errorMessage .= 'Please update exchange rate for the selected currency code.\n\n';
-$errorFlag = true;
+	$errorMessage .= 'Please update exchange rate for the selected currency code.\n\n';
+	$errorFlag = true;
 }else if ($CUR_CODE != "PHP" && $CUR_CODE != "" && $rate != "none"){
-$foreign_cost = $unit_cost;
-$available = $quantity * ($unit_cost / $rate);
-$unit_cost = $unit_cost / $rate;
+	$foreign_cost = $unit_cost;
+	$available = $quantity * ($unit_cost / $rate);
+	$unit_cost = $unit_cost / $rate;
 }else{
-$available = $quantity * $unit_cost;
-$foreign_cost = $unit_cost;
+	$available = $quantity * $unit_cost;
+	$foreign_cost = $unit_cost;
 }
+
+$q1_total_cost = ($january + $february + $march) * $unit_cost;
+$q2_total_cost = ($april + $may + $june) * $unit_cost;
+$q3_total_cost = ($july + $august + $september) * $unit_cost;
+$q4_total_cost = ($october + $november + $december) * $unit_cost;
 
 if ($code == ""){
 $errorMessage .= 'Please select an Item.\n\n';
@@ -409,8 +410,18 @@ $today = date("m/d/Y H:i");
 		"march"=>$march,"april"=>$april,"may"=>$may,"june"=>$june,"july"=>$july,
 		"august"=>$august,"september"=>$september,"october"=>$october,"november"=>$november,"december"=>$december,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
 		$data5 = array("reference_no"=>$reference_no,"rowid"=>$record_id,"version"=>$version);	
-		$data6 = array("id"=>$record_id, "q1_total_cost"=>$q1_total_cost, "q2_total_cost"=>$q2_total_cost, "q3_total_cost"=>$q3_total_cost, "q4_total_cost"=>$q4_total_cost, "createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
+		// $data6 = array("id"=>$record_id, "q1_total_cost"=>$q1_total_cost, "q2_total_cost"=>$q2_total_cost, "q3_total_cost"=>$q3_total_cost, "q4_total_cost"=>$q4_total_cost, "createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
+		$data6 = array("id"=>$record_id, "createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
 		
+		for($q = 1; $q <= 4; $q++) {
+			$data6["q" . $q . "_total_cost"] = ${"q".$q."_total_cost"};
+			$data6["q" . $q . "_adjustments"] = 0;
+			$data6["q" . $q . "_available"] =  ${"q".$q."_total_cost"};
+			$data6["q" . $q . "_reserved"] = 0;
+			$data6["q" . $q . "_allocated"] = 0;
+			$data6["q" . $q . "_paid"] = 0;
+		}
+
 		$table = "R5_EAM_DPP_ITEMBASE_LINES";
 		$table2 = "R5_REF_ITEMBASE_BUDGET_MONTH";
 		$table3 = "R5_EAM_DPP_ITEMBASE_BRIDGE";
@@ -428,6 +439,7 @@ $today = date("m/d/Y H:i");
 				$result4New = $crudapp->insertRecord($conn,$data6,$table4);
 				$cnd = "reference_no = '$ref_no' AND rowid = '$id' AND version =$version";
 				$result3New = $crudapp->updateRecord2($conn,$data5,$table3,$cnd);
+				
 			} else {
 				$data3 = array("code"=>$code,"quantity"=>$quantity,"available"=>$available,"total_cost"=>$available,"unit_cost"=>$unit_cost,"saveFlag"=>0,"foreign_curr"=>$CUR_CODE_VAL,"foreign_cost"=>$foreign_cost,"updatedAt"=>$today,"updatedBy"=>$user);	
 				$data4 = array("january"=>$january,"february"=>$february,

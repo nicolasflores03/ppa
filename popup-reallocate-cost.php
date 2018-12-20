@@ -30,7 +30,7 @@ $cnd = "year_budget = '$year_budget' AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '
 }
 
 $crudapp = new crudClass();
-$data = $crudapp->readRecord4($conn,"R5_BUDGET_REALLOCATION_LOOKUP_COST",$cnd)
+$data = $crudapp->readRecord4($conn,"R5_BUDGET_REALLOCATION_LOOKUP_COST",$cnd);
 ?>
 
 
@@ -96,10 +96,17 @@ $("#new_tmp_reallocate").click(function() {
 
 });
 
-	$("tr#tbitem").click(function() {        // function_tr
+	$("tr.tbitem").click(function() {        // function_tr
 		var id = $(this).find("td").eq(0).text();
 		var name = $(this).find("td").eq(1).text();
-		var budget = $(this).find("td").eq(2).text();
+		// var budget = $(this).find("td").eq(2).text();
+		var budget = $(this).find("td input.budget").val();
+		var q1_budget = $(this).find("td input.q1").val();
+		var q2_budget = $(this).find("td input.q2").val();
+		var q3_budget = $(this).find("td input.q3").val();
+		var q4_budget = $(this).find("td input.q4").val();
+
+
 		var field = "<?php echo $field; ?>";
 		var ids = "<?php echo $id; ?>";
 		var from_id = "<?php echo $from_id; ?>";
@@ -133,7 +140,7 @@ $("#new_tmp_reallocate").click(function() {
 		if( field == "from" ){
 			if (type == "reallocation"){
 				window.opener.document.theForm.budget.value=budget;
-				window.opener.document.theForm.budget_fr.value=budget;
+			//	window.opener.document.theForm.budget_fr.value=budget;
 			}	
 		window.opener.document.theForm.from_id.value=id; 
 		window.opener.document.theForm.from_val.value=name;  
@@ -142,11 +149,18 @@ $("#new_tmp_reallocate").click(function() {
 		//window.opener.document.theForm.budget_to.value=budget;
 			if (type == "supplement"){
 				window.opener.document.theForm.budget.value=budget;
-				window.opener.document.theForm.budget_fr.value=budget;
+			//	window.opener.document.theForm.budget_fr.value=budget;
 			}	
 		window.opener.document.theForm.to_id.value=id; 
 		window.opener.document.theForm.to_val.value=name;  
 		}
+
+		window.opener.document.theForm.total_budget.value=budget;
+		window.opener.document.theForm.q1_budget.value=q1_budget;
+		window.opener.document.theForm.q2_budget.value=q2_budget;
+		window.opener.document.theForm.q3_budget.value=q3_budget;
+		window.opener.document.theForm.q4_budget.value=q4_budget;
+
 		
 		window.opener.document.theForm.amount.value=amount;
 		window.opener.document.theForm.movementType.value=type;
@@ -156,6 +170,7 @@ $("#new_tmp_reallocate").click(function() {
 		window.opener.checkType();
 		window.opener.getFromCostCenter(frmrccode,costcenterfr);
 		//window.opener.setFromCostCenter();
+		window.opener.setBudgetValue();
 		self.close(); 
 
 	});
@@ -175,14 +190,21 @@ $("#new_tmp_reallocate").click(function() {
 	</tr>
 	<?php
 	foreach($data as $value){
-	$id=$value['rowid'];
-	$description = $value['description'];
-	$budget = $value['available'];
-	echo "<tr id='tbitem'>";
-	echo "<td>".$id."</td>";
-	echo "<td>".$description."</td>";
-	echo "<td>".$budget."</td>";		
-	echo "</tr>";
+		$id=$value['rowid'];
+		$description = $value['description'];
+		$budget = $value['available'];
+		echo "<tr class='tbitem'>";
+		echo "<td>".$id."</td>";
+		echo "<td>".$description."</td>";
+		echo "<td>";
+		echo "<input type='hidden' value='".$value['q1_available']."' class='q1' name='q1' />";
+		echo "<input type='hidden' value='".$value['q2_available']."' class='q2' name='q2' />";
+		echo "<input type='hidden' value='".$value['q3_available']."' class='q3' name='q3' />";
+		echo "<input type='hidden' value='".$value['q4_available']."' class='q4' name='q4' />";
+		echo "<input type='hidden' value='".$budget."' class='budget' name='budget' />";
+			echo $budget;
+		echo "</td>";		
+		echo "</tr>";
 	}
 	echo '</table>';
 	?>

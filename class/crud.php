@@ -1513,8 +1513,13 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 	/*Read Details from Table*/
     public function readRecord4($conn,$table,$cnd)
     {		
-		$sql = "SELECT ORG_CODE,MRC_CODE,year_budget,version,reference_no,rowid,description,convert(varchar,cast(available as money),1) AS available,status FROM $table WHERE $cnd";
-		
+		$sql = "SELECT ORG_CODE,MRC_CODE,year_budget,version,reference_no,rowid,description,convert(varchar,cast(available as money),1) AS available,status, 
+		q1_available, 
+		q2_available,
+		q3_available,
+		q4_available
+		FROM $table WHERE $cnd";
+
 		$result = sqlsrv_query($conn,$sql);
 
 		if( $result === false) {
@@ -1532,6 +1537,11 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			$data['description'] = $val['description'];
 			$data['available'] = $val['available'];
 			$data['status'] = $val['status'];
+			$data['q1_available'] = $val['q1_available'];
+			$data['q2_available'] = $val['q2_available'];
+			$data['q3_available'] = $val['q3_available'];
+			$data['q4_available'] = $val['q4_available'];
+
 			array_push($resultArr,$data);
 		}
         return $resultArr;

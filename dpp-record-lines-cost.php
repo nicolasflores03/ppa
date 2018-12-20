@@ -381,8 +381,17 @@ $today = date("m/d/Y H:i");
 		"march"=>$march,"april"=>$april,"may"=>$may,"june"=>$june,"july"=>$july,
 		"august"=>$august,"september"=>$september,"october"=>$october,"november"=>$november,"december"=>$december,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
 		$data5 = array("reference_no"=>$ref_no,"rowid"=>$record_id2,"version"=>$version);	
-		$data6 = array("id"=>$record_id, "q1_total_cost"=>$q1_total_cost, "q2_total_cost"=>$q2_total_cost, "q3_total_cost"=>$q3_total_cost, "q4_total_cost"=>$q4_total_cost, "createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
-
+		// $data6 = array("id"=>$record_id, "q1_total_cost"=>$q1_total_cost, "q2_total_cost"=>$q2_total_cost, "q3_total_cost"=>$q3_total_cost, "q4_total_cost"=>$q4_total_cost, "createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
+		$data6 = array("id"=>$record_id2, "createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
+		
+		for($q = 1; $q <= 4; $q++) {
+			$data6["q" . $q . "_total_cost"] = ${"q".$q."_total_cost"};
+			$data6["q" . $q . "_adjustments"] = 0;
+			$data6["q" . $q . "_available"] =  ${"q".$q."_total_cost"};
+			$data6["q" . $q . "_reserved"] = 0;
+			$data6["q" . $q . "_allocated"] = 0;
+			$data6["q" . $q . "_paid"] = 0;
+		}
 		$table = "R5_EAM_DPP_COSTBASE_LINES";
 		$table2 = "R5_REF_COSTBASE_BUDGET_MONTH";
 		$table3 = "R5_EAM_DPP_COSTBASE_BRIDGE";
@@ -744,7 +753,8 @@ xmlhttp.onreadystatechange=function()
 	 var unit_cost = "1";
 	 var costCommodity = json['CMD_DESC'];
 	 var classification = json['PAR_UDFCHAR07'];
-	 var unit_cost = json['PAR_BASEPRICE'];
+	//  var unit_cost = json['PAR_BASEPRICE'];
+	var unit_cost = "1";
 	 var gl = json['gl'];
 	 var gl_description = json['gl_description'];
 	 var PAR_COMMODITY = json['PAR_COMMODITY'];
@@ -1373,7 +1383,7 @@ if(expired > 0 && version < 2){
 				</td>
 				
 			<td class="textLabel">Budget Amount: <i class="required">*</i></td>
-				<td class="textField"><input type="text" class="field" name="budget_amount_cost" id="budget_amount_cost" spellcheck="false" tabindex="1" onkeypress="return numbersonly(this, event)" onblur="round(this,2);"></td>			
+				<td class="textField"><input type="text" class="field" name="budget_amount_cost" id="budget_amount_cost" spellcheck="false" tabindex="1" onkeypress="return numbersonly(this, event)" onblur="round(this,2);" readonly></td>			
 			</tr>
 			<tr>
 			<td class="textLabel">GL Description:</td>

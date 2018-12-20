@@ -5,7 +5,7 @@ include("../class/crud.php");
 $id=$_GET["id"];
 $crudapp = new crudClass();
 $condition = "WHERE id LIKE '$id'";
-$data =array('id','app_id','ORG_CODE','FR_MRC_CODE','Source_Department','TO_MRC_CODE','fr_code','Source','to_code','Destination','Amount','year_budget','type','status','remarks','fr_cost_center','reason','fr_table','to_table','target_quarter_value');
+$data =array('id','app_id','ORG_CODE','FR_MRC_CODE','Source_Department','TO_MRC_CODE','fr_code','Source','to_code','Destination','Amount','year_budget','type','status','remarks','fr_cost_center','reason','fr_table','to_table','to_quarter', 'fr_quarter');
   
 $jsonInfo = $crudapp->readRecord2($conn,$data,"R5_VIEW_BUDGET_MOVEMENT",$condition);
 
