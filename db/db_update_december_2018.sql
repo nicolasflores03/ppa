@@ -89,7 +89,7 @@ SELECT     id, app_id, ORG_CODE, to_table, fr_table,
 
 /****** Object:  Table [dbo].[R5_REF_ITEMBASE_BUDGET_QUARTERLY]  ******/
 
- /*
+
 CREATE TABLE [dbo].[R5_REF_ITEMBASE_BUDGET_QUARTERLY](
 	[id] [int] NOT NULL,
 	[q1_total_cost] [numeric](24, 6) NULL,
@@ -187,7 +187,32 @@ GROUP BY dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VE
 					  dbo.R5_REF_ITEMBASE_BUDGET_QUARTERLY.q2_available,
 					  dbo.R5_REF_ITEMBASE_BUDGET_QUARTERLY.q3_available,
 					  dbo.R5_REF_ITEMBASE_BUDGET_QUARTERLY.q4_available
-*/
+
+
+ALTER VIEW [dbo].[R5_BUDGET_REALLOCATION_LOOKUP_COST]
+AS
+SELECT     dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.version, 
+                      dbo.R5_DPP_VERSION.reference_no, dbo.R5_EAM_DPP_COSTBASE_BRIDGE.rowid, dbo.R5_EAM_DPP_COSTBASE_LINES.description, 
+                      dbo.R5_DPP_VERSION.status, dbo.R5_EAM_DPP_COSTBASE_LINES.available, dbo.R5_DPP_VERSION.cost_center,
+					  dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.q1_available, 
+					  dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.q2_available,
+					  dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.q3_available,
+					  dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.q4_available
+FROM         dbo.R5_EAM_DPP_COSTBASE_BRIDGE INNER JOIN
+                      dbo.R5_DPP_VERSION ON dbo.R5_EAM_DPP_COSTBASE_BRIDGE.reference_no = dbo.R5_DPP_VERSION.reference_no AND 
+                      dbo.R5_EAM_DPP_COSTBASE_BRIDGE.version = dbo.R5_DPP_VERSION.version INNER JOIN
+                      dbo.R5_EAM_DPP_COSTBASE_LINES ON dbo.R5_EAM_DPP_COSTBASE_BRIDGE.rowid = dbo.R5_EAM_DPP_COSTBASE_LINES.id 
+					  INNER JOIN dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY ON dbo.R5_EAM_DPP_ITEMBASE_LINES.record_id = dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.id
+
+GROUP BY dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.version, 
+                      dbo.R5_DPP_VERSION.reference_no, dbo.R5_EAM_DPP_COSTBASE_BRIDGE.rowid, 
+                      dbo.R5_DPP_VERSION.status, dbo.R5_EAM_DPP_COSTBASE_LINES.available, dbo.R5_DPP_VERSION.cost_center, dbo.R5_EAM_DPP_COSTBASE_LINES.description,
+					  dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.q1_available, 
+					  dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.q2_available,
+					  dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.q3_available,
+					  dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.q4_available
+	  
+
 GO
 
 
