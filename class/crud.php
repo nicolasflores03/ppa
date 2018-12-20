@@ -2362,26 +2362,31 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				WHERE id = ?";
 				$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
 	
-				$sql_quarterly_update = "UPDATE $table SET 
-				$quarterly_available = ? + (SELECT $quarterly_available  FROM $table WHERE id = ?),
-				$quarterly_adjustments = ? + (SELECT $quarterly_adjustments  FROM $table WHERE id = ?)
+				$sql_quarterly_update = "UPDATE $quarterly_table SET 
+				$quarterly_available = ? + (SELECT $quarterly_available  FROM $quarterly_table WHERE id = ?),
+				$quarterly_adjustments = ? + (SELECT $quarterly_adjustments  FROM $quarterly_table WHERE id = ?)
 				WHERE id = ?";	
 				
-				$quarterly_params = array($amount,$to_code,$amount,$to_code);	
+				$quarterly_params = array($amount,$to_code,$amount,$to_code,$to_code);	
 
 			}else{
-				$sql2 = "UPDATE $table SET 
-				adjustments = ? + (SELECT adjustments FROM $table WHERE id = ?),
-				saveFlag = 1,
-				available = ?
-				WHERE id = ?";	
-				$params2 = array($amount,$to_code,$amount,$to_code);	
+				//check why does the available amount needs to be replaced not add to existing amount
+					
 				$sql_quarterly_update = "UPDATE $quarterly_table SET 
 				$quarterly_adjustments = ? + (SELECT $quarterly_adjustments FROM $quarterly_table WHERE id = ?), 
 				$quarterly_available = ?
 				WHERE id = ?";	
 				$quarterly_params = array($amount,$to_code,$amount,$to_code);	
+
+				
+				$sql2 = "UPDATE $table SET 
+				adjustments = ? + (SELECT adjustments FROM $table WHERE id = ?),
+				saveFlag = 1,
+				available = (SELECT (q1_available + q2_available + q3_available + q4_available ) FROM $quarterly_table WHERE id = ?)
+				WHERE id = ?";	
+				$params2 = array($amount,$to_code,$to_code,$to_code);
 			}	
+
 			//$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
 			$result2 = sqlsrv_query($conn,$sql2,$params2);
 			$result3 = sqlsrv_query($conn,$sql_quarterly_update,$quarterly_params);
@@ -2390,10 +2395,9 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				die( print_r( sqlsrv_errors(), true) );
 			}
 
-
 			//BALANCE to
 			$updatebalancesql = "UPDATE dbo.R5_BUDGET_MOVEMENT SET 
-			to_available_amount =(SELECT available FROM $table WHERE id = ?)
+			to_available_amount =(SELECT $quarterly_available FROM $quarterly_table WHERE id = ?)
 			WHERE id = ?";
 			$paramsbalance = array($to_code,$id);
 			$resultbalance = sqlsrv_query($conn,$updatebalancesql,$paramsbalance);
@@ -2409,31 +2413,51 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			return false;
 			}
 		}else{
-		echo "REALLOCATE";
+		echo "REALLOCATE";			
 			//TO
+			$quarterly_table = "";
 			$table = "";
 			if ($to_table == 'IB'){
 				$table = "dbo.R5_EAM_DPP_ITEMBASE_LINES";
+				$quarterly_table = "dbo.R5_REF_ITEMBASE_BUDGET_QUARTERLY";
 			}else{
 				$table = "dbo.R5_EAM_DPP_COSTBASE_LINES";
+				$quarterly_table = "dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY";
 			}
 			
 			$table2 = "";
+			$quarterly_table2 = "";
 			if ($fr_table == 'IB'){
 				$table2 = "dbo.R5_EAM_DPP_ITEMBASE_LINES";
+				$quarterly_table2 = "dbo.R5_REF_ITEMBASE_BUDGET_QUARTERLY";
 			}else{
 				$table2 = "dbo.R5_EAM_DPP_COSTBASE_LINES";
+				$quarterly_table2 = "dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY";
 			}
 			
+			$quarterly_adjustments = "q" . $to_quarter ."_adjustments";
+			$quarterly_available = "q" . $to_quarter ."_available";
+			$quarterly_adjustments2 = "q" . $fr_quarter ."_adjustments";
+			$quarterly_available2 = "q" . $fr_quarter ."_available";
+
+
 			$sql2 = "UPDATE $table SET 
 			available = ? + (SELECT available FROM $table WHERE id = ?),
 			adjustments = ? + (SELECT adjustments FROM $table WHERE id = ?),
 			saveFlag = 1
 			WHERE id = ?";
 			$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
-			$result2 = sqlsrv_query($conn,$sql2,$params2);
 			
-			if( $result2 === false) {
+			$sql_quarterly_update = "UPDATE $quarterly_table SET 
+			$quarterly_available = ? + (SELECT $quarterly_available FROM $quarterly_table WHERE id = ?),
+			$quarterly_adjustments = ? + (SELECT $quarterly_adjustments  FROM $quarterly_table WHERE id = ?)
+			WHERE id = ?";	
+			$quarterly_params = array($amount,$to_code,$amount,$to_code,$to_code);	
+
+			$result2 = sqlsrv_query($conn,$sql2,$params2);
+			$sql_quarterly_result = sqlsrv_query($conn,$sql_quarterly_update,$quarterly_params);
+			
+			if( $result2 === false || $sql_quarterly_result === false) {
 				die( print_r( sqlsrv_errors(), true) );
 			} 
 			
@@ -2444,12 +2468,19 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			WHERE id = ?";
 			$params3 = array($fr_code,$amount,$fr_code,$amount,$fr_code);
 			$result3 = sqlsrv_query($conn,$sql3,$params3);
-			
+
+			$sql_quarterly_update2 = "UPDATE $quarterly_table2 SET 
+			$quarterly_available2 = (SELECT $quarterly_available2  FROM $quarterly_table2 WHERE id = ?) - ?,
+			$quarterly_adjustments2 = (SELECT $quarterly_adjustments2  FROM $quarterly_table2 WHERE id = ?) - ?
+			WHERE id = ?";	
+
+			$quarterly_params3 = array($fr_code,$amount,$fr_code,$amount,$fr_code);
+			$sql_quarterly_result = sqlsrv_query($conn,$sql_quarterly_update2,$quarterly_params3);
+
 			if( $result3 === false) {
 				die( print_r( sqlsrv_errors(), true) );
 			}
 
-		
 			//BALANCE to
 			$updatebalancesql2 = "UPDATE dbo.R5_BUDGET_MOVEMENT SET 
 			to_available_amount =(SELECT available FROM $table WHERE id = ?)
@@ -2474,8 +2505,9 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			}
 			//END BALANCE FROM				
 						
+
 			
-			if( $result2 && $result3) {
+			if( $result2 && $result3 && $sql_quarterly_result) {
 			return true;
 			}else{
 			return false;
