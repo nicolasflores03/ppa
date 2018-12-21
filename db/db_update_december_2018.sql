@@ -12,7 +12,7 @@ GO
 	ADD 
 	fr_quarter int null ,
 	to_quarter int null ,
-	to_orc_code int null
+	to_org_code int null
 	;
 	
 
