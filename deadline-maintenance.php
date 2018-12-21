@@ -195,26 +195,44 @@ xmlhttp.send();
 
 function insertDeadlineInfo(json){
 	var month = json['month'];
-	 var year = json['year'];
-	 var date = json['date'];
-	 var budget_year = json['budget_year'];	 
-	 var id = json['id'];
-	 var isActive = json['isActive'];
+	var year = json['year'];
+	var date = json['date'];
+	var budget_year = json['budget_year'];	 
+	var id = json['id'];
+	var isActive = json['isActive'];
 
-	 var Q1 = json['Q1'] != null ? $.datepicker.formatDate('mm/dd/yy', new Date(json['Q1'].date)) : '';
-	 var Q2 = json['Q2'] != null ? $.datepicker.formatDate('mm/dd/yy', new Date(json['Q2'].date)) : '';
-	 var Q3 = json['Q3'] != null ? $.datepicker.formatDate('mm/dd/yy', new Date(json['Q3'].date)) : '';
-	 var Q4 = json['Q4'] != null ? $.datepicker.formatDate('mm/dd/yy', new Date(json['Q4'].date)) : '';
+	var q1_date = "";
+	var q2_date = "";
+	var q3_date = "";
+	var q4_date = "";
+	
+	if(json['Q1'] != null) {
+		q1_date = json['Q1'].date.replace(" 00:00:00", "").split("-");
+		q1_date = q1_date[1] + "/" + q1_date[2] + "/" + q1_date[0];
+	} 
+	if(json['Q2'] != null) {
+		q2_date = json['Q2'].date.replace(" 00:00:00", "").split("-");
+		q2_date = q2_date[1] + "/" + q2_date[2] + "/" + q2_date[0];
+	} 
+	if(json['Q3'] != null) {
+		q3_date = json['Q3'].date.replace(" 00:00:00", "").split("-");
+		q3_date = q3_date[1] + "/" + q3_date[2] + "/" + q3_date[0];
+	} 
+	if(json['Q4'] != null) {
+		q4_date = json['Q4'].date.replace(" 00:00:00", "").split("-");
+		q4_date = q4_date[1] + "/" + q4_date[2] + "/" + q4_date[0];
+	}
 
-	 $('#q1_datepicker').val(Q1);
-	 $('#q2_datepicker').val(Q2);
-	 $('#q3_datepicker').val(Q3);
-	 $('#q4_datepicker').val(Q4);
-
+	$('#q1_datepicker').val(q1_dateg);
+	$('#q2_datepicker').val(q2_date);
+	$('#q3_datepicker').val(q3_date);
+	$('#q4_datepicker').val(q4_date);
+	 
 	 month = month.replace(/ /g, '');
 	 date = date.replace(/ /g, '');
 	 year = year.replace(/ /g, '');
-	 var deadline = month+"/"+date+"/"+year;
+
+	 var deadline = month+"/"+date+"/20"+year;
 	 $('#datepick2').val(deadline);
 	 $('#id').val(id);
 	 $('#budget_year').val(budget_year);
