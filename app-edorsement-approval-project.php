@@ -130,7 +130,7 @@ $generateAPP = $crudapp->generateApp($conn,$year,$ORG_CODE);
 		
 		sqlsrv_commit( $conn );
 		//echo "Transaction committed.<br />";
-		header("Location:http://eamqas.fdcutilities.local:8080/crn/cgi-bin/mod_cognos.dll?b_action=cognosViewer&ui.action=run&ui.object=%2fcontent%2ffolder%5b%40name%3d%27DS_MP_1%27%5d%2freport%5b%40name%3d%27APP_CONSOLIDATED.xml%27%5d&ui.name=APP_CONSOLIDATED.xml&run.outputFormat=PDF&run.prompt=false&CAMUsername=R5&CAMPassword=R5&p_Version=$generateAPP&p_Org=$ORG_CODE&p_Year=$year&p_Status=Endorsed");
+		header("Location:http://fdcui-eamdev-37:8080/crn/cgi-bin/mod_cognos.dll?b_action=cognosViewer&ui.action=run&ui.object=%2fcontent%2ffolder%5b%40name%3d%27DS_MP_1%27%5d%2freport%5b%40name%3d%27APP_CONSOLIDATED.xml%27%5d&ui.name=APP_CONSOLIDATED.xml&run.outputFormat=PDF&run.prompt=false&CAMUsername=R5&CAMPassword=R5&p_Version=$generateAPP&p_Org=$ORG_CODE&p_Year=$year&p_Status=Endorsed");
 	} else {
 		sqlsrv_rollback( $conn );
 		//echo "Transaction rolled back.<br />";
