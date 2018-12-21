@@ -11,9 +11,10 @@ GO
 	ALTER TABLE [dbo].[R5_BUDGET_MOVEMENT]
 	ADD 
 	fr_quarter int null ,
-	to_quarter int null ;
+	to_quarter int null ,
+	to_orc_code int null
+	;
 	
-
 
 ALTER VIEW [dbo].[R5_VIEW_BUDGET_MOVEMENT]
 AS
@@ -211,6 +212,10 @@ GROUP BY dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VE
 					  dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.q2_available,
 					  dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.q3_available,
 					  dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY.q4_available
+
+
+
+					  
 	  
 
 GO
