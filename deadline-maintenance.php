@@ -50,8 +50,19 @@ if (isset($_POST['submit'])){
 
 //Validation
 if ($deadline == ""){
-$errorMessage .= 'Please enter budget deadline.\n\n';
-$errorFlag = true;
+	$errorMessage .= 'Please enter budget deadline.\n\n';
+	$errorFlag = true;
+
+	$checkmonth = "";
+	$checkdate = "";
+	$checkyear = "";
+} else {
+	//VALIDATE DEADLIN
+	$checkdeadline = explode("/",$deadline);
+	$checkmonth = $checkdeadline[0];
+	$checkdate = $checkdeadline[1];
+	$checkyear = $checkdeadline[2];
+
 }
 	
 	//Validation
@@ -60,11 +71,6 @@ $errorMessage .= 'Please select a budget year.\n\n';
 $errorFlag = true;
 }
 
-//VALIDATE DEADLINE
-$checkdeadline = explode("/",$deadline);
-$checkmonth = $checkdeadline[0];
-$checkdate = $checkdeadline[1];
-$checkyear = $checkdeadline[2];
 $isvalidDate = checkdate($checkmonth, $checkdate, "20".$checkyear);
 
 if (!$isvalidDate){
@@ -208,22 +214,22 @@ function insertDeadlineInfo(json){
 	
 	if(json['Q1'] != null) {
 		q1_date = json['Q1'].date.replace(" 00:00:00", "").split("-");
-		q1_date = q1_date[1] + "/" + q1_date[2] + "/" + q1_date[0];
+		q1_date = q1_date[1] + "/" + q1_date[2] + "/" + q1_date[0].replace("20","");
 	} 
 	if(json['Q2'] != null) {
 		q2_date = json['Q2'].date.replace(" 00:00:00", "").split("-");
-		q2_date = q2_date[1] + "/" + q2_date[2] + "/" + q2_date[0];
+		q2_date = q2_date[1] + "/" + q2_date[2] + "/" + q2_date[0].replace("20","");
 	} 
 	if(json['Q3'] != null) {
 		q3_date = json['Q3'].date.replace(" 00:00:00", "").split("-");
-		q3_date = q3_date[1] + "/" + q3_date[2] + "/" + q3_date[0];
+		q3_date = q3_date[1] + "/" + q3_date[2] + "/" + q3_date[0].replace("20","");
 	} 
 	if(json['Q4'] != null) {
 		q4_date = json['Q4'].date.replace(" 00:00:00", "").split("-");
-		q4_date = q4_date[1] + "/" + q4_date[2] + "/" + q4_date[0];
+		q4_date = q4_date[1] + "/" + q4_date[2] + "/" + q4_date[0].replace("20","");
 	}
 
-	$('#q1_datepicker').val(q1_dateg);
+	$('#q1_datepicker').val(q1_date);
 	$('#q2_datepicker').val(q2_date);
 	$('#q3_datepicker').val(q3_date);
 	$('#q4_datepicker').val(q4_date);
@@ -232,7 +238,7 @@ function insertDeadlineInfo(json){
 	 date = date.replace(/ /g, '');
 	 year = year.replace(/ /g, '');
 
-	 var deadline = month+"/"+date+"/20"+year;
+	 var deadline = month+"/"+date+"/"+year;
 	 $('#datepick2').val(deadline);
 	 $('#id').val(id);
 	 $('#budget_year').val(budget_year);
