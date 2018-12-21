@@ -83,7 +83,7 @@ $record_id = $record_id + 1;
 
 $versionExist = $crudapp->checkRecordExist($conn,"R5_DPP_VERSION","ORG_CODE = '$orgcode' AND MRC_CODE = '$mrccode' AND year_budget = '$year'");
 
-$requiredField = array('id','code','Description','GL_Code','UOM','QTY','Foreign_Currency','foreign_cost','unit_cost','total_cost','Classification','Jan','Feb','Mar','Apr','may','Jun','Jul','Aug','Sept','Oct','Nov','Dec');
+$requiredField = array('id','code','Description','GL_Code','UOM','QTY','Foreign_Currency','foreign_cost','total_cost','Classification','Jan','Feb','Mar','Apr','may','Jun','Jul','Aug','Sept','Oct','Nov','Dec');
 $column = array_intersect($column,$requiredField);
 $listView = $crudapp->listTable($conn,"R5_VIEW_ITEMBASE_LINES",$column,$cndItem);
 $tableView = $filterapp->filterViewURL($conn,$column,$listView,$filter,"id");
