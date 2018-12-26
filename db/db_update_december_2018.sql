@@ -79,7 +79,7 @@ SELECT     id, app_id, ORG_CODE, to_table, fr_table,
 											'Q4'
 									ELSE  
 										''
-								End ) as source_quarter,  dbo.R5_BUDGET_MOVEMENT.fr_quarter,
+								End ) as source_quarter,  dbo.R5_BUDGET_MOVEMENT.fr_quarter, dbo.R5_BUDGET_MOVEMENT.to_org_code, 
                       fr_cost_center, cost_center, status, reason, updatedAt, remarks
 					FROM  dbo.R5_BUDGET_MOVEMENT;
 				
