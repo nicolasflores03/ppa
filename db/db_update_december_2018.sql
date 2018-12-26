@@ -82,8 +82,7 @@ SELECT     id, app_id, dbo.R5_BUDGET_MOVEMENT.ORG_CODE, to_table, fr_table,
 								End ) as source_quarter,  dbo.R5_BUDGET_MOVEMENT.fr_quarter,  dbo.R5_BUDGET_MOVEMENT.to_org_code, org_rec.ORG_DESC as destination_organization,
                       fr_cost_center, cost_center, status, reason, updatedAt, remarks
 					FROM  dbo.R5_BUDGET_MOVEMENT
-					LEFT OUTER JOIN dbo.R5ORGANIZATION AS org_rec ON dbo.R5_BUDGET_MOVEMENT.to_org_code = org_rec.ORG_CODE
-				    WHERE     (org_rec.ORG_CODE NOT LIKE '*')
+					LEFT OUTER JOIN dbo.R5ORGANIZATION AS org_rec ON dbo.R5_BUDGET_MOVEMENT.to_org_code = org_rec.ORG_CODE AND org_rec.ORG_CODE  != '*'
 				
 
 
