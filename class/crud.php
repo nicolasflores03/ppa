@@ -2237,7 +2237,7 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
     }
 
 
-   public function optionValue4($conn,$tbname,$tbfield,$tbfield2,$cnd)
+   public function optionValue4($conn,$tbname,$tbfield,$tbfield2,$cnd,$select_name=null)
     {
 		$str = "SELECT $tbfield,$tbfield2 FROM $tbname $cnd ORDER BY $tbfield2";
 		$result = sqlsrv_query($conn,$str);
@@ -2250,9 +2250,13 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		die( print_r( sqlsrv_errors(), true) );
 		}
 
+		if($select_name == null) {
+			$select_name = $tbfield;
+		}
+
         //Render them in drop down box	
         $selection = "";
-	    $selection .= "<select name='".$tbfield."' id='".$tbfield."'>";
+	    $selection .= "<select name='".$select_name."' id='".$select_name."'>";
 	    $selection .= "<option value=''>-- Please select --</option>";
         while($ors = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {		
 		$fieldVal = str_replace(" ","",$ors[$tbfield]);

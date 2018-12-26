@@ -122,8 +122,9 @@ if (isset($_POST['submit'])){
 	$status = $_POST['status'];
 	$to_quarter_tb = $_POST['to_quarter_tb'];
 	$fr_quarter_tb = $_POST['fr_quarter_tb'];
+	$to_org_code = $_POST['to_org_code'];
 
-
+	
 	if ($type == ""){
 	$errorMessage .= 'Please select a movement type.\n\n';
 	$errorFlag = true;
@@ -153,6 +154,21 @@ if (isset($_POST['submit'])){
 		$errorMessage .= 'Please select a destination of budget item.\n\n';
 		$errorFlag = true;
 		}
+
+		if ($type == "reallocation" && $to_org_code == ""){
+			$errorMessage .= 'Please select a target organization .\n\n';
+			$errorFlag = true;
+		}
+
+		if ($type == "reallocation" && $fr_quarter_tb == ""){
+			$errorMessage .= 'Please select a source quarter .\n\n';
+			$errorFlag = true;
+		}
+
+		if ($to_quarter_tb == ""){
+			$errorMessage .= 'Please select a target quarter .\n\n';
+			$errorFlag = true;
+		}
 	}
 	
 	if ($amount == ""){
@@ -163,22 +179,30 @@ if (isset($_POST['submit'])){
 	if(!$errorFlag){	
 		$table = "dbo.R5_BUDGET_MOVEMENT";
 		$today = date("m/d/Y H:i");	
+		$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "to_quarter"=>$to_quarter_tb, "to_org_code" => null);
 		if($id != ""){
 			if($status != "") {
-				$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>$status,"cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "to_quarter"=>$to_quarter_tb);
-			} else {
-				$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "to_quarter"=>$to_quarter_tb);
-			}
+				// $data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>$status,"cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "to_quarter"=>$to_quarter_tb);
+				$data["status"] = $status;
+			} 
 			
+			if ($type == "reallocation"){
+				$data["to_org_code"] = $to_org_code;
+			}
+
 			$result2 = $crudapp->updateRecord($conn,$data,$table,"id",$id);
 		
 		}else{
 		
 			$record_id = $crudapp->readID($conn,"R5_BUDGET_MOVEMENT");
 			$id = $record_id + 1;
-			$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"createdBy"=>$user,"createdAt"=>$today,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "to_quarter"=>$to_quarter_tb, "fr_quarter"=>$fr_quarter_tb);
+			$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"createdBy"=>$user,"createdAt"=>$today,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "to_quarter"=>$to_quarter_tb, "fr_quarter"=>$fr_quarter_tb, "to_org_code"=>null);
+			if ($type == "reallocation"){
+				$data["to_org_code"] = $to_org_code;
+			}
 			$result2 = $crudapp->insertRecord($conn,$data,$table);
 		}
+
 		if($result2) {
 			sqlsrv_commit( $conn );
 			
@@ -319,6 +343,7 @@ xmlhttp.onreadystatechange=function()
 	 var remarks = json['remarks'];
 	 var to_quarter_tb = json['to_quarter'];
 	 var fr_quarter_tb = json['fr_quarter'];
+	 var to_org_code = json['to_org_code'];
 	 var responsible ='';
 
 
@@ -354,6 +379,7 @@ xmlhttp.onreadystatechange=function()
 	 $('#destination_tb').val(to_table);
 	 $('#to_quarter_tb').val(to_quarter_tb);
 	 $('#fr_quarter_tb').val(fr_quarter_tb);
+	 $('#to_org_code').val(to_org_code);
 
 	 if (status == "RevisionRequest" || status == ""){
 	 $('#select-status').css('visibility', 'visible');
@@ -401,12 +427,14 @@ xmlhttp.send();
 }
 
 function movementType(type){
+
 	if (type == "reallocation"){
 		$('#budgetLabel').html('Available Budget:');
 		$('#tr_source_tb').show();
 		$('#from').show();
 		$('#tr_destination_tb').show();
 		$('#tr_to_quarter_tb').show();
+		$('#tr_to_org_code_tb').show();
 		$('#tr_fr_quarter_tb').show();
 		$('#to').show();
 		$('#amount_movement').show();
@@ -419,6 +447,7 @@ function movementType(type){
 		$('#to').show();
 		$('#tr_destination_tb').show();
 		$('#tr_to_quarter_tb').show();
+		$('#tr_to_org_code_tb').hide();
 		$('#tr_fr_quarter_tb').hide();
 		$('#amount_movement').show();
 		$('#department').hide();
@@ -429,6 +458,7 @@ function movementType(type){
 		$('#tr_source_tb').hide();
 		$('#tr_destination_tb').hide();
 		$('#tr_to_quarter_tb').hide();
+		$('#tr_to_org_code_tb').hide();
 		$('#tr_fr_quarter_tb').hide();
 		$('#amount_movement').hide();
 		$('#department').hide();
@@ -478,6 +508,10 @@ function valideopenerform(field){
 			filename = "popup-reallocate-cost";
 		}
 	}		
+
+	if($("#movementType").val() == "reallocation" &&  field == "to") {
+		orgcode = $("#to_org_code").val();
+	}
 		
 	var popup= window.open(filename+'.php?hash='+text+'&from_id='+from_id+'&from_val='+from_val+'&field='+field+'&to_id='+to_id+'&orgcode='+orgcode+'&frmrccode='+frmrccode+'&tomrccode='+tomrccode+'&mrcdesc='+mrcdesc+''
 	+'&to_val='+to_val+'&amount='+amount+'&year_budget='+year_budget+'&type='+type+'&budget='+budget+'&cost_center='+cost_center+'&costcenterfr='+costcenterfr+'&id='+id+'&login='+login+'&source_tb='+source_tb+'&destination_tb='+destination_tb+'','popup_form','location=no,menubar=no,status=no,scrollbars=yes,top=50%,left=50%,height=550,width=750'); 
@@ -640,6 +674,7 @@ var type = $('#movementType').val();
 		$('#to').show();
 		$('#tr_destination_tb').show();
 		$('#tr_to_quarter_tb').show();
+		$('#tr_to_org_code_tb').show();
 		$('#tr_fr_quarter_tb').show();
 		$('#amount_movement').show();
 		$('#department').show();
@@ -651,6 +686,7 @@ var type = $('#movementType').val();
 		$('#to').show();
 		$('#tr_destination_tb').show();
 		$('#tr_to_quarter_tb').show();
+		$('#tr_to_org_code_tb').hide();
 		$('#tr_fr_quarter_tb').hide();
 		$('#amount_movement').show();
 		$('#department').hide();
@@ -661,6 +697,7 @@ var type = $('#movementType').val();
 		$('#to').hide();
 		$('#tr_destination_tb').hide();
 		$('#tr_to_quarter_tb').hide();
+		$('#tr_to_org_code_tb').hide();
 		$('#tr_fr_quarter_tb').hide();
 		$('#amount_movement').hide();
 		$('#department').hide();
@@ -725,6 +762,7 @@ var type = $('#movementType').val();
 		$('#to').show();
 		$('#tr_destination_tb').show();
 		$('#tr_to_quarter_tb').show();
+		$('#tr_to_org_code_tb').show();
 		$('#tr_fr_quarter_tb').show();
 		$('#amount_movement').show();
 		$('#department').show();
@@ -737,6 +775,7 @@ var type = $('#movementType').val();
 		$('#tr_destination_tb').show();
 		$('#tr_to_quarter_tb').show();
 		$('#tr_fr_quarter_tb').hide();
+		$('#tr_to_org_code_tb').hide();
 		$('#amount_movement').show();
 		$('#department').hide();
 		$('#fr_cost_center').hide();
@@ -745,6 +784,7 @@ var type = $('#movementType').val();
 		$('#to').hide();
 		$('#tr_source_tb').hide();
 		$('#tr_destination_tb').hide();
+		$('#tr_to_org_code_tb').hide();
 		$('#tr_to_quarter_tb').hide();
 		$('#tr_fr_quarter_tb').hide();
 		$('#amount_movement').hide();
@@ -1015,6 +1055,17 @@ $("#destination_tb").change(function(e) {
 		<tr id="from">
 			<td class="textLabel">From <i class="required">*</i></td>
 			<td class="textField"><input type="hidden" class="field" name="from_id" id="from_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="from_val" id="from_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('from'); return false;">...</button></td>
+		</tr>
+		<tr id="tr_to_org_code_tb">
+			<td class="textLabel">Target Organization <i class="required">*</i></td>
+			<td>
+				<?php 
+					$tbname = "R5_VIEW_USERINFO";
+					$tbfield = "DISTINCT(ORG_CODE)";
+					$tbfield2 = "ORG_DESC";
+					$crudapp->optionValue4($conn,$tbname,$tbfield,$tbfield2,"WHERE USR_CODE = '$user'", "to_org_code");
+				?>
+			</td>
 		</tr>
 		<tr id="tr_to_quarter_tb">
 			<td class="textLabel">Target Quarter <i class="required">*</i></td>
