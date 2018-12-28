@@ -1,6 +1,6 @@
 <?php
-// $_GET['login'] = "EAMSYSADMIN";
-$_GET['login'] = "JLOAYON";
+$_GET['login'] = "EAMSYSADMIN";
+// $_GET['login'] = "JLOAYON";
 class crudClass{
 
 /* Update Session*/
@@ -1088,11 +1088,10 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
         while($val = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {			
 			foreach($column as $fieldName){
 				if(in_array($fieldName,array("Q1", "Q2" , "Q3", "Q4"))) {
-
-					if(is_null($val["$fieldName"])) {
-						$val["$fieldName"] = "N/A";
+					if($val["$fieldName"] > 0) {
+						$val["$fieldName"] = "Yes";
 					} else {
-						$val["$fieldName"] = $val["$fieldName"]->format("m/d/Y");
+						$val["$fieldName"] = "No";
 					}
 				}
 
