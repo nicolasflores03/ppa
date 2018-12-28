@@ -30,11 +30,10 @@ $orgcode = $userinfo[0]['ORG_CODE'];
 $filter = array();
 $cnd = "";
 $column = $crudapp->readColumn($conn,"R5_DEADLINE_MAINTENANCE");
-$requiredField = array('id','month','date','year','budget_year', array('isActive', 'IS ACTIVE') , 'Q1', 'Q2', 'Q3', 'Q4');
+$requiredField = array('id','month','date','year','budget_year', array('isActive', 'IS ACTIVE') , array('Q1', 'Q1 Open'), array('Q2', 'Q2 Open'), array('Q3', 'Q3 Open'), array('Q4', 'Q4 Open'));
 // $column = array_intersect($column,$requiredField);
 $listView = $crudapp->listTableDeadline($conn,"R5_DEADLINE_MAINTENANCE",$column,$cnd);
 $tableView = $filterapp->filterViewURLXdelete($conn,$requiredField,$listView,$filter,"id");
-
 
 if (isset($_POST['submit'])){
 	//Passing of Data
@@ -42,11 +41,15 @@ if (isset($_POST['submit'])){
 	$budget_year = $_POST['budget_year'];
 	$id =  @$_POST['id'];
 	$active = @$_POST['active'];
+	$Q1 = @$_POST['Q1'];
+	$Q2 = @$_POST['Q2'];
+	$Q3 = @$_POST['Q3'];
+	$Q4 = @$_POST['Q4'];
 
-	$Q1 = $_POST['Q1'] != "" ? date("Y-m-d",  strtotime($_POST['Q1']))  : null;
-	$Q2 = $_POST['Q2'] != "" ? date("Y-m-d",  strtotime($_POST['Q2']))  : null;
-	$Q3 = $_POST['Q3'] != "" ? date("Y-m-d",  strtotime($_POST['Q3']))  : null;
-	$Q4 = $_POST['Q4'] != "" ? date("Y-m-d",  strtotime($_POST['Q4']))  : null;
+	// $Q1 = $_POST['Q1'] != "" ? date("Y-m-d",  strtotime($_POST['Q1']))  : null;
+	// $Q2 = $_POST['Q2'] != "" ? date("Y-m-d",  strtotime($_POST['Q2']))  : null;
+	// $Q3 = $_POST['Q3'] != "" ? date("Y-m-d",  strtotime($_POST['Q3']))  : null;
+	// $Q4 = $_POST['Q4'] != "" ? date("Y-m-d",  strtotime($_POST['Q4']))  : null;
 
 //Validation
 if ($deadline == ""){
@@ -62,7 +65,6 @@ if ($deadline == ""){
 	$checkmonth = $checkdeadline[0];
 	$checkdate = $checkdeadline[1];
 	$checkyear = $checkdeadline[2];
-
 }
 	
 	//Validation
@@ -206,33 +208,55 @@ function insertDeadlineInfo(json){
 	var budget_year = json['budget_year'];	 
 	var id = json['id'];
 	var isActive = json['isActive'];
+	var q1_isActive = json['Q1'];
+	var q2_isActive = json['Q2'];
+	var q3_isActive = json['Q3'];
+	var q4_isActive = json['Q4'];
 
-	var q1_date = "";
-	var q2_date = "";
-	var q3_date = "";
-	var q4_date = "";
-	
-	if(json['Q1'] != null) {
-		q1_date = json['Q1'].date.replace(" 00:00:00", "").split("-");
-		q1_date = q1_date[1] + "/" + q1_date[2] + "/" + q1_date[0].replace("20","");
-	} 
-	if(json['Q2'] != null) {
-		q2_date = json['Q2'].date.replace(" 00:00:00", "").split("-");
-		q2_date = q2_date[1] + "/" + q2_date[2] + "/" + q2_date[0].replace("20","");
-	} 
-	if(json['Q3'] != null) {
-		q3_date = json['Q3'].date.replace(" 00:00:00", "").split("-");
-		q3_date = q3_date[1] + "/" + q3_date[2] + "/" + q3_date[0].replace("20","");
-	} 
-	if(json['Q4'] != null) {
-		q4_date = json['Q4'].date.replace(" 00:00:00", "").split("-");
-		q4_date = q4_date[1] + "/" + q4_date[2] + "/" + q4_date[0].replace("20","");
+	$('#q1_isActive').prop('checked', false);
+	$('#q2_isActive').prop('checked', false);
+	$('#q3_isActive').prop('checked', false);
+	$('#q4_isActive').prop('checked', false);
+
+	if (q1_isActive > 0){
+		$('#q1_isActive').prop('checked', true);
+	}
+	if (q2_isActive > 0){
+		$('#q2_isActive').prop('checked', true);
+	}
+	if (q3_isActive > 0){
+		$('#q3_isActive').prop('checked', true);
+	}
+	if (q4_isActive > 0){
+		$('#q4_isActive').prop('checked', true);
 	}
 
-	$('#q1_datepicker').val(q1_date);
-	$('#q2_datepicker').val(q2_date);
-	$('#q3_datepicker').val(q3_date);
-	$('#q4_datepicker').val(q4_date);
+	// var q1_date = "";
+	// var q2_date = "";
+	// var q3_date = "";
+	// var q4_date = "";
+	
+	// if(json['Q1'] != null) {
+	// 	q1_date = json['Q1'].date.replace(" 00:00:00", "").split("-");
+	// 	q1_date = q1_date[1] + "/" + q1_date[2] + "/" + q1_date[0].replace("20","");
+	// } 
+	// if(json['Q2'] != null) {
+	// 	q2_date = json['Q2'].date.replace(" 00:00:00", "").split("-");
+	// 	q2_date = q2_date[1] + "/" + q2_date[2] + "/" + q2_date[0].replace("20","");
+	// } 
+	// if(json['Q3'] != null) {
+	// 	q3_date = json['Q3'].date.replace(" 00:00:00", "").split("-");
+	// 	q3_date = q3_date[1] + "/" + q3_date[2] + "/" + q3_date[0].replace("20","");
+	// } 
+	// if(json['Q4'] != null) {
+	// 	q4_date = json['Q4'].date.replace(" 00:00:00", "").split("-");
+	// 	q4_date = q4_date[1] + "/" + q4_date[2] + "/" + q4_date[0].replace("20","");
+	// }
+
+	// $('#q1_datepicker').val(q1_date);
+	// $('#q2_datepicker').val(q2_date);
+	// $('#q3_datepicker').val(q3_date);
+	// $('#q4_datepicker').val(q4_date);
 	 
 	 month = month.replace(/ /g, '');
 	 date = date.replace(/ /g, '');
@@ -278,21 +302,21 @@ var user ="<?php echo $user; ?>";
 	});
 
 	
-	new datepickr('datepick2', {
-		'dateFormat': 'm/d/y'
-	});
-	new datepickr('q1_datepicker', {
-		'dateFormat': 'm/d/y'
-	});
-	new datepickr('q2_datepicker', {
-		'dateFormat': 'm/d/y'
-	});
-	new datepickr('q3_datepicker', {
-		'dateFormat': 'm/d/y'
-	});
-	new datepickr('q4_datepicker', {
-		'dateFormat': 'm/d/y'
-	});
+	// new datepickr('datepick2', {
+	// 	'dateFormat': 'm/d/y'
+	// });
+	// new datepickr('q1_datepicker', {
+	// 	'dateFormat': 'm/d/y'
+	// });
+	// new datepickr('q2_datepicker', {
+	// 	'dateFormat': 'm/d/y'
+	// });
+	// new datepickr('q3_datepicker', {
+	// 	'dateFormat': 'm/d/y'
+	// });
+	// new datepickr('q4_datepicker', {
+	// 	'dateFormat': 'm/d/y'
+	// });
 
 	// $("#q1_datepicker").datepicker();
 
@@ -311,6 +335,11 @@ var user ="<?php echo $user; ?>";
 		if (xmlhttp.readyState==4 && xmlhttp.status==200)
 			{
 			var result = $.parseJSON(xmlhttp.responseText);
+			$('#q1_isActive').prop('checked', false);
+			$('#q2_isActive').prop('checked', false);
+			$('#q3_isActive').prop('checked', false);
+			$('#q4_isActive').prop('checked', false);	
+
 				if(result != "0"){
 					var r=confirm("There is an existing budget deadline for the selected year. Do you want to change?");
 					if (r==true){
@@ -319,22 +348,19 @@ var user ="<?php echo $user; ?>";
 						$('#active').prop('checked', true);
 						$('#budget_year').val('');
 						$('#datepick2').val('');
-						$('#q1_datepicker').val('');
-						$('#q2_datepicker').val('');
-						$('#q3_datepicker').val('');
-						$('#q4_datepicker').val('');			
+		
 					}
 				} else {
 					$('#datepick2').val('');
-					var Q1 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 3, 0));
-					var Q2 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 6, 0));
-					var Q3 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 9, 0));
-					var Q4 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 12, 0));
+					// var Q1 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 3, 0));
+					// var Q2 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 6, 0));
+					// var Q3 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 9, 0));
+					// var Q4 = $.datepicker.formatDate('mm/dd/yy', new Date(budget_year, 12, 0));
 
-					$('#q1_datepicker').val(Q1);
-					$('#q2_datepicker').val(Q2);
-					$('#q3_datepicker').val(Q3);
-					$('#q4_datepicker').val(Q4);
+					// $('#q1_datepicker').val(Q1);
+					// $('#q2_datepicker').val(Q2);
+					// $('#q3_datepicker').val(Q3);
+					// $('#q4_datepicker').val(Q4);
 				}
 			}
 		}
@@ -540,30 +566,31 @@ var user ="<?php echo $user; ?>";
 			<td class="textField">	<input type="checkbox" name="active" id="active" value="1" checked>
 		</tr> 
 		<tr>
-			<td class="textLabel"><strong>Quarter Close:</strong></td>
+			<td class="textLabel"><strong>Quarter Open (Check to open):</strong></td>
 		</tr> 
 		<tr>
 			<td class="textLabel">Q1:</td>
 			<td class="textField">
-				<input type="text" class="datepick2" value="" id="q1_datepicker" name="Q1">
+
+				<input type="checkbox" name="Q1" id="q1_isActive" value="1" >
 			</td>
 		</tr>
 		<tr>
 			<td class="textLabel">Q2:</td>
 			<td class="textField">
-				<input type="text" class="datepick2" value="" id="q2_datepicker" name="Q2">
+				<input type="checkbox" name="Q2" id="q2_isActive" value="1" >
 			</td>
 		</tr>
 		<tr>
 			<td class="textLabel">Q3:</td>
 			<td class="textField">
-				<input type="text" class="datepick2" value="" id="q3_datepicker" name="Q3">
+				<input type="checkbox" name="Q3" id="q3_isActive" value="1" >
 			</td>
 		</tr>
 		<tr>
 			<td class="textLabel">Q4:</td>
 			<td class="textField">
-				<input type="text" class="datepick2" value="" id="q4_datepicker" name="Q4">
+				<input type="checkbox" name="Q4" id="q4_isActive" value="1" >
 			</td>
 		</tr>
 		
