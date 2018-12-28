@@ -3,10 +3,10 @@ GO
 
   ALTER TABLE [dbo].[R5_DEADLINE_MAINTENANCE]
   ADD 
-	Q1 date null ,
-	Q2 date null ,
-	Q3 date null ,
-	Q4 date null ;
+	Q1 tinyint DEFAULT 0 ,
+	Q2 tinyint DEFAULT 0 ,
+	Q3 tinyint DEFAULT 0 ,
+	Q4 tinyint DEFAULT 0 ;
 
 	ALTER TABLE [dbo].[R5_BUDGET_MOVEMENT]
 	ADD 
@@ -167,7 +167,7 @@ CREATE TABLE [dbo].[R5_REF_COSTBASE_BUDGET_QUARTERLY](
 
 ALTER VIEW [dbo].[R5_BUDGET_REALLOCATION_LOOKUP]
 AS
-SELECT     dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.version, 
+SELECT    dbo.R5_DPP_VERSION.ORG_CODE, dbo.R5_DPP_VERSION.MRC_CODE, dbo.R5_DPP_VERSION.year_budget, dbo.R5_DPP_VERSION.version, 
                       dbo.R5_DPP_VERSION.reference_no, dbo.R5_EAM_DPP_ITEMBASE_BRIDGE.rowid, dbo.R5_EAM_DPP_ITEMBASE_LINES.code, dbo.R5PARTS.PAR_DESC, 
                       dbo.R5_DPP_VERSION.status, dbo.R5_EAM_DPP_ITEMBASE_LINES.available, dbo.R5_DPP_VERSION.cost_center,
 					  dbo.R5_REF_ITEMBASE_BUDGET_QUARTERLY.q1_available, 
