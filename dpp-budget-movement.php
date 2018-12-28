@@ -61,6 +61,9 @@ if(isset($_GET['year'])) {
 	$q3_deadline = isset($quarterDeadlineInfo[0]['Q3']) ? ($quarterDeadlineInfo[0]['Q3'] > 0 ? true : false ) : false;
 	$q4_deadline = isset($quarterDeadlineInfo[0]['Q4']) ? ($quarterDeadlineInfo[0]['Q4'] > 0 ? true : false ) : false;
 }
+
+
+
 // end closed date per quarters
 
 //GET status Based on reference_no,dept,org,year
@@ -1035,10 +1038,10 @@ $("#destination_tb").change(function(e) {
 			<td>
 			<select name="fr_quarter_tb" id="fr_quarter_tb" onchange="setBudgetValue('fr');">
 				<option value="">-- Please select --</option>
-				<option <?php echo  $q1_deadline ? "disabled" : "" ?> value="1">Q1 <?php echo  $q1_deadline ? "(Closed)" : "" ?></option>
-				<option <?php echo  $q2_deadline ? "disabled" : "" ?> value="2">Q2 <?php echo  $q2_deadline ? "(Closed)" : "" ?></option>
-				<option <?php echo  $q3_deadline ? "disabled" : "" ?> value="3">Q3 <?php echo  $q3_deadline ? "(Closed)" : "" ?></option>
-				<option <?php echo  $q4_deadline ? "disabled" : "" ?> value="4">Q4 <?php echo  $q4_deadline ? "(Closed)" : "" ?></option>
+				<option <?php echo  $q1_deadline ? "" : "disabled" ; ?> value="1">Q1 <?php echo  $q1_deadline ? "" : "(Closed)" ; ?></option>
+				<option <?php echo  $q2_deadline ? "" : "disabled" ; ?> value="2">Q2 <?php echo  $q2_deadline ? "" : "(Closed)" ; ?></option>
+				<option <?php echo  $q3_deadline ? "" : "disabled" ; ?> value="3">Q3 <?php echo  $q3_deadline ? "" : "(Closed)" ; ?></option>
+				<option <?php echo  $q4_deadline ? "" : "disabled" ; ?> value="4">Q4 <?php echo  $q4_deadline ? "" : "(Closed)" ; ?></option>
 			</select>
 			</td>
 		</tr>
@@ -1072,10 +1075,10 @@ $("#destination_tb").change(function(e) {
 			<td>
 			<select name="to_quarter_tb" id="to_quarter_tb" onchange="setBudgetValue('to');">
 				<option value="">-- Please select --</option>
-				<option <?php echo $q1_deadline ? "disabled" : "" ?> value="1">Q1 <?php echo $q1_deadline ? "(Closed)" : "" ?></option>
-				<option <?php echo $q2_deadline ? "disabled" : "" ?> value="2">Q2 <?php echo $q2_deadline ? "(Closed)" : "" ?></option>
-				<option <?php echo $q3_deadline ? "disabled" : "" ?> value="3">Q3 <?php echo $q3_deadline ? "(Closed)" : "" ?></option>
-				<option <?php echo $q4_deadline ? "disabled" : "" ?> value="4">Q4 <?php echo $q4_deadline ? "(Closed)" : "" ?></option>
+				<option <?php echo $q1_deadline ? "" : "disabled"; ?> value="1">Q1 <?php echo $q1_deadline ? "" : "(Closed)"; ?></option>
+				<option <?php echo $q2_deadline ? "" : "disabled"; ?> value="2">Q2 <?php echo $q2_deadline ? "" : "(Closed)"; ?></option>
+				<option <?php echo $q3_deadline ? "" : "disabled"; ?> value="3">Q3 <?php echo $q3_deadline ? "" : "(Closed)"; ?></option>
+				<option <?php echo $q4_deadline ? "" : "disabled"; ?> value="4">Q4 <?php echo $q4_deadline ? "" : "(Closed)"; ?></option>
 			</select>
 			</td>
 		</tr>
