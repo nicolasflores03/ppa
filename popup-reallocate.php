@@ -23,6 +23,8 @@ $source_tb = $_GET['source_tb'];
 $destination_tb = $_GET['destination_tb'];
 $cnd="";
 
+$source_quarter = isset($_GET['source_quarter']) ? $_GET['source_quarter'] : '';
+$destination_quarter = isset($_GET['destination_quarter']) ?  $_GET['destination_quarter'] : '';
 if ($field=="from"){
 $cnd = "year_budget = '$year_budget' AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$frmrccode' AND status = 'Approved' AND cost_center = '$costcenterfr'";
 }else{
@@ -67,17 +69,26 @@ var costcenterfr = "<?php echo $costcenterfr; ?>";
 var MRC_DESC = "<?php echo $MRC_DESC; ?>";
 var source_tb = "<?php echo $source_tb; ?>";
 var destination_tb = "<?php echo $destination_tb; ?>";
+var source_quarter = "<?php echo $source_quarter; ?>";
+var destination_quarter = "<?php echo $destination_quarter; ?>";
+
 
 $("#new_tmp").click(function() {
-	var r=confirm("Are you sure you want to add a new record?");
-	if (r==true){
-			//window.opener.close();
-			
-			window.opener.document.location.href = "dpp-record-lines-item-addmore.php?year="+year_budget+"&login="+login+"&mrccode="+mrccode+"&org_code="+org_code+"&cost_center="+cost_center+"&source_tb="+source_tb+"&destination_tb="+destination_tb;
-			self.close();
-			//window.open("dpp-record-lines-item-addmore.php?year="+year_budget+"&login="+login+"&mrccode="+mrccode+"&org_code="+org_code+"&cost_center="+cost_center);
-	}
-
+//	var _amount = "<?php echo $_GET['amount']; ?>";
+//	if(parseInt(_amount) > 0)  {
+		var r=confirm("Are you sure you want to add a new record?");
+		if (r==true){
+				//window.opener.close();
+				var addmore_url = "dpp-record-lines-item-addmore.php?year="+year_budget+"&login="+login+"&mrccode="+mrccode+"&org_code="+org_code+"&cost_center="+cost_center+"&source_tb="+source_tb+"&destination_tb="+destination_tb;
+				addmore_url += "&source_quarter="+source_quarter+"&destination_quarter="+destination_quarter;
+				window.opener.document.location.href = addmore_url;
+				self.close();
+				//window.open("dpp-record-lines-item-addmore.php?year="+year_budget+"&login="+login+"&mrccode="+mrccode+"&org_code="+org_code+"&cost_center="+cost_center);
+		}
+	// } else {
+	// 	alert("Please enter budget movement amount.");
+	// 	self.close();
+	// }
 });
 
 $("#new_tmp_reallocate").click(function() {

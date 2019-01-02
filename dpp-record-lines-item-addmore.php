@@ -28,6 +28,9 @@ $res = @$_GET['res'];
 $source_tb = $_GET['source_tb'];
 $destination_tb = $_GET['destination_tb'];
 
+$source_quarter = $_GET['source_quarter'];
+$destination_quarter = $_GET['destination_quarter'];
+
 //GET status Based on reference_no,dept,org,year
 $dppfilter = "year_budget = '$year' AND ORG_CODE = '$orgcode' AND MRC_CODE = '$mrccode' AND cost_center = '$cost_center' AND status = 'Approved'";
 $dppcolumn = $crudapp->readColumn($conn,"R5_VIEW_DPP_VERSION");
@@ -73,6 +76,10 @@ $rate = "";
 $foreign_cost = 0;
 $available = 0.00;
 
+$to_quarter_tb = $_POST['to_quarter_tb'];
+$fr_quarter_tb = $_POST['fr_quarter_tb'];
+//$to_org_code = $_POST['to_org_code'];
+
 if($CUR_CODE != "PHP" && $CUR_CODE != ""){
 $today = date("m/d/Y H:i");	
 $rate = $crudapp->checkRate($conn,"R5EXCHRATES","CRR_CURR = '$CUR_CODE' AND '$today' between CRR_START and CRR_END ORDER BY CRR_END DESC");
@@ -98,17 +105,13 @@ $errorMessage .= 'Please update exchange rate for the selected currency code.\n\
 $errorFlag = true;
 }else if ($CUR_CODE != "PHP" && $CUR_CODE != "" && $rate != "none"){
 $foreign_cost = $unit_cost;
-$available = $quantity * ($unit_cost / $rate);
+$available = ($unit_cost / $rate);
 $unit_cost = $unit_cost / $rate;
 }else{
-$available = $quantity * $unit_cost;
+$available = $unit_cost;
 $foreign_cost = $unit_cost;
 }
 
-if ($unit_cost == ""){
-$errorMessage .= 'Please enter a Unit Cost.\n\n';
-$errorFlag = true;
-}
 
 if ($CUR_CODE_VAL == ""){
 $errorMessage .= 'Please enter a Currency Code.\n\n';
@@ -119,30 +122,45 @@ if (!is_numeric ($unit_cost)){
 $errorMessage .= 'Unit Cost must be numeric characters only.\n\n';
 $errorFlag = true;
 }
-
-if (!is_numeric ($january) || !is_numeric ($february) || !is_numeric ($march) || !is_numeric ($april) || !is_numeric ($may) || !is_numeric ($june) || !is_numeric ($july) || !is_numeric ($august) || !is_numeric ($september) || !is_numeric ($october) || !is_numeric ($november) || !is_numeric ($december)){
-$errorMessage .= 'Budget Month must be numeric characters only.\n\n';
-$errorFlag = true;
+if ((int)$unit_cost <= 0){
+	$errorMessage .= 'Please enter a budget amount.\n\n';
+	$errorFlag = true;
 }
+	
+
+// if (!is_numeric ($january) || !is_numeric ($february) || !is_numeric ($march) || !is_numeric ($april) || !is_numeric ($may) || !is_numeric ($june) || !is_numeric ($july) || !is_numeric ($august) || !is_numeric ($september) || !is_numeric ($october) || !is_numeric ($november) || !is_numeric ($december)){
+// $errorMessage .= 'Budget Month must be numeric characters only.\n\n';
+// $errorFlag = true;
+// }
 
 $today = date("m/d/Y H:i");	
 	if(!$errorFlag){
-		$data = array("record_id"=>$record_id,"id"=>$record_id,"code"=>$code,"quantity"=>$quantity,"available"=>$available,"total_cost"=>$available,"unit_cost"=>$unit_cost,"saveFlag"=>0,"version"=>1,"foreign_curr"=>$CUR_CODE_VAL,"foreign_cost"=>$foreign_cost,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);	
+		$data = array("record_id"=>$record_id,"id"=>$record_id,"code"=>$code,"quantity"=>0,"available"=>0,"total_cost"=>0,"unit_cost"=>0,"saveFlag"=>0,"version"=>1,"foreign_curr"=>$CUR_CODE_VAL,"foreign_cost"=>0,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);	
 		$data2 = array("id"=>$record_id,"january"=>$january,"february"=>$february,
 		"march"=>$march,"april"=>$april,"may"=>$may,"june"=>$june,"july"=>$july,
 		"august"=>$august,"september"=>$september,"october"=>$october,"november"=>$november,"december"=>$december,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
 		$data5 = array("reference_no"=>$reference_no,"rowid"=>$record_id,"version"=>$version);	
+		$data6 = array("id"=>$record_id, "createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
+		
+		for($q = 1; $q <= 4; $q++) {
+			$data6["q" . $q . "_total_cost"] = 0;
+			$data6["q" . $q . "_adjustments"] = 0;
+			$data6["q" . $q . "_available"] =  0;
+			$data6["q" . $q . "_reserved"] = 0;
+			$data6["q" . $q . "_allocated"] = 0;
+			$data6["q" . $q . "_paid"] = 0;
+		}
 		
 		$table = "R5_EAM_DPP_ITEMBASE_LINES";
 		$table2 = "R5_REF_ITEMBASE_BUDGET_MONTH";
 		$table3 = "R5_EAM_DPP_ITEMBASE_BRIDGE";
-		
-		$result = $crudapp->insertRecord($conn,$data,$table);
+		$table4 = "R5_REF_ITEMBASE_BUDGET_QUARTERLY";
+
+		$result  = $crudapp->insertRecord($conn,$data,$table);
 		$result2 = $crudapp->insertRecord($conn,$data2,$table2);
 		$result3 = $crudapp->insertRecord($conn,$data5,$table3);
-		
-		
-		
+		$result4 = $crudapp->insertRecord($conn,$data6,$table4);
+
 		//INSERT IN BUDGET MOVEMENT TABLE
 		
 		//GET status Based on reference_no,dept,org,year
@@ -151,8 +169,37 @@ $today = date("m/d/Y H:i");
 		$appinfo = $crudapp->listTable($conn,"R5_APP_VERSION",$appcolumn,$appfilter);
 		@$app_id = $appinfo[0]['app_id'];
 		$table = "dbo.R5_BUDGET_MOVEMENT";
-		$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"to_code"=>$record_id,"amount"=>$available,"year_budget"=>$year,"type"=>'supplement',"status"=>"Created","cost_center"=>$cost_center,"createdAt"=>$today,"updatedAt"=>$today,"to_table"=>$destination_tb,"FR_MRC_CODE"=>"","fr_table"=>"","fr_cost_center"=>"","fr_code"=>0);
-		$result2 = $crudapp->insertRecord($conn,$data,$table);
+		$data_budget = array(
+						"app_id"=>$app_id,
+						"ORG_CODE"=>$orgcode,
+						"TO_MRC_CODE"=>$mrccode,
+						"to_code"=>$record_id,
+						"amount"=>$available,
+						"year_budget"=>$year,
+						"type"=>'supplement',
+						"status"=>"Created",
+						"cost_center"=>$cost_center,
+						"createdAt"=>$today,
+						"updatedAt"=>$today,
+						"to_table"=>$destination_tb,
+						"FR_MRC_CODE"=>"",
+						"fr_table"=>"",
+						"fr_cost_center"=>"",
+						"fr_code"=>0,
+						"to_quarter"=>$to_quarter_tb, 
+						"fr_quarter"=>$fr_quarter_tb,
+						"to_org_code"=>null
+					);
+				
+			// $record_id = $crudapp->readID($conn,"R5_BUDGET_MOVEMENT");
+			// $id = $record_id + 1;
+
+			// if ($type == "reallocation"){
+			// 	$data["to_org_code"] = $to_org_code;
+			// }
+			// $result2 = $crudapp->insertRecord($conn,$data,$table);
+		
+		$result5 = $crudapp->insertRecord($conn,$data_budget,$table);
 
 			//if( $result == 1 && $result2 == 1 && $result3 == 1) {
 				sqlsrv_commit( $conn );
@@ -287,7 +334,7 @@ xmlhttp.onreadystatechange=function()
 	 }
 	 var io_number = '<?php echo $lastDigit;?>'+gl+'<?php echo $cost_center;?>';
 	 
-	 $('#unit_cost').val(unit_cost);
+	// $('#unit_cost').val(unit_cost);
 	 if (unit_cost > 0){
 	//   $('#unit_cost').attr('readonly', 'true'); // mark it as read only
 	   $('#CUR_CODE').val('PHP');
@@ -418,23 +465,23 @@ if(res !=""){
 	
 	$("#year_budget").val(year);
 
-	$(".scheduleField").change(function() {
-		getTotalCost();
-	}); 
+	// $(".scheduleField").change(function() {
+	// 	getTotalCost();
+	// }); 
 	
 	$("#CUR_CODE").change(function() {
 		var curr_code = $(this).val();
 		$("#CUR_CODE_VAL").val(curr_code);
 	});
 
-	$("#unit_cost").change(function() {
-		getTotalCost();
-	});
+	// $("#unit_cost").change(function() {
+	// 	getTotalCost();
+	// });
 });
 </script>
 </head>
 <body>
-<form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&mrccode=".$mrccode."&org_code=".$orgcode."&cost_center=".$cost_center."&source_tb=".$source_tb."&destination_tb=".$destination_tb; ?>" method="post" name="theForm" enctype="multipart/form-data">
+<form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&mrccode=".$mrccode."&org_code=".$orgcode."&cost_center=".$cost_center."&source_tb=".$source_tb."&destination_tb=".$destination_tb."&source_quarter=".$source_quarter."&destination_quarter=".$destination_quarter; ?>" method="post" name="theForm" enctype="multipart/form-data">
 <div class="headerText2"><div id="divText">Annual Procurement Plan</div></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>
@@ -447,7 +494,7 @@ if(res !=""){
 			<td class="textField"><input type="hidden" class="field" name="ref_no" id="ref_no" spellcheck="false" tabindex="1" value= "<?php echo $reference_no;?>"><input type="text" class="field" name="organization" id="organization" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['ORG_DESC'];?>" readonly><input type="hidden" class="field" name="ORG_CODE" id="ORG_CODE" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['ORG_CODE'];?>"></td>			
 			<td class="textLabel">Year Budget:</td>
 			<td class="textField">
-				<select name="year_budget" id="year_budget" readonly>
+				<select name="year_budget" id="year_budget" class="readonly">
 					<option value="">-- Please select --</option>
 					<option value="2014">2014</option>
 					<option value="2015">2015</option>
@@ -482,12 +529,30 @@ if(res !=""){
 		<tr>
 			<td class="textLabel">Department:</td>
 			<td class="textField"><input type="text" class="field" name="department" id="department" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['MRC_DESC'];?>" readonly><input type="hidden" class="field" name="MRC_CODE" id="MRC_CODE" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['MRC_CODE'];?>"></td>				
-			<td class="textLabel"></td>
-			<td class="textField"></td>				
+			<td class="textLabel">Source Quarter:</td>
+			<td class="textField">
+			<select name="fr_quarter_tb" id="fr_quarter_tb" class="readonly">
+				<option selected value="">N/A</option>
+				<option <?php echo $_GET["source_quarter"] == 1 ? "selected" : ""; ?> value="1">Q1</option>
+				<option <?php echo $_GET["source_quarter"] == 2 ? "selected" : ""; ?> value="2">Q2</option>
+				<option <?php echo $_GET["source_quarter"] == 3 ? "selected" : ""; ?> value="3">Q3</option>
+				<option <?php echo $_GET["source_quarter"] == 4 ? "selected" : ""; ?> value="4">Q4</option>
+			</select>
+			</td>		
 		</tr>
 		<tr>
 			<td class="textLabel">Cost Center:</td>
 			<td class="textField"><input type="text" class="field" name="cost_center" id="cost_center" spellcheck="false" tabindex="1" value="<?php echo $cost_center; ?>" readonly></td>				
+			<td class="textLabel">Target Quarter:</td>
+			<td class="textField">
+			<select name="to_quarter_tb" id="to_quarter_tb" class="readonly">
+				<option value="">N/A</option>
+				<option <?php echo $_GET["destination_quarter"] == 1 ?  "selected" : ""; ?> value="1">Q1</option>
+				<option <?php echo $_GET["destination_quarter"] == 2 ?  "selected" : ""; ?> value="2">Q2</option>
+				<option <?php echo $_GET["destination_quarter"] == 3 ?  "selected" : ""; ?> value="3">Q3</option>
+				<option <?php echo $_GET["destination_quarter"] == 4 ?  "selected" : ""; ?> value="4">Q4</option>
+			</select>
+			</td>	
 		</tr>
 	</tbody>
 </table>
@@ -500,7 +565,7 @@ if(res !=""){
 		<tbody>
 			<tr>
 				<td class="textLabel">Item Code: <i class="required">*</i></td>
-				<td class="textField"><input type="hidden" class="field" name="id" id="id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="code" id="code" spellcheck="false" tabindex="1" readonly><input type="hidden" class="field" name="item_val" id="item_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform2('R5_VIEW_PARTS_UOM_INFO')">...</button></td>			
+				<td class="textField"><input type="hidden" class="field" name="id" id="id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="code" id="code" spellcheck="false" tabindex="1" readonly><input type="hidden" class="field" name="item_val" id="item_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform2('R5_VIEW_PARTS_UOM_INFO'); return false;">...</button></td>			
 				
 				<td class="textLabel">Currency Code</td>
 				<td class="textField">
@@ -517,8 +582,9 @@ if(res !=""){
 			<tr>
 				<td class="textLabel">Item Description: </td>
 				<td class="textField"><input type="text" class="field" name="description" id="description" spellcheck="false" tabindex="1" readonly></td>				
-				<td class="textLabel">Unit Cost:</td>
-				<td class="textField" colspan="3"><input type="text" class="field" name="unit_cost" id="unit_cost" spellcheck="false" tabindex="1" value="0.00" onkeypress="return numbersonly(this, event)" onblur="round(this,2);">
+				<td class="textLabel">Amount:</td>
+				<td class="textField hidden"><input type="text" class="field" name="cost" id="cost" spellcheck="false" tabindex="1" value="0.00" onkeypress="return numbersonly(this, event)" onblur="round(this,2);"></td>								
+				<td class="textField " colspan="3"><input type="text" class="field" name="unit_cost" id="unit_cost" spellcheck="false" tabindex="1" value="0.00" onkeypress="return numbersonly(this, event)" onblur="round(this,2);">
 				</td>				
 			</tr>
 			<tr>
@@ -534,8 +600,12 @@ if(res !=""){
 				<td class="textField">
 					<input type="text" class="field" name="itemGL" id="itemGL" spellcheck="false" tabindex="1" readonly>
 				</td>	
-				<td class="textLabel">Quantity:</td>
-				<td class="textField"><input type="text" class="field" name="quantity" id="quantity" spellcheck="false" tabindex="1" value="0" readonly><input type="hidden" class="field" name="quantity_val" id="quantity_val" spellcheck="false" tabindex="1" value="0"></td>						
+				<td class="textLabel hidden">Quantity:</td>
+				<td class="textField hidden"><input type="text" class="field" name="quantity" id="quantity" spellcheck="false" tabindex="1" value="0" readonly><input type="hidden" class="field" name="quantity_val" id="quantity_val" spellcheck="false" tabindex="1" value="0"></td>						
+				<td class="textLabel">Last Price:</td>
+				<td class="textField">
+					<input type="text" class="field" name="PAR_LASTPRICE" id="PAR_LASTPRICE" spellcheck="false" tabindex="1" readonly>
+				</td>	
 			</tr>
 			<tr>
 				
@@ -543,8 +613,6 @@ if(res !=""){
 				<td class="textField">
 					<input type="text" class="field" name="gl_description" id="gl_description" spellcheck="false" tabindex="1" readonly>
 				</td>	
-				<td class="textLabel">Total Cost: </td>
-				<td class="textField"><input type="text" class="field" name="cost" id="cost" spellcheck="false" tabindex="1" readonly></td>								
 			</tr>
 			<tr>
 				
@@ -552,11 +620,7 @@ if(res !=""){
 				<td class="textField">
 					<input type="text" class="field" name="classification" id="classification" spellcheck="false" tabindex="1" readonly>
 				</td>	
-				<td class="textLabel">Last Price:</td>
-				<td class="textField">
-				<input type="text" class="field" name="PAR_LASTPRICE" id="PAR_LASTPRICE" spellcheck="false" tabindex="1" readonly>
-					
-				</td>	
+			
 			</tr>
 			<tr>
 				
@@ -572,7 +636,7 @@ if(res !=""){
 	</table>
 	<!--DATE of NEED-->
 	
-	<table border="1" class="schedule">
+	<table border="1" class="schedule hidden">
 	<tr>
 		<th>Jan</th>
 		<th>Feb</th>

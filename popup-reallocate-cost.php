@@ -23,6 +23,10 @@ $destination_tb = $_GET['destination_tb'];
 $login = $_GET['login'];
 $cnd="";
 
+
+$source_quarter = isset($_GET['source_quarter']) ? $_GET['source_quarter'] : '';
+$destination_quarter = isset($_GET['destination_quarter']) ?  $_GET['destination_quarter'] : '';
+
 if ($field=="from"){
 $cnd = "year_budget = '$year_budget' AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$frmrccode' AND status = 'Approved' AND cost_center = '$costcenterfr'";
 }else{
@@ -67,6 +71,8 @@ var costcenterfr = "<?php echo $costcenterfr; ?>";
 var MRC_DESC = "<?php echo $MRC_DESC; ?>";
 var source_tb = "<?php echo $source_tb; ?>";
 var destination_tb = "<?php echo $destination_tb; ?>";
+var source_quarter = "<?php echo $source_quarter; ?>";
+var destination_quarter = "<?php echo $destination_quarter; ?>";
 
 
 $("#new_tmp").click(function() {
@@ -75,7 +81,8 @@ $("#new_tmp").click(function() {
 			//window.opener.close();
 			//window.open("dpp-record-lines-cost-addmore.php?year="+year_budget+"&login="+login+"&mrccode="+mrccode+"&org_code="+org_code+"&cost_center="+cost_center);
 	
-			window.opener.document.location.href = "dpp-record-lines-cost-addmore.php?year="+year_budget+"&login="+login+"&mrccode="+mrccode+"&org_code="+org_code+"&cost_center="+cost_center+"&source_tb="+source_tb+"&destination_tb="+destination_tb;
+
+			window.opener.document.location.href = "dpp-record-lines-cost-addmore.php?year="+year_budget+"&login="+login+"&mrccode="+mrccode+"&org_code="+org_code+"&cost_center="+cost_center+"&source_tb="+source_tb+"&destination_tb="+destination_tb+"&source_quarter="+source_quarter+"&destination_quarter="+destination_quarter;
 			self.close();
 			
 	}
