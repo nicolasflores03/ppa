@@ -492,6 +492,7 @@ function valideopenerform(field){
 
 	var source_quarter = $('#fr_quarter_tb').val();
 	var destination_quarter = $('#to_quarter_tb').val();
+	var to_org_code = $('#to_org_code').val();
 	
 	var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -521,7 +522,7 @@ function valideopenerform(field){
 		
 	var popup= window.open(filename+'.php?hash='+text+'&from_id='+from_id+'&from_val='+from_val+'&field='+field+'&to_id='+to_id+'&orgcode='+orgcode+'&frmrccode='+frmrccode+'&tomrccode='+tomrccode+'&mrcdesc='+mrcdesc+''
 	+'&to_val='+to_val+'&amount='+amount+'&year_budget='+year_budget+'&type='+type+'&budget='+budget+'&cost_center='+cost_center+'&costcenterfr='+costcenterfr+'&id='+id+'&login='+login+'&source_tb='+source_tb+'&destination_tb='+destination_tb+''
-	+'&source_quarter='+source_quarter+'&destination_quarter='+destination_quarter
+	+'&source_quarter='+source_quarter+'&destination_quarter='+destination_quarter+"&to_org_code="+to_org_code
 	,'popup_form','location=no,menubar=no,status=no,scrollbars=yes,top=50%,left=50%,height=550,width=750'); 
 	popup.focus(); 
 }
