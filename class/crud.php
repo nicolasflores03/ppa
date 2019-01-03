@@ -2225,9 +2225,9 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 
         while($ors = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {	
 			$fieldVal = str_replace(" ","",$ors[$tbfield]);
-		if ($fieldVal != ""){
-			 $selection .= "<option name='costcenterfr' value='" . $fieldVal . "'>". $fieldVal . "</option>";
-		}
+			if ($fieldVal != ""){
+				$selection .= "<option name='costcenterfr' value='" . $fieldVal . "'>". $fieldVal . "</option>";
+			}
 		}
     
 		$selection .= "</select>";
@@ -2374,7 +2374,7 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 
 			}else{
 				//check why does the available amount needs to be replaced not add to existing amount
-					
+				
 				$sql_quarterly_update = "UPDATE $quarterly_table SET 
 				$quarterly_adjustments = ? + (SELECT $quarterly_adjustments FROM $quarterly_table WHERE id = ?), 
 				$quarterly_available = ?
@@ -2385,9 +2385,9 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				$sql2 = "UPDATE $table SET 
 				adjustments = ? + (SELECT adjustments FROM $table WHERE id = ?),
 				saveFlag = 1,
-				available = (SELECT (q1_available + q2_available + q3_available + q4_available ) FROM $quarterly_table WHERE id = ?)
+				available = ? + (SELECT (q1_available + q2_available + q3_available + q4_available ) FROM $quarterly_table WHERE id = ?)
 				WHERE id = ?";	
-				$params2 = array($amount,$to_code,$to_code,$to_code);
+				$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
 			}	
 
 			//$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
