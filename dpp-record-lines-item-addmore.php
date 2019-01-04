@@ -28,7 +28,6 @@ $res = @$_GET['res'];
 $source_tb = $_GET['source_tb'];
 $destination_tb = $_GET['destination_tb'];
 
-$source_quarter = $_GET['source_quarter'];
 $destination_quarter = $_GET['destination_quarter'];
 
 //GET status Based on reference_no,dept,org,year
@@ -77,8 +76,7 @@ $foreign_cost = 0;
 $available = 0.00;
 
 $to_quarter_tb = $_POST['to_quarter_tb'];
-$fr_quarter_tb = $_POST['fr_quarter_tb'];
-//$to_org_code = $_POST['to_org_code'];
+$to_org_code = $_POST['to_org_code'];
 
 if($CUR_CODE != "PHP" && $CUR_CODE != ""){
 $today = date("m/d/Y H:i");	
@@ -187,7 +185,7 @@ $today = date("m/d/Y H:i");
 						"fr_cost_center"=>"",
 						"fr_code"=>0,
 						"to_quarter"=>$to_quarter_tb, 
-						"fr_quarter"=>$fr_quarter_tb,
+						"fr_quarter"=>null,
 						"to_org_code"=>null
 					);
 				
@@ -481,7 +479,7 @@ if(res !=""){
 </script>
 </head>
 <body>
-<form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&mrccode=".$mrccode."&org_code=".$orgcode."&cost_center=".$cost_center."&source_tb=".$source_tb."&destination_tb=".$destination_tb."&source_quarter=".$source_quarter."&destination_quarter=".$destination_quarter; ?>" method="post" name="theForm" enctype="multipart/form-data">
+<form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&mrccode=".$mrccode."&org_code=".$orgcode."&cost_center=".$cost_center."&source_tb=".$source_tb."&destination_tb=".$destination_tb."&destination_quarter=".$destination_quarter; ?>" method="post" name="theForm" enctype="multipart/form-data">
 <div class="headerText2"><div id="divText">Annual Procurement Plan</div></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>
@@ -529,20 +527,6 @@ if(res !=""){
 		<tr>
 			<td class="textLabel">Department:</td>
 			<td class="textField"><input type="text" class="field" name="department" id="department" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['MRC_DESC'];?>" readonly><input type="hidden" class="field" name="MRC_CODE" id="MRC_CODE" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['MRC_CODE'];?>"></td>				
-			<td class="textLabel">Source Quarter:</td>
-			<td class="textField">
-			<select name="fr_quarter_tb" id="fr_quarter_tb" class="readonly">
-				<option selected value="">N/A</option>
-				<option <?php echo $_GET["source_quarter"] == 1 ? "selected" : ""; ?> value="1">Q1</option>
-				<option <?php echo $_GET["source_quarter"] == 2 ? "selected" : ""; ?> value="2">Q2</option>
-				<option <?php echo $_GET["source_quarter"] == 3 ? "selected" : ""; ?> value="3">Q3</option>
-				<option <?php echo $_GET["source_quarter"] == 4 ? "selected" : ""; ?> value="4">Q4</option>
-			</select>
-			</td>		
-		</tr>
-		<tr>
-			<td class="textLabel">Cost Center:</td>
-			<td class="textField"><input type="text" class="field" name="cost_center" id="cost_center" spellcheck="false" tabindex="1" value="<?php echo $cost_center; ?>" readonly></td>				
 			<td class="textLabel">Target Quarter:</td>
 			<td class="textField">
 			<select name="to_quarter_tb" id="to_quarter_tb" class="readonly">
@@ -553,6 +537,10 @@ if(res !=""){
 				<option <?php echo $_GET["destination_quarter"] == 4 ?  "selected" : ""; ?> value="4">Q4</option>
 			</select>
 			</td>	
+		</tr>
+		<tr>
+			<td class="textLabel">Cost Center:</td>
+			<td class="textField"><input type="text" class="field" name="cost_center" id="cost_center" spellcheck="false" tabindex="1" value="<?php echo $cost_center; ?>" readonly></td>				
 		</tr>
 	</tbody>
 </table>

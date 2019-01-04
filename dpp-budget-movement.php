@@ -38,6 +38,9 @@ $department_val =  @$_GET['department_val'];
 $source_tb =  @$_GET['source_tb'];
 $destination_tb =  @$_GET['destination_tb'];
 
+$fr_quarter_tb =  @$_GET['fr_quarter_tb'];
+$to_quarter_tb =  @$_GET['to_quarter_tb'];
+$to_org_code =  @$_GET['to_org_code'];
 
 $cost_center = @$_GET['cost_center'];
 $cost_center = str_replace(" ","@",$cost_center);
@@ -516,7 +519,7 @@ function valideopenerform(field){
 		}
 	}		
 
-	if($("#movementType").val() == "reallocation" &&  field == "to") {
+	if($("#movementType").val() == "reallocation" &&  field == "from") {
 		orgcode = $("#to_org_code").val();
 	}
 		
@@ -539,8 +542,8 @@ function valideopenerform2(){
 	var year_budget = $('#year_budget').val();
 	var type = $('#movementType').val();
 	var budget = $('#budget').val();
-	var orgcode = "<?php echo $orgcode; ?>";
-	var mrccode = "<?php echo $mrccode; ?>";
+	var orgcode = $("#to_org_code").val(); //"<?php echo $orgcode; ?>";
+	var mrccode = "" //"<?php echo $mrccode; ?>";
 	var cost_center = $('#CST_CODE').val();
 		
 var popup= window.open('popup-reallocate2.php?from_id='+from_id+'&from_val='+from_val+'&to_id='+to_id+'&orgcode='+orgcode+'&mrccode='+mrccode+''
@@ -592,6 +595,10 @@ $(document).ready(function(){
 	$("#department_val").val('<?php echo $department_val; ?>');
 	$("#source_tb").val('<?php echo $source_tb; ?>');
 	$("#destination_tb").val('<?php echo $destination_tb; ?>');
+	
+	$("#fr_quarter_tb").val('<?php echo $fr_quarter_tb; ?>');
+	$("#to_quarter_tb").val('<?php echo $to_quarter_tb; ?>');
+	$("#to_org_code").val('<?php echo $to_org_code; ?>');
 
 	if($("#to_id").val() != ""){ 
 		var table = $("#destination_tb").val();
@@ -601,6 +608,14 @@ $(document).ready(function(){
 	if($("#department_id").val() != ""){ 
 		getFromCostCenter($("#department_id").val(),"<?php echo $costcenterfr; ?>");
 	}
+
+	$("#to_org_code").change(function() {
+		$("#department_id").val('');
+		$("#department_val").val('');
+		$("#costcenterfr").html('<option value="">-- Please select --</option>');
+		$('#from_id').val('');
+		$('#from_val').val('');
+	});
 
 	$("#amount").val('<?php echo $amount; ?>');
 	$("#movementType").val('<?php echo $movementType; ?>');
@@ -1027,6 +1042,17 @@ $("#destination_tb").change(function(e) {
 				</select>
 			</td>				
 		</tr>
+		<tr id="tr_to_org_code_tb">
+			<td class="textLabel">Organization <i class="required">*</i></td>
+			<td>
+				<?php 
+					$tbname = "R5_VIEW_USERINFO";
+					$tbfield = "DISTINCT(ORG_CODE)";
+					$tbfield2 = "ORG_DESC";
+					$crudapp->optionValue4($conn,$tbname,$tbfield,$tbfield2,"WHERE USR_CODE = '$user'", "to_org_code");
+				?>
+			</td>
+		</tr>
 		<tr id="department">
 			<td class="textLabel">Department <i class="required">*</i></td>
 			<td class="textField"><input type="hidden" class="field" name="department_id" id="department_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="department_val" id="department_val" spellcheck="false" tabindex="1" readonly><button name="department" onclick="valideopenerform2(); return false;">...</button></td>
@@ -1065,17 +1091,7 @@ $("#destination_tb").change(function(e) {
 			<td class="textLabel">From <i class="required">*</i></td>
 			<td class="textField"><input type="hidden" class="field" name="from_id" id="from_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="from_val" id="from_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('from'); return false;">...</button></td>
 		</tr>
-		<tr id="tr_to_org_code_tb">
-			<td class="textLabel">Target Organization <i class="required">*</i></td>
-			<td>
-				<?php 
-					$tbname = "R5_VIEW_USERINFO";
-					$tbfield = "DISTINCT(ORG_CODE)";
-					$tbfield2 = "ORG_DESC";
-					$crudapp->optionValue4($conn,$tbname,$tbfield,$tbfield2,"WHERE USR_CODE = '$user'", "to_org_code");
-				?>
-			</td>
-		</tr>
+
 		<tr id="tr_to_quarter_tb">
 			<td class="textLabel">Target Quarter <i class="required">*</i></td>
 			<td>

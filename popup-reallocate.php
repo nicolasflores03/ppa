@@ -25,6 +25,8 @@ $cnd="";
 
 $source_quarter = isset($_GET['source_quarter']) ? $_GET['source_quarter'] : '';
 $destination_quarter = isset($_GET['destination_quarter']) ?  $_GET['destination_quarter'] : '';
+$to_org_code = isset($_GET['to_org_code']) ?  $_GET['to_org_code'] : '';
+
 if ($field=="from"){
 $cnd = "year_budget = '$year_budget' AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$frmrccode' AND status = 'Approved' AND cost_center = '$costcenterfr'";
 }else{
@@ -71,6 +73,7 @@ var source_tb = "<?php echo $source_tb; ?>";
 var destination_tb = "<?php echo $destination_tb; ?>";
 var source_quarter = "<?php echo $source_quarter; ?>";
 var destination_quarter = "<?php echo $destination_quarter; ?>";
+var to_org_code = "<?php echo $to_org_code; ?>";
 
 
 $("#new_tmp").click(function() {
@@ -96,7 +99,9 @@ $("#new_tmp_reallocate").click(function() {
 	if (r==true){
 			//window.opener.close();
 			
-			window.opener.document.location.href = "dpp-record-lines-item-addmore-reallocate.php?year="+year_budget+"&login="+login+"&mrccode="+mrccode+"&org_code="+org_code+"&cost_center="+cost_center+"&from_id="+from_id+"&from_val="+from_val+"&frmrccode="+frmrccode+"&costcenterfr="+costcenterfr+"&mrcdesc="+MRC_DESC+"&source_tb="+source_tb+"&destination_tb="+destination_tb;
+			var addmore_url =  "dpp-record-lines-item-addmore-reallocate.php?year="+year_budget+"&login="+login+"&mrccode="+mrccode+"&org_code="+org_code+"&cost_center="+cost_center+"&from_id="+from_id+"&from_val="+from_val+"&frmrccode="+frmrccode+"&costcenterfr="+costcenterfr+"&mrcdesc="+MRC_DESC+"&source_tb="+source_tb+"&destination_tb="+destination_tb;
+			addmore_url += "&source_quarter="+source_quarter+"&destination_quarter="+destination_quarter+"&to_org_code="+to_org_code;
+			window.opener.document.location.href = addmore_url;
 			self.close();
 			//window.open("dpp-record-lines-item-addmore.php?year="+year_budget+"&login="+login+"&mrccode="+mrccode+"&org_code="+org_code+"&cost_center="+cost_center);
 	}
