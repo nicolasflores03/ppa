@@ -507,11 +507,11 @@ function movementType(type){
 function valideopenerform(field){	
 	var from_id = $('#from_id').val();
 	var id = $('#id').val();
-	var from_val = $('#from_val').val();
+	var from_val = encodeURIComponent($('#from_val').val());
 	var source_tb = $('#source_tb').val();
 	var destination_tb = $('#destination_tb').val();
 	var to_id = $('#to_id').val();
-	var to_val = $('#to_val').val();
+	var to_val = encodeURIComponent($('#to_val').val());
 	var amount = $('#amount').val();
 	var year_budget = $('#year_budget').val();
 	var type = $('#movementType').val();
@@ -519,7 +519,7 @@ function valideopenerform(field){
 	var orgcode = "<?php echo $orgcode; ?>";
 	var frmrccode = $('#department_id').val();
 	var tomrccode = "<?php echo $mrccode; ?>";
-	var mrcdesc = $('#department_val').val();
+	var mrcdesc = encodeURIComponent($('#department_val').val());
 	var cost_center = $('#CST_CODE').val();
 	var costcenterfr = $('#costcenterfr').val();
 	var to_quarter_tb = $('#to_quarter_tb').val();
@@ -565,11 +565,11 @@ function valideopenerform(field){
 function valideopenerform2(){	
 	var from_id = $('#from_id').val();
 	var id = $('#id').val();
-	var from_val = $('#from_val').val();
+	var from_val = encodeURIComponent($('#from_val').val());
 	var to_id = $('#to_id').val();
 	var destination_tb = $('#destination_tb').val();
 	var source_tb = $('#source_tb').val();
-	var to_val = $('#to_val').val();
+	var to_val = encodeURIComponent($('#to_val').val());
 	var amount = $('#amount').val();
 	var year_budget = $('#year_budget').val();
 	var type = $('#movementType').val();
