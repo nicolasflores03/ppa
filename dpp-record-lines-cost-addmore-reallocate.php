@@ -33,6 +33,11 @@ $res = @$_GET['res'];
 $source_tb = $_GET['source_tb'];
 $destination_tb = $_GET['destination_tb'];
 
+//new variables
+$source_quarter = $_GET['source_quarter'];
+$destination_quarter = $_GET['destination_quarter'];
+$to_org_code = $_GET['to_org_code'];
+
 //GET status Based on reference_no,dept,org,year
 $dppfilter = "year_budget = '$year' AND ORG_CODE = '$orgcode' AND MRC_CODE = '$mrccode' AND cost_center = '$cost_center' AND status = 'Approved'";
 $dppcolumn = $crudapp->readColumn($conn,"R5_VIEW_DPP_VERSION");
@@ -87,27 +92,39 @@ $errorFlag = true;
 }
 
 
-if (!is_numeric ($january) || !is_numeric ($february) || !is_numeric ($march) || !is_numeric ($april) || !is_numeric ($may) || !is_numeric ($june) || !is_numeric ($july) || !is_numeric ($august) || !is_numeric ($september) || !is_numeric ($october) || !is_numeric ($november) || !is_numeric ($december)){
-$errorMessage .= 'Budget Month must be numeric characters only.\n\n';
-$errorFlag = true;
-}
+// if (!is_numeric ($january) || !is_numeric ($february) || !is_numeric ($march) || !is_numeric ($april) || !is_numeric ($may) || !is_numeric ($june) || !is_numeric ($july) || !is_numeric ($august) || !is_numeric ($september) || !is_numeric ($october) || !is_numeric ($november) || !is_numeric ($december)){
+// $errorMessage .= 'Budget Month must be numeric characters only.\n\n';
+// $errorFlag = true;
+// }
 
 $today = date("m/d/Y H:i");	
 	if(!$errorFlag){
 		$data = array("record_id"=>$record_id2,"id"=>$record_id2,"CMD_CODE"=>$CMD_CODE,"description"=>$description,"budget_amount"=>0,"available"=>0,"classification"=>$classification_cost,"category"=>$category_cost,"saveFlag"=>0,"version"=>1,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user,"code"=>$code,"type"=>$type);	
-		$data2 = array("id"=>$record_id2,"january"=>$january,"february"=>$february,
-		"march"=>$march,"april"=>$april,"may"=>$may,"june"=>$june,"july"=>$july,
-		"august"=>$august,"september"=>$september,"october"=>$october,"november"=>$november,"december"=>$december,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
+		$data2 = array("id"=>$record_id2,"january"=>0,"february"=>0,
+		"march"=>0,"april"=>0,"may"=>0,"june"=>0,"july"=>0,
+		"august"=>0,"september"=>0,"october"=>0,"november"=>0,"december"=>0,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
 		$data5 = array("reference_no"=>$ref_no,"rowid"=>$record_id2,"version"=>$version);	
+		$data6 = array("id"=>$record_id, "createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
 		
+		for($q = 1; $q <= 4; $q++) {
+			$data6["q" . $q . "_total_cost"] = 0;
+			$data6["q" . $q . "_adjustments"] = 0;
+			$data6["q" . $q . "_available"] =  0;
+			$data6["q" . $q . "_reserved"] = 0;
+			$data6["q" . $q . "_allocated"] = 0;
+			$data6["q" . $q . "_paid"] = 0;
+		}
+
 		$table = "R5_EAM_DPP_COSTBASE_LINES";
 		$table2 = "R5_REF_COSTBASE_BUDGET_MONTH";
 		$table3 = "R5_EAM_DPP_COSTBASE_BRIDGE";
-		
+		$table4 = "R5_REF_COSTBASE_BUDGET_QUARTERLY";
+
 			$result = $crudapp->insertRecord($conn,$data,$table);
 			$result2 = $crudapp->insertRecord($conn,$data2,$table2);
 			$result3 = $crudapp->insertRecord($conn,$data5,$table3);	
-		
+			$result4 = $crudapp->insertRecord($conn,$data6,$table4);
+
 			//if( $result == 1 && $result2 == 1) {
 				sqlsrv_commit( $conn );
 				//echo "Transaction committed.<br />";
@@ -115,7 +132,7 @@ $today = date("m/d/Y H:i");
 				//sqlsrv_rollback( $conn );
 				//echo "Transaction rolled back.<br />";
 			//}
-			header("Location:dpp-budget-movement.php?login=".$user."&year=".$year."&MRC_CODE=".$mrccode."&ORG_CODE=".$orgcode."&cost_center=".$cost_center."&id=&from_id=".$from_id."&from_val=".$from_val."&to_id=".$record_id2."&to_val=".$to_val."&amount=".$amount."&movementType=reallocation&costcenterfr=".$costcenterfr."&department_id=".$frmrccode."&department_val=".$frmrcdesc."&source_tb=".$source_tb."&destination_tb=".$destination_tb);
+			header("Location:dpp-budget-movement.php?login=".$user."&year=".$year."&MRC_CODE=".$mrccode."&ORG_CODE=".$orgcode."&cost_center=".$cost_center."&id=&from_id=".$from_id."&from_val=".$from_val."&to_id=".$record_id2."&to_val=".$to_val."&amount=".$amount."&movementType=reallocation&costcenterfr=".$costcenterfr."&department_id=".$frmrccode."&department_val=".$frmrcdesc."&source_tb=".$source_tb."&destination_tb=".$destination_tb. "&to_org_code=" . $to_org_code . "&fr_quarter_tb=" . $source_quarter . "&to_quarter_tb=" . $destination_quarter);
 	}else{
 		echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
 	}	
@@ -429,14 +446,14 @@ if(res !=""){
 	$("#year_budget").val(year);
 	
 
-	$(".scheduleField").change(function() {
-		getTotalCost();
-	});
+	// $(".scheduleField").change(function() {
+	// 	getTotalCost();
+	// });
 });
 </script>
 </head>
 <body>
-<form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&mrccode=".$mrccode."&org_code=".$orgcode."&cost_center=".$cost_center."&from_val=".$from_val."&from_id=".$from_id."&frmrccode=".$frmrccode."&costcenterfr=".$costcenterfr."&mrcdesc=".$frmrcdesc."&source_tb=".$source_tb."&destination_tb=".$destination_tb; ?>" method="post" name="theForm" enctype="multipart/form-data">
+<form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&mrccode=".$mrccode."&org_code=".$orgcode."&cost_center=".$cost_center."&from_val=".$from_val."&from_id=".$from_id."&frmrccode=".$frmrccode."&costcenterfr=".$costcenterfr."&mrcdesc=".$frmrcdesc."&source_tb=".$source_tb."&destination_tb=".$destination_tb . "&source_quarter=" . $source_quarter ."&destination_quarter=" . $destination_quarter . "&to_org_code=" . $to_org_code; ?>" method="post" name="theForm" enctype="multipart/form-data">
 <div class="headerText2"><div id="divText">Annual Procurement Plan</div></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>
@@ -449,7 +466,7 @@ if(res !=""){
 			<td class="textField"><input type="hidden" class="field" name="ref_no" id="ref_no" spellcheck="false" tabindex="1" value= "<?php echo $reference_no;?>"><input type="text" class="field" name="organization" id="organization" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['ORG_DESC'];?>" readonly><input type="hidden" class="field" name="ORG_CODE" id="ORG_CODE" spellcheck="false" tabindex="1" value= "<?php echo $dppinfo[0]['ORG_CODE'];?>"></td>			
 			<td class="textLabel">Year Budget:</td>
 			<td class="textField">
-				<select name="year_budget" id="year_budget" readonly>
+				<select name="year_budget" id="year_budget" class="readonly">
 					<option value="">-- Please select --</option>
 					<option value="2014">2014</option>
 					<option value="2015">2015</option>
@@ -503,7 +520,7 @@ if(res !=""){
 			<tr>		
 				<td class="textLabel">Cost-Based Item: <i class="required">*</i></td>
 				<td class="textField">
-				<input type="text" class="fieldLookUp" name="description_cost" id="description_cost" spellcheck="false" tabindex="1" readonly><input type="hidden" class="field" name="code" id="code" spellcheck="false" tabindex="1" readonly><button name="cmd" onclick="valideopenerform2('R5_VIEW_SERVICE_UOM_INFO')">...</button>			
+				<input type="text" class="fieldLookUp" name="description_cost" id="description_cost" spellcheck="false" tabindex="1" readonly><input type="hidden" class="field" name="code" id="code" spellcheck="false" tabindex="1" readonly><button name="cmd" onclick="valideopenerform2('R5_VIEW_SERVICE_UOM_INFO'); return false;">...</button>			
 				<input type="hidden" class="field" name="id_cost" id="id_cost" spellcheck="false" tabindex="1">			
 				</td>				
 				<td class="textLabel">IO Number:</td>
@@ -552,7 +569,7 @@ if(res !=""){
 	</table>
 	<!--DATE of NEED-->
 	
-	<table border="1" class="schedule">
+	<table border="1" class="schedule hidden">
 	<tr>
 		<th>Jan</th>
 		<th>Feb</th>

@@ -42,8 +42,16 @@ $fr_quarter_tb =  @$_GET['fr_quarter_tb'];
 $to_quarter_tb =  @$_GET['to_quarter_tb'];
 $to_org_code =  @$_GET['to_org_code'];
 
+
 $cost_center = @$_GET['cost_center'];
 $cost_center = str_replace(" ","@",$cost_center);
+
+$total_available = 0.00;
+$q1_available = 0.00;
+$q2_available = 0.00;
+$q3_available = 0.00;
+$q4_available = 0.00;
+
 
 $current_date = new DateTime("now");
 
@@ -65,8 +73,32 @@ if(isset($_GET['year'])) {
 	$q4_deadline = isset($quarterDeadlineInfo[0]['Q4']) ? ($quarterDeadlineInfo[0]['Q4'] > 0 ? true : false ) : false;
 }
 
-
-
+$from_data = array();
+if(isset($_GET['movementType']))  {
+	$source_quarter = isset($_GET['source_quarter']) ? $_GET['source_quarter'] : '';
+	$destination_quarter = isset($_GET['destination_quarter']) ?  $_GET['destination_quarter'] : '';
+	$to_org_code = isset($_GET['to_org_code']) ?  $_GET['to_org_code'] : '';
+	$proceed_budget_query = false;
+	if($movementType == "reallocation" && isset($_GET['from_id'])){
+		$cnd = "year_budget = '$year' AND ORG_CODE = '$to_org_code' AND MRC_CODE = '$department_id' AND status = 'Approved' AND cost_center = '$costcenterfr'";
+		$proceed_budget_query = true;
+	} else if($movementType == "supplement" && isset($_GET['to_id'])) {
+		$cnd = "year_budget = '$year' AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$mrccode' AND status = 'Approved' AND cost_center = '$cost_center'";
+		$proceed_budget_query = true;
+	}
+	
+	if($proceed_budget_query) {
+		$from_data = $crudapp->readRecord3($conn,"R5_BUDGET_REALLOCATION_LOOKUP",$cnd);
+		if(count($from_data) > 0) {
+			$total_available = $from_data[0]["available"];
+			$q1_available = $from_data[0]["q1_available"];
+			$q2_available = $from_data[0]["q2_available"];
+			$q3_available = $from_data[0]["q3_available"];
+			$q4_available = $from_data[0]["q4_available"];
+		}
+	
+	}
+}
 // end closed date per quarters
 
 //GET status Based on reference_no,dept,org,year
@@ -564,7 +596,7 @@ xmlhttp.onreadystatechange=function()
   if (xmlhttp.readyState==4 && xmlhttp.status==200)
     {
 	var htmlContent = '';
-	htmlContent += '<td class="textLabel">Cost Center:</td>';
+	htmlContent += '<td class="textLabel">Source Cost Center:</td>';
 	htmlContent += '<td class="textField">';
 	htmlContent += xmlhttp.responseText;
 	htmlContent += '</td>';	
@@ -599,6 +631,7 @@ $(document).ready(function(){
 	$("#fr_quarter_tb").val('<?php echo $fr_quarter_tb; ?>');
 	$("#to_quarter_tb").val('<?php echo $to_quarter_tb; ?>');
 	$("#to_org_code").val('<?php echo $to_org_code; ?>');
+
 
 	if($("#to_id").val() != ""){ 
 		var table = $("#destination_tb").val();
@@ -828,7 +861,7 @@ var type = $('#movementType').val();
 		location.reload();
 		// window.location = "dpp-budget-movement.php?login="+user+"&year="+year;
 	});
-	
+	setBudgetValue();
 });
 
 
@@ -871,29 +904,30 @@ var type = $('#movementType').val();
 }
 
 function setBudgetValue() {
+	if($("#movementType").val() != "") {
+		var quarter = $("#to_quarter_tb").val();
+		if($("#movementType").val() == "reallocation"){
+			quarter = $("#fr_quarter_tb").val();
+		}
 
-	var quarter = $("#to_quarter_tb").val();
-	if($("#movementType").val() == "reallocation"){
-		quarter = $("#fr_quarter_tb").val();
+		var budget = "";
+		switch(quarter){
+			case "1":
+				budget = $("#q1_budget").val();	
+			break;
+			case "2":
+				budget = $("#q2_budget").val();
+			break;
+			case "3":
+				budget = $("#q3_budget").val();
+			break;
+			case "4":
+				budget = $("#q4_budget").val();
+			break;
+
+		}
+		$("#budget").val(budget);
 	}
-
-	var budget = "";
-	switch(quarter){
-		case "1":
-			budget = $("#q1_budget").val();	
-		break;
-		case "2":
-			budget = $("#q2_budget").val();
-		break;
-		case "3":
-			budget = $("#q3_budget").val();
-		break;
-		case "4":
-			budget = $("#q4_budget").val();
-		break;
-
-	}
-	$("#budget").val(budget);
 }
 
 $("#destination_tb").change(function(e) {
@@ -1043,7 +1077,7 @@ $("#destination_tb").change(function(e) {
 			</td>				
 		</tr>
 		<tr id="tr_to_org_code_tb">
-			<td class="textLabel">Organization <i class="required">*</i></td>
+			<td class="textLabel">Source Organization <i class="required">*</i></td>
 			<td>
 				<?php 
 					$tbname = "R5_VIEW_USERINFO";
@@ -1054,11 +1088,11 @@ $("#destination_tb").change(function(e) {
 			</td>
 		</tr>
 		<tr id="department">
-			<td class="textLabel">Department <i class="required">*</i></td>
+			<td class="textLabel">Source Department <i class="required">*</i></td>
 			<td class="textField"><input type="hidden" class="field" name="department_id" id="department_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="department_val" id="department_val" spellcheck="false" tabindex="1" readonly><button name="department" onclick="valideopenerform2(); return false;">...</button></td>
 		</tr>
 		<tr id="fr_cost_center">
-			<td class="textLabel">Cost Center<i class="required">*</i></td>
+			<td class="textLabel">Source Cost Center<i class="required">*</i></td>
 			<td class="textField">				
 				<select name="costcenterfr" id="costcenterfr">
 				<option value="">-- Please select --</option>
@@ -1088,12 +1122,12 @@ $("#destination_tb").change(function(e) {
 			</td>
 		</tr>
 		<tr id="from">
-			<td class="textLabel">From <i class="required">*</i></td>
+			<td class="textLabel">Source <i class="required">*</i></td>
 			<td class="textField"><input type="hidden" class="field" name="from_id" id="from_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="from_val" id="from_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('from'); return false;">...</button></td>
 		</tr>
 
 		<tr id="tr_to_quarter_tb">
-			<td class="textLabel">Target Quarter <i class="required">*</i></td>
+			<td class="textLabel">Destination Quarter <i class="required">*</i></td>
 			<td>
 			<select name="to_quarter_tb" id="to_quarter_tb" onchange="setBudgetValue('to');">
 				<option value="">-- Please select --</option>
@@ -1115,7 +1149,7 @@ $("#destination_tb").change(function(e) {
 			</td>
 		</tr>
 		<tr id="to">
-			<td class="textLabel">To <i class="required">*</i></td>
+			<td class="textLabel">Destination <i class="required">*</i></td>
 			<td class="textField"><input type="hidden" class="field" name="to_id" id="to_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="to_val" id="to_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('to'); return false;">...</button></td>
 		</tr>
 		<tr id="amount_movement">
@@ -1127,11 +1161,11 @@ $("#destination_tb").change(function(e) {
 			<td class="textField"><input type="text" class="field" name="budget" id="budget" spellcheck="false" tabindex="1" readonly>
 			<input type="hidden" class="field" name="budget_fr" id="budget_fr" spellcheck="false" tabindex="1">
 
-			<input type='hidden' value='total_budget' id='total_budget' name='total_budget' />
-			<input type='hidden' value='' id='q1_budget' name='q1_budget' />
-			<input type='hidden' value='' id='q2_budget' name='q2_budget' />
-			<input type='hidden' value='' id='q3_budget' name='q3_budget' />
-			<input type='hidden' value='' id='q4_budget' name='q4_budget' />
+			<input type='hidden' value='<?php echo $total_available;?>' id='total_budget' name='total_budget' />
+			<input type='hidden' value='<?php echo $q1_available;?>' id='q1_budget' name='q1_budget' />
+			<input type='hidden' value='<?php echo $q2_available;?>' id='q2_budget' name='q2_budget' />
+			<input type='hidden' value='<?php echo $q3_available;?>' id='q3_budget' name='q3_budget' />
+			<input type='hidden' value='<?php echo $q4_available;?>' id='q4_budget' name='q4_budget' />
 			<!--<input type="hidden" class="field" name="budget_to" id="budget_to" spellcheck="false" tabindex="1">-->
 			</td>			
 		</tr>

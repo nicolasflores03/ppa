@@ -302,9 +302,9 @@ var user ="<?php echo $user; ?>";
 	});
 
 	
-	// new datepickr('datepick2', {
-	// 	'dateFormat': 'm/d/y'
-	// });
+	new datepickr('datepick2', {
+		'dateFormat': 'm/d/y'
+	});
 	// new datepickr('q1_datepicker', {
 	// 	'dateFormat': 'm/d/y'
 	// });
@@ -558,7 +558,7 @@ var user ="<?php echo $user; ?>";
 			<td class="textLabel">Deadline:</td>
 			<td class="textField">
 						<input type="hidden" value="" id="id" name="id">
-						<input type="text" value="" id="datepick2" name="deadline">
+						<input type="text" autocomplete="off" value="" id="datepick2" name="deadline">
 			</td>				
 	</tr>
 		<tr>
