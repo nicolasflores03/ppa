@@ -2334,16 +2334,14 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		$table = "";
 		$quarterly_table = "";
 			if ($to_table == 'IB'){
-			echo "here";
 				$table = "dbo.R5_EAM_DPP_ITEMBASE_LINES";
 				$quarterly_table = "dbo.R5_REF_ITEMBASE_BUDGET_QUARTERLY";
 			}else{
-			echo "here2";
 				$table = "dbo.R5_EAM_DPP_COSTBASE_LINES";
 				$quarterly_table = "dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY";
 			}
 			//TO
-			echo "SUPPLEMENT";
+			// echo "SUPPLEMENT";
 			
 			$saveFlag = 0;
 			$selectItem = "SELECT saveFlag FROM $table WHERE id = ?";
@@ -2362,7 +2360,7 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			if ($saveFlag > 0) {
 				$sql2 = "UPDATE $table SET 
 				available = ? + (SELECT available FROM $table WHERE id = ?),
-				adjustments = ? + (SELECT adjustments FROM $table WHERE id = ?),
+				adjustments = ? + (SELECT adjustments FROM $table WHERE id = ?)
 				WHERE id = ?";
 				$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
 	
@@ -2390,34 +2388,29 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				WHERE id = ?";	
 				$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
 			}	
-
 			//$params2 = array($amount,$to_code,$amount,$to_code,$to_code);
 			$result2 = sqlsrv_query($conn,$sql2,$params2);
 			$result3 = sqlsrv_query($conn,$sql_quarterly_update,$quarterly_params);
-			
 			if( $result2 === false || $result3 === false) {
 				die( print_r( sqlsrv_errors(), true) );
 			}
-
 			//BALANCE to
 			$updatebalancesql = "UPDATE dbo.R5_BUDGET_MOVEMENT SET 
 			to_available_amount =(SELECT $quarterly_available FROM $quarterly_table WHERE id = ?)
 			WHERE id = ?";
 			$paramsbalance = array($to_code,$id);
 			$resultbalance = sqlsrv_query($conn,$updatebalancesql,$paramsbalance);
-			
 			if( $resultbalance === false) {
 				die( print_r( sqlsrv_errors(), true) );
 			}
 			//END BALANCE to	
-			
 			if( $result2) {
 			return true;
 			}else{
 			return false;
 			}
 		}else{
-		echo "REALLOCATE";			
+		// echo "REALLOCATE";			
 			//TO
 			$quarterly_table = "";
 			$table = "";
@@ -2512,9 +2505,9 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 
 			
 			if( $result2 && $result3 && $sql_quarterly_result) {
-			return true;
+				return true;
 			}else{
-			return false;
+				return false;
 			}
 		}
     }
