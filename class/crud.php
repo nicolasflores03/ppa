@@ -3,6 +3,7 @@ $_GET['login'] = "EAMSYSADMIN";
 // $_GET['login'] = "JLOAYON";
 class crudClass{
 
+	public $cognos_url = "http://fdcui-eamqas-38.fdcutilities.local:8080/crn/cgi-bin/mod_cognos.dll?";
 /* Update Session*/
 public function updateSession($conn,$user)
 {

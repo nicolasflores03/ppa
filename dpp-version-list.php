@@ -143,7 +143,7 @@ function runReport(id){
 		var ORG_CODE = json['ORG_CODE'];
 		var user = "<?php echo $user;?>";
 		var password = "<?php echo $password;?>";
-		window.location = "http://fdcui-eamdev-37:8080/crn/cgi-bin/mod_cognos.dll?b_action=cognosViewer&ui.action=run&ui.object=%2fcontent%2ffolder%5b%40name%3d%27DS_MP_1%27%5d%2freport%5b%40name%3d%27APP_DEPT.xml%27%5d&ui.name=APP_DEPT.xml&run.outputFormat=PDF&run.prompt=false&CAMUsername=R5&CAMPassword=R5&p_Refno="+reference_no+"&p_Department="+MRC_CODE+"&p_Year="+year+"&p_Version="+version+"&p_Status=&p_GL=&p_Organization="+ORG_CODE+"";
+		window.location = "<?php echo $crudapp->cognos_url ;?>" + "b_action=cognosViewer&ui.action=run&ui.object=%2fcontent%2ffolder%5b%40name%3d%27DS_MP_1%27%5d%2freport%5b%40name%3d%27APP_DEPT.xml%27%5d&ui.name=APP_DEPT.xml&run.outputFormat=PDF&run.prompt=false&CAMUsername=R5&CAMPassword=R5&p_Refno="+reference_no+"&p_Department="+MRC_CODE+"&p_Year="+year+"&p_Version="+version+"&p_Status=&p_GL=&p_Organization="+ORG_CODE+"";
 		}
 	}
 	xmlhttp.open("GET","ajax/get-dpp-version-info.php?hash="+text+"&id="+id,true);

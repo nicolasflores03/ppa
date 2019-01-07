@@ -140,7 +140,7 @@ function onclickAPPEvent(id){
 		var status = json['status'];
 		var user = "<?php echo $user;?>";
 		var password = "<?php echo $password;?>";
-		window.location = "http://fdcui-eamdev-37:8080/crn/cgi-bin/mod_cognos.dll?b_action=cognosViewer&ui.action=run&ui.object=%2fcontent%2ffolder%5b%40name%3d%27DS_MP_1%27%5d%2freport%5b%40name%3d%27APP_CONSOLIDATED.xml%27%5d&ui.name=APP_CONSOLIDATED.xml&run.outputFormat=PDF&run.prompt=false&CAMUsername=R5&CAMPassword=R5&p_Version="+version+"&p_Org="+ORG_CODE+"&p_Year="+year+"&p_Status="+status+"";
+		window.location = "<?php echo $crudapp->cognos_url; ?>" + "?b_action=cognosViewer&ui.action=run&ui.object=%2fcontent%2ffolder%5b%40name%3d%27DS_MP_1%27%5d%2freport%5b%40name%3d%27APP_CONSOLIDATED.xml%27%5d&ui.name=APP_CONSOLIDATED.xml&run.outputFormat=PDF&run.prompt=false&CAMUsername=R5&CAMPassword=R5&p_Version="+version+"&p_Org="+ORG_CODE+"&p_Year="+year+"&p_Status="+status+"";
 		}
 	}
 	xmlhttp.open("GET","ajax/get-app-version-info.php?hash="+text+"&id="+id,true);
