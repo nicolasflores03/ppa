@@ -81,12 +81,12 @@ $errorFlag = true;
 }
 
 if(!$errorFlag){
+	$table = "dbo.R5_DEADLINE_MAINTENANCE";
 	if ($active != '1') {
 		$active = '0';
 	} else {
 		//UNCHECK EXISTING DEADLINE
 		$dataisActive = array("isActive"=>"0");			
-		$table = "dbo.R5_DEADLINE_MAINTENANCE";
 		$cnd = "WHERE isActive = '1' AND budget_year = '$budget_year'";
 		$crudapp->updateRecord3($conn,$dataisActive,$table,$cnd);
 	}
