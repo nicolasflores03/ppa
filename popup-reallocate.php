@@ -137,50 +137,68 @@ $("#new_tmp_reallocate").click(function() {
 		var source_tb = "<?php echo $source_tb; ?>";
 		var destination_tb = "<?php echo $destination_tb; ?>";
 		
-	
+
 		//Default value for ref tables
 		window.opener.document.theForm.from_id.value=from_id;
 		window.opener.document.theForm.id.value=ids; 
 		window.opener.document.theForm.department_val.value=MRC_DESC; 
 		window.opener.document.theForm.department_id.value=frmrccode;  
 		window.opener.document.theForm.to_id.value=to_id;  
-		
-		window.opener.document.theForm.from_val.value=from_val;  
-		window.opener.document.theForm.to_val.value=to_val; 
+
+		// if(field == "from") {
+			window.opener.document.theForm.from_val.value=from_val; 
+		// } else {
+			window.opener.document.theForm.to_val.value=to_val; 
+		// }
 		window.opener.document.theForm.budget.value=budgetOrig; 
 		//window.opener.document.theForm.budget_fr.value=budgetOrig;
 		
 		if( field == "from" ){
-			if (type == "reallocation"){
-				window.opener.document.theForm.budget.value=budget;
-				window.opener.document.theForm.budget_fr.value=budget;
+			window.opener.document.theForm.budget.value=budget;
+			window.opener.document.theForm.budget_fr.value=budget;
 
-				window.opener.document.theForm.total_budget.value=budget;
-				window.opener.document.theForm.q1_budget.value=q1_budget;
-				window.opener.document.theForm.q2_budget.value=q2_budget;
-				window.opener.document.theForm.q3_budget.value=q3_budget;
-				window.opener.document.theForm.q4_budget.value=q4_budget;
-			}	
+			window.opener.document.theForm.total_budget.value=budget;
+			window.opener.document.theForm.q1_budget.value=q1_budget;
+			window.opener.document.theForm.q2_budget.value=q2_budget;
+			window.opener.document.theForm.q3_budget.value=q3_budget;
+			window.opener.document.theForm.q4_budget.value=q4_budget;
+			// if (type == "reallocation"){
+			// 	window.opener.document.theForm.budget.value=budget;
+			// 	window.opener.document.theForm.budget_fr.value=budget;
+
+			// 	window.opener.document.theForm.total_budget.value=budget;
+			// 	window.opener.document.theForm.q1_budget.value=q1_budget;
+			// 	window.opener.document.theForm.q2_budget.value=q2_budget;
+			// 	window.opener.document.theForm.q3_budget.value=q3_budget;
+			// 	window.opener.document.theForm.q4_budget.value=q4_budget;
+			// }
 			window.opener.document.theForm.from_id.value=id; 
 			window.opener.document.theForm.from_val.value=name;  
-		}else{
+		} else {
 		window.opener.document.theForm.budget_fr.value=budgetOrig;
 		//window.opener.document.theForm.budget_to.value=budget;
-			if (type == "supplement"){
-				window.opener.document.theForm.budget.value="";
-				window.opener.document.theForm.budget_fr.value="";
-				
-				window.opener.document.theForm.total_budget.value=budget;
-				window.opener.document.theForm.q1_budget.value=q1_budget;
-				window.opener.document.theForm.q2_budget.value=q2_budget;
-				window.opener.document.theForm.q3_budget.value=q3_budget;
-				window.opener.document.theForm.q4_budget.value=q4_budget;
-			}	
+
+			window.opener.document.theForm.budget_to.value=budget;
+			window.opener.document.theForm.total_budget_to.value=budget;
+			window.opener.document.theForm.q1_budget_to.value=q1_budget;
+			window.opener.document.theForm.q2_budget_to.value=q2_budget;
+			window.opener.document.theForm.q3_budget_to.value=q3_budget;
+			window.opener.document.theForm.q4_budget_to.value=q4_budget;
+
+			// if (type == "supplement"){
+			// 	window.opener.document.theForm.budget.value="";
+			// 	window.opener.document.theForm.budget_fr.value="";
+			// 	window.opener.document.theForm.total_budget.value=budget;
+			// 	window.opener.document.theForm.q1_budget.value=q1_budget;
+			// 	window.opener.document.theForm.q2_budget.value=q2_budget;
+			// 	window.opener.document.theForm.q3_budget.value=q3_budget;
+			// 	window.opener.document.theForm.q4_budget.value=q4_budget;
+			// } else {
+			// }
 			window.opener.document.theForm.to_id.value=id; 
 			window.opener.document.theForm.to_val.value=name;  
 		}
 
-		
 		
 		window.opener.document.theForm.amount.value=amount;
 		window.opener.document.theForm.movementType.value=type;
@@ -190,7 +208,7 @@ $("#new_tmp_reallocate").click(function() {
 		window.opener.checkType();
 		window.opener.getFromCostCenter(frmrccode,costcenterfr);
 		//window.opener.setFromCostCenter();
-		window.opener.setBudgetValue();
+		window.opener.setBudgetValue(field);
 		self.close(); 
 
 	});
@@ -218,12 +236,12 @@ $("#new_tmp_reallocate").click(function() {
 		echo "<td>".$value['code']."</td>";
 		echo "<td>".$PAR_DESC."</td>";
 		echo "<td>";
-		echo "<input type='hidden' value='".$value['q1_available']."' class='q1' name='q1' />";
-		echo "<input type='hidden' value='".$value['q2_available']."' class='q2' name='q2' />";
-		echo "<input type='hidden' value='".$value['q3_available']."' class='q3' name='q3' />";
-		echo "<input type='hidden' value='".$value['q4_available']."' class='q4' name='q4' />";
+		echo "<input type='hidden' value='".number_format((float)$value['q1_available'], 2, '.', '')."' class='q1' name='q1' />";
+		echo "<input type='hidden' value='".number_format((float)$value['q2_available'], 2, '.', '')."' class='q2' name='q2' />";
+		echo "<input type='hidden' value='".number_format((float)$value['q3_available'], 2, '.', '')."' class='q3' name='q3' />";
+		echo "<input type='hidden' value='".number_format((float)$value['q4_available'], 2, '.', '')."' class='q4' name='q4' />";
 		echo "<input type='hidden' value='".$budget."' class='budget' name='budget' />";
-			echo $budget;
+		echo $budget;
 		echo "</td>";		
 		echo "</tr>";
 	}

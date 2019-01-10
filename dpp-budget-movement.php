@@ -52,7 +52,6 @@ $q2_available = 0.00;
 $q3_available = 0.00;
 $q4_available = 0.00;
 
-
 $current_date = new DateTime("now");
 
 $q1_deadline = false;
@@ -60,10 +59,26 @@ $q2_deadline = false;
 $q3_deadline = false;
 $q4_deadline = false;
 
+$orgInfo = array();
+if($orgcode){
+	$parameters = array('ORG_CODE', 'ORG_DESC');
+	$org_where = " USR_CODE = '$user' AND ORG_CODE = '$orgcode' ";
+	if($mrccode) {
+		array_push($parameters, 'MRC_DESC');
+		array_push($parameters, 'MRC_CODE');
+		$org_where .= " AND MRC_CODE IN (SELECT MRC_CODE FROM R5_DPP_APPROVED_DEPT WHERE ORG_CODE = '$orgcode' AND year_budget = '$year') AND MRC_CODE = '$mrccode'"; 
+	}
+
+	$_orgInfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO", $parameters, $org_where );
+	if(count($_orgInfo) > 0) {
+		$orgInfo = $_orgInfo[0];
+	}
+}
+
 //get closed date per quarters
 if(isset($_GET['year'])) {
 	$condition = " budget_year = '$year' AND isActive = '1'";
-	$crudapp = new crudClass();
+	// $crudapp = new crudClass();
 	$deadLineInfoColumn = array('Q1', 'Q2', 'Q3', 'Q4');
 	$quarterDeadlineInfo = $crudapp->listTable($conn,"R5_DEADLINE_MAINTENANCE",$deadLineInfoColumn,$condition);
 
@@ -213,6 +228,11 @@ if (isset($_POST['submit'])){
 	$errorMessage .= 'Please enter a valid amount.\n\n';
 	$errorFlag = true;
 	}
+
+	if ($amount == ""){
+		$errorMessage .= 'Please enter a reason for this request.\n\n';
+		$errorFlag = true;
+	}
 	
 	if(!$errorFlag){	
 		$table = "dbo.R5_BUDGET_MOVEMENT";
@@ -310,40 +330,40 @@ if (isset($_POST['submit'])){
 <script>
 
 function cancel(oForm) {
-    
+	
   var elements = oForm.elements; 
     
   oForm.reset();
 
   for(i=0; i<elements.length; i++) {
       
-	field_type = elements[i].type.toLowerCase();
+		field_type = elements[i].type.toLowerCase();
 	
-	switch(field_type) {
-	
-		case "text": 
-		case "password": 
-		case "textarea":
-	        case "hidden":	
-			$(this).prop("defaultValue");
-			//elements[i].value = ""; 
-			break;
-        
-		case "radio":
-		case "checkbox":
-  			if (elements[i].checked) {
-   				elements[i].checked = false; 
-			}
-			break;
+		switch(field_type) {
+		
+			case "text": 
+			case "password": 
+			case "textarea":
+				case "hidden":	
+				$(this).prop("defaultValue");
+				//elements[i].value = ""; 
+				break;
+			
+			case "radio":
+			case "checkbox":
+				if (elements[i].checked) {
+					elements[i].checked = false; 
+				}
+				break;
 
-		case "select-one":
-		case "select-multi":
-            		elements[i].selectedIndex = "";
-			break;
+			case "select-one":
+			case "select-multi":
+						elements[i].selectedIndex = "";
+				break;
 
-		default: 
-			break;
-	}
+			default: 
+				break;
+		}
     }
 }
 
@@ -426,7 +446,8 @@ xmlhttp.onreadystatechange=function()
 	 $('#select-status').css('visibility', 'hidden');
 	 $('.actionButtonCenter').hide();
 	 }
-	 movementType(type); 
+	 //movementType(type); 
+	 movementTypeFields();
     }
   }
 xmlhttp.open("GET","ajax/app-get-budget-movement-info.php?hash="+text+"&id="+id,true);
@@ -467,37 +488,37 @@ xmlhttp.send();
 function movementType(type){
 
 	if (type == "reallocation"){
-		$('#budgetLabel').html('Available Budget:');
-		$('#tr_source_tb').show();
+		// $('#budgetLabel').html('Available Budget:');
+		$('#td_source_tb').show();
 		$('#from').show();
-		$('#tr_destination_tb').show();
-		$('#tr_to_quarter_tb').show();
-		$('#tr_to_org_code_tb').show();
-		$('#tr_fr_quarter_tb').show();
+		$('#td_destination_tb').show();
+		$('#td_to_quarter_tb').show();
+		$('#td_to_org_code_tb').show();
+		$('#td_fr_quarter_tb').show();
 		$('#to').show();
 		$('#amount_movement').show();
 		$('#department').show();
 		$('#fr_cost_center').show();
 		}else if (type == "supplement"){
-		$('#budgetLabel').html('Current Budget:');
+		// $('#budgetLabel').html('Current Budget:');
 		$('#from').hide();
-		$('#tr_source_tb').hide();
+		$('#td_source_tb').hide();
 		$('#to').show();
-		$('#tr_destination_tb').show();
-		$('#tr_to_quarter_tb').show();
-		$('#tr_to_org_code_tb').hide();
-		$('#tr_fr_quarter_tb').hide();
+		$('#td_destination_tb').show();
+		$('#td_to_quarter_tb').show();
+		$('#td_to_org_code_tb').hide();
+		$('#td_fr_quarter_tb').hide();
 		$('#amount_movement').show();
 		$('#department').hide();
 		$('#fr_cost_center').hide();
 		}else{
 		$('#from').hide();
 		$('#to').hide();
-		$('#tr_source_tb').hide();
-		$('#tr_destination_tb').hide();
-		$('#tr_to_quarter_tb').hide();
-		$('#tr_to_org_code_tb').hide();
-		$('#tr_fr_quarter_tb').hide();
+		$('#td_source_tb').hide();
+		$('#td_destination_tb').hide();
+		$('#td_to_quarter_tb').hide();
+		$('#td_to_org_code_tb').hide();
+		$('#td_fr_quarter_tb').hide();
 		$('#amount_movement').hide();
 		$('#department').hide();
 		$('#fr_cost_center').hide();
@@ -596,10 +617,10 @@ xmlhttp.onreadystatechange=function()
   if (xmlhttp.readyState==4 && xmlhttp.status==200)
     {
 	var htmlContent = '';
-	htmlContent += '<td class="textLabel">Source Cost Center:</td>';
-	htmlContent += '<td class="textField">';
+	// htmlContent += '<td class="textLabel">Source Cost Center:</td>';
+	// htmlContent += '<td class="textField">';
 	htmlContent += xmlhttp.responseText;
-	htmlContent += '</td>';	
+	// htmlContent += '</td>';	
 
 		$('#fr_cost_center').html(htmlContent);
 		setFromCostCenter(val);
@@ -680,9 +701,9 @@ $(document).ready(function(){
 		
 	var cst = $("#CST_CODE").val();
 	if (cst != ""){
-	$("#movementType").attr("disabled", false);
-	}else{
-	$("#movementType").attr("disabled", true);
+		$("#movementType").attr("disabled", false);
+	} else {
+		$("#movementType").attr("disabled", true);
 	}
 	//Error Message
 	var res = "<?php echo @$res;?>";
@@ -725,37 +746,37 @@ var type = $('#movementType').val();
 		//$('#budget_to').val('');
 		
 		if (type == "reallocation"){
-		$('#budgetLabel').html('Available Budget:');
+		// $('#budgetLabel').html('Available Budget:');
 		$('#from').show();
-		$('#tr_source_tb').show();
+		$('#td_source_tb').show();
 		$('#to').show();
-		$('#tr_destination_tb').show();
-		$('#tr_to_quarter_tb').show();
-		$('#tr_to_org_code_tb').show();
-		$('#tr_fr_quarter_tb').show();
+		$('#td_destination_tb').show();
+		$('#td_to_quarter_tb').show();
+		$('#td_to_org_code_tb').show();
+		$('#td_fr_quarter_tb').show();
 		$('#amount_movement').show();
 		$('#department').show();
 		$('#fr_cost_center').show();
 		}else if (type == "supplement"){
-		$('#budgetLabel').html('Current Budget:');
+		// $('#budgetLabel').html('Current Budget:');
 		$('#from').hide();
-		$('#tr_source_tb').hide();
+		$('#td_source_tb').hide();
 		$('#to').show();
-		$('#tr_destination_tb').show();
-		$('#tr_to_quarter_tb').show();
-		$('#tr_to_org_code_tb').hide();
-		$('#tr_fr_quarter_tb').hide();
+		$('#td_destination_tb').show();
+		$('#td_to_quarter_tb').show();
+		$('#td_to_org_code_tb').hide();
+		$('#td_fr_quarter_tb').hide();
 		$('#amount_movement').show();
 		$('#department').hide();
 		$('#fr_cost_center').hide();
 		}else{
 		$('#from').hide();
-		$('#tr_source_tb').hide();
+		$('#td_source_tb').hide();
 		$('#to').hide();
-		$('#tr_destination_tb').hide();
-		$('#tr_to_quarter_tb').hide();
-		$('#tr_to_org_code_tb').hide();
-		$('#tr_fr_quarter_tb').hide();
+		$('#td_destination_tb').hide();
+		$('#td_to_quarter_tb').hide();
+		$('#td_to_org_code_tb').hide();
+		$('#td_fr_quarter_tb').hide();
 		$('#amount_movement').hide();
 		$('#department').hide();
 		$('#fr_cost_center').hide();
@@ -799,55 +820,9 @@ var type = $('#movementType').val();
 		}
 	});
 
-	
-	
+	movementTypeFields();
 	$('#movementType').change(function() {
-		var type = $('#movementType').val();
-		$('#from_val').val("");
-		$('#to_val').val("");
-		$('#to_id').val("");
-		$('#from_id').val("");
-		$('#amount').val(0.00);
-		$('#budget').val("");
-		$('#budget_fr').val("");
-		//$('#budget_to').val("");
-	
-		if (type == "reallocation"){
-		$('#budgetLabel').html('Available Budget:');
-		$('#from').show();
-		$('#tr_source_tb').show();
-		$('#to').show();
-		$('#tr_destination_tb').show();
-		$('#tr_to_quarter_tb').show();
-		$('#tr_to_org_code_tb').show();
-		$('#tr_fr_quarter_tb').show();
-		$('#amount_movement').show();
-		$('#department').show();
-		$('#fr_cost_center').show();
-		}else if (type == "supplement"){
-		$('#budgetLabel').html('Current Budget:');
-		$('#from').hide();
-		$('#tr_source_tb').hide();
-		$('#to').show();
-		$('#tr_destination_tb').show();
-		$('#tr_to_quarter_tb').show();
-		$('#tr_fr_quarter_tb').hide();
-		$('#tr_to_org_code_tb').hide();
-		$('#amount_movement').show();
-		$('#department').hide();
-		$('#fr_cost_center').hide();
-		}else{
-		$('#from').hide();
-		$('#to').hide();
-		$('#tr_source_tb').hide();
-		$('#tr_destination_tb').hide();
-		$('#tr_to_org_code_tb').hide();
-		$('#tr_to_quarter_tb').hide();
-		$('#tr_fr_quarter_tb').hide();
-		$('#amount_movement').hide();
-		$('#department').hide();
-		$('#fr_cost_center').hide();
-		}
+		movementTypeFields();
 	});
 	
 	var user = "<?php echo $user; ?>";
@@ -860,34 +835,128 @@ var type = $('#movementType').val();
 	$("#newRecord").click(function() {
 		location.reload();
 		// window.location = "dpp-budget-movement.php?login="+user+"&year="+year;
+		// 	var url = "dpp-budget-movement.php?login="+user+"&year="+year+"&MRC_CODE="+MRC_CODE;
+		// 	url = url + "&ORG_CODE="+ORG_CODE + "&cost_center=" + $("#CST_CODE").val();
+		// 	window.location = url;
 	});
-	setBudgetValue();
+	setBudgetValue("from");
+
+	$("#amount").change(function() {
+		changeAmount();
+	});
 });
 
+function changeAmount() {
+	var amount = parseFloat($("#amount").val());
+	var budget_to = parseFloat($("#budget_to").val());
+	var budget = parseFloat($("#budget").val());
 
+	var reallocated_to = parseFloat(budget_to + amount).toFixed(2);
+	var reallocated_fr = parseFloat(budget - amount).toFixed(2);
 
-function cancel(){	
-window.location.href = "app-list.php";
+	if(isNaN(reallocated_to)) {
+		reallocated_to = 0;
+	}
+
+	if(isNaN(reallocated_fr)) {
+		reallocated_fr = 0;
+	}
+
+	$("#reallocated_budget_to").val(reallocated_to);
+	$("#reallocated_budget_fr").val(reallocated_fr);
 }
 
+function movementTypeFields(){
+	$("#tr_quarter").show();
+	$("#tr_table").show();
+	$("#tr_item").show();
+
+	var type = $('#movementType').val();
+		$('#to_org_code').val("");
+		$('#departmen_id').val("");
+		$('#departmen_val').val("");
+		$("#td_reallocated_budget_fr").hide();
+		$("#td_budget_to").hide();
+		$("#th_from").hide();
+
+
+		$('#from_val').val("");
+		$('#to_val').val("");
+		$('#to_id').val("");
+		$('#from_id').val("");
+		$('#amount').val(0.00);
+		$('#budget').val("");
+		$('#budget_fr').val("");
+		//$('#budget_to').val("");
+	
+		if (type == "reallocation"){
+			$('#to_org_code').val("<?php echo $orgcode; ?>");
+			$('#department_id').val("<?php echo $mrccode; ?>");
+			$('#department_val').val("<?php echo isset($orgInfo['MRC_DESC']) ? $orgInfo['MRC_DESC'] : ''; ?>");
+			$("#td_reallocated_budget_fr").show();
+			$("#td_budget_to").show();
+			$("#th_from").show();
+
+			getFromCostCenter("<?php echo $mrccode; ?>", "<?php echo $cost_center; ?>");
+
+			// $('#budgetLabel').html('Available Budget:');
+			$('#from').show();
+			$('#td_source_tb').show();
+			$('#to').show();
+			$('#td_destination_tb').show();
+			$('#td_to_quarter_tb').show();
+			$('#td_to_org_code_tb').show();
+			$('#td_fr_quarter_tb').show();
+			$('#amount_movement').show();
+			$('#department').show();
+			$('#fr_cost_center').show();
+		}else if (type == "supplement"){
+			// $('#budgetLabel').html('Current Budget:');
+			$('#from').hide();
+			$('#td_source_tb').hide();
+			$('#to').show();
+			$('#td_destination_tb').show();
+			$('#td_to_quarter_tb').show();
+			$('#td_fr_quarter_tb').hide();
+			$('#td_to_org_code_tb').hide();
+			$('#amount_movement').show();
+			$('#department').hide();
+			$('#fr_cost_center').hide();
+		}else{
+			$("#tr_quarter").hide();
+			$("#tr_table").hide();
+			$("#tr_item").hide();
+	
+			$('#from').hide();
+			$('#to').hide();
+			$('#td_source_tb').hide();
+			$('#td_destination_tb').hide();
+			$('#td_to_org_code_tb').hide();
+			$('#td_to_quarter_tb').hide();
+			$('#td_fr_quarter_tb').hide();
+			$('#amount_movement').hide();
+			$('#department').hide();
+			$('#fr_cost_center').hide();
+		}
+}
 
 function checkType(){
 var type = $('#movementType').val();
 	if (type == "reallocation"){
-	$('#budgetLabel').html('Available Budget:');
+	// $('#budgetLabel').html('Available Budget:');
 	$('#from').show();
-	$('#tr_source_tb').show();
+	$('#td_source_tb').show();
 	$('#to').show();
-	$('#tr_destination_tb').show();
+	$('#td_destination_tb').show();
 	$('#amount_movement').show();
 	$('#department').show();
 	$('#fr_cost_center').show();
 	}else if (type == "supplement"){
-	$('#budgetLabel').html('Current Budget:');
+	// $('#budgetLabel').html('Current Budget:');
 	$('#from').hide();
 	$('#to').show();
-	$('#tr_source_tb').hide();
-	$('#tr_destination_tb').show();
+	$('#td_source_tb').hide();
+	$('#td_destination_tb').show();
 	$('#amount_movement').show();
 	$('#department').hide();
 	$('#fr_cost_center').hide();
@@ -895,38 +964,54 @@ var type = $('#movementType').val();
 	}else{
 	$('#from').hide();
 	$('#to').hide();
-	$('#tr_source_tb').hide();
-	$('#tr_destination_tb').hide();
+	$('#td_source_tb').hide();
+	$('#td_destination_tb').hide();
 	$('#amount_movement').hide();
 	$('#department').hide();
 	$('#fr_cost_center').hide();
 	}
 }
 
-function setBudgetValue() {
+function setBudgetValue(field) {
 	if($("#movementType").val() != "") {
-		var quarter = $("#to_quarter_tb").val();
-		if($("#movementType").val() == "reallocation"){
-			quarter = $("#fr_quarter_tb").val();
-		}
-
 		var budget = "";
-		switch(quarter){
-			case "1":
-				budget = $("#q1_budget").val();	
-			break;
-			case "2":
-				budget = $("#q2_budget").val();
-			break;
-			case "3":
-				budget = $("#q3_budget").val();
-			break;
-			case "4":
-				budget = $("#q4_budget").val();
-			break;
-
+		if(field == "from"){
+			var quarter = $("#fr_quarter_tb").val();
+			switch(quarter){
+				case "1":
+					budget = $("#q1_budget").val();	
+				break;
+				case "2":
+					budget = $("#q2_budget").val();
+				break;
+				case "3":
+					budget = $("#q3_budget").val();
+				break;
+				case "4":
+					budget = $("#q4_budget").val();
+				break;
+			}
+			$("#budget").val(budget);
+		} else {
+			var quarter = $("#to_quarter_tb").val();
+			switch(quarter){
+				case "1":
+					budget = $("#q1_budget_to").val();	
+				break;
+				case "2":
+					budget = $("#q2_budget_to").val();
+				break;
+				case "3":
+					budget = $("#q3_budget_to").val();
+				break;
+				case "4":
+					budget = $("#q4_budget_to").val();
+				break;
+			}
+			$("#budget_to").val(budget);
 		}
-		$("#budget").val(budget);
+
+		changeAmount();
 	}
 }
 
@@ -1063,139 +1148,173 @@ $("#destination_tb").change(function(e) {
 <!--PROJECT MILESTONE-->
 <div class="formDiv">
 <div class="headerText">Budget Movement Details</div>
-	<table class="procurement" border="0" cellspacing="5px" width="100%">
-	<tbody>
-			<tr>
-			<td class="textLabel">Movement Type: <i class="required">*</i></td>
-			<td class="textField">
+	<div style="padding: 15px;">
+		
+		<div style="padding: 5px 0px; width: 100%; text-align: right;">
+			<label style="font-size: 12px; font-weight:strong;">Movement Type<i class="required">*</i></label>
 			<input type="hidden" class="field" name="id" id="id" spellcheck="false" tabindex="1">
-				<select name="movementType" id="movementType">
+			<select name="movementType" id="movementType">
+				<option value="">-- Please select --</option>
+				<option value="reallocation">Budget Re-Allocation</option>
+				<option value="supplement">Budget Supplement</option>
+			</select>
+		</div>
+		<table class="procurement" border="0" cellspacing="5px"  width="100%">
+
+			<thead>
+				<tr>
+					<th class="textField" style="max-width:40%;">Column Name</th>
+					<th class="textField" style="max-width:30%;" id="th_from">From:</th>
+					<th class="textField" style="max-width:30%;">To:</th>
+				</tr>
+			</thead>
+			<tbody>
+			<tr >
+				<td class="textLabel">Organization <i class="required">*</i></td>
+				<td id="td_to_org_code_tb">
+					<?php 
+						$tbname = "R5_VIEW_USERINFO";
+						$tbfield = "DISTINCT(ORG_CODE)";
+						$tbfield2 = "ORG_DESC";
+						$crudapp->optionValue4($conn,$tbname,$tbfield,$tbfield2,"WHERE USR_CODE = '$user'", "to_org_code");
+					?>
+				</td>
+				<td>
+					<input type="text" value="<?php echo isset($orgInfo['ORG_DESC']) ? $orgInfo['ORG_DESC'] : ''; ?>" readonly />
+				</td>
+			</tr>
+			<tr >
+				<td class="textLabel">Department <i class="required">*</i></td>
+				<td id="department" class="textField"><input type="hidden" class="field" name="department_id" id="department_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="department_val" id="department_val" spellcheck="false" tabindex="1" readonly><button name="department" onclick="valideopenerform2(); return false;">...</button></td>
+				<td>
+					<input type="text" value="<?php echo isset($orgInfo['MRC_DESC']) ? $orgInfo['MRC_DESC'] : ''; ?>" readonly/>
+				</td>
+			</tr>
+			<tr >
+				<td class="textLabel">Cost Center <i class="required">*</i></td>
+				<td id="fr_cost_center" class="textField" >				
+					<select name="costcenterfr" id="costcenterfr">
 					<option value="">-- Please select --</option>
-					<option value="reallocation">Budget Re-Allocation</option>
-					<option value="supplement">Budget Supplement</option>
-				</select>
-			</td>				
-		</tr>
-		<tr id="tr_to_org_code_tb">
-			<td class="textLabel">Source Organization <i class="required">*</i></td>
-			<td>
-				<?php 
-					$tbname = "R5_VIEW_USERINFO";
-					$tbfield = "DISTINCT(ORG_CODE)";
-					$tbfield2 = "ORG_DESC";
-					$crudapp->optionValue4($conn,$tbname,$tbfield,$tbfield2,"WHERE USR_CODE = '$user'", "to_org_code");
-				?>
-			</td>
-		</tr>
-		<tr id="department">
-			<td class="textLabel">Source Department <i class="required">*</i></td>
-			<td class="textField"><input type="hidden" class="field" name="department_id" id="department_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="department_val" id="department_val" spellcheck="false" tabindex="1" readonly><button name="department" onclick="valideopenerform2(); return false;">...</button></td>
-		</tr>
-		<tr id="fr_cost_center">
-			<td class="textLabel">Source Cost Center<i class="required">*</i></td>
-			<td class="textField">				
-				<select name="costcenterfr" id="costcenterfr">
-				<option value="">-- Please select --</option>
-				</select>
-			</td>
-		</tr>
-		<tr id="tr_fr_quarter_tb">
-			<td class="textLabel">Source Quarter <i class="required">*</i></td>
-			<td>
-			<select name="fr_quarter_tb" id="fr_quarter_tb" onchange="setBudgetValue('fr');">
-				<option value="">-- Please select --</option>
-				<option <?php echo  $q1_deadline ? "" : "disabled" ; ?> value="1">Q1 <?php echo  $q1_deadline ? "" : "(Closed)" ; ?></option>
-				<option <?php echo  $q2_deadline ? "" : "disabled" ; ?> value="2">Q2 <?php echo  $q2_deadline ? "" : "(Closed)" ; ?></option>
-				<option <?php echo  $q3_deadline ? "" : "disabled" ; ?> value="3">Q3 <?php echo  $q3_deadline ? "" : "(Closed)" ; ?></option>
-				<option <?php echo  $q4_deadline ? "" : "disabled" ; ?> value="4">Q4 <?php echo  $q4_deadline ? "" : "(Closed)" ; ?></option>
-			</select>
-			</td>
-		</tr>
-		<tr id="tr_source_tb">
-			<td class="textLabel">Source Table <i class="required">*</i></td>
-			<td>
-			<select name="source_tb" id="source_tb">
-				<option value="">-- Please select --</option>
-				<option value="IB">ITEM-BASED</option>
-				<option value="CB">COST-BASED</option>
-			</select>
-			</td>
-		</tr>
-		<tr id="from">
-			<td class="textLabel">Source <i class="required">*</i></td>
-			<td class="textField"><input type="hidden" class="field" name="from_id" id="from_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="from_val" id="from_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('from'); return false;">...</button></td>
-		</tr>
+					</select>
+				</td>
+				<td>
+					<input type="text" value="<?php echo $cost_center; ?>" readonly/>
+				</td>
+			</tr>
+			<tr id="tr_quarter">
+				<td class="textLabel">Quarter <i class="required">*</i></td>
+				<td id="td_fr_quarter_tb">
+					<select name="fr_quarter_tb" id="fr_quarter_tb" onchange="setBudgetValue('from');">
+						<option value="">-- Please select --</option>
+						<option <?php echo  $q1_deadline ? "" : "disabled" ; ?> value="1">Q1 <?php echo  $q1_deadline ? "" : "(Closed)" ; ?></option>
+						<option <?php echo  $q2_deadline ? "" : "disabled" ; ?> value="2">Q2 <?php echo  $q2_deadline ? "" : "(Closed)" ; ?></option>
+						<option <?php echo  $q3_deadline ? "" : "disabled" ; ?> value="3">Q3 <?php echo  $q3_deadline ? "" : "(Closed)" ; ?></option>
+						<option <?php echo  $q4_deadline ? "" : "disabled" ; ?> value="4">Q4 <?php echo  $q4_deadline ? "" : "(Closed)" ; ?></option>
+					</select>
+				</td>
+				<td id="td_to_quarter_tb">
+					<select name="to_quarter_tb" id="to_quarter_tb" onchange="setBudgetValue('to');">
+						<option value="">-- Please select --</option>
+						<option <?php echo $q1_deadline ? "" : "disabled"; ?> value="1">Q1 <?php echo $q1_deadline ? "" : "(Closed)"; ?></option>
+						<option <?php echo $q2_deadline ? "" : "disabled"; ?> value="2">Q2 <?php echo $q2_deadline ? "" : "(Closed)"; ?></option>
+						<option <?php echo $q3_deadline ? "" : "disabled"; ?> value="3">Q3 <?php echo $q3_deadline ? "" : "(Closed)"; ?></option>
+						<option <?php echo $q4_deadline ? "" : "disabled"; ?> value="4">Q4 <?php echo $q4_deadline ? "" : "(Closed)"; ?></option>
+					</select>
+				</td>
+			</tr>
+			<tr id="tr_table">
+				<td class="textLabel">Table <i class="required">*</i></td>
+				<td id="td_source_tb">
+					<select name="source_tb" id="source_tb">
+						<option value="">-- Please select --</option>
+						<option value="IB">ITEM-BASED</option>
+						<option value="CB">COST-BASED</option>
+					</select>
+				</td>
+				<td id="td_destination_tb">
+					<select name="destination_tb" id="destination_tb">
+						<option value="">-- Please select --</option>
+						<option value="IB">ITEM-BASED</option>
+						<option value="CB">COST-BASED</option>
+					</select>
+				</td>
+			</tr>
+			<tr id="tr_item">
+				<td class="textLabel">Item <i class="required">*</i></td>
+				<td id="from" class="textField"><input type="hidden" class="field" name="from_id" id="from_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="from_val" id="from_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('from'); return false;">...</button></td>
+				<td id="to" class="textField"><input type="hidden" class="field" name="to_id" id="to_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="to_val" id="to_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('to'); return false;">...</button></td>
+			</tr>
 
-		<tr id="tr_to_quarter_tb">
-			<td class="textLabel">Destination Quarter <i class="required">*</i></td>
-			<td>
-			<select name="to_quarter_tb" id="to_quarter_tb" onchange="setBudgetValue('to');">
-				<option value="">-- Please select --</option>
-				<option <?php echo $q1_deadline ? "" : "disabled"; ?> value="1">Q1 <?php echo $q1_deadline ? "" : "(Closed)"; ?></option>
-				<option <?php echo $q2_deadline ? "" : "disabled"; ?> value="2">Q2 <?php echo $q2_deadline ? "" : "(Closed)"; ?></option>
-				<option <?php echo $q3_deadline ? "" : "disabled"; ?> value="3">Q3 <?php echo $q3_deadline ? "" : "(Closed)"; ?></option>
-				<option <?php echo $q4_deadline ? "" : "disabled"; ?> value="4">Q4 <?php echo $q4_deadline ? "" : "(Closed)"; ?></option>
-			</select>
-			</td>
-		</tr>
-		<tr id="tr_destination_tb">
-			<td class="textLabel">Destination Table <i class="required">*</i></td>
-			<td>
-			<select name="destination_tb" id="destination_tb">
-				<option value="">-- Please select --</option>
-				<option value="IB">ITEM-BASED</option>
-				<option value="CB">COST-BASED</option>
-			</select>
-			</td>
-		</tr>
-		<tr id="to">
-			<td class="textLabel">Destination <i class="required">*</i></td>
-			<td class="textField"><input type="hidden" class="field" name="to_id" id="to_id" spellcheck="false" tabindex="1"><input type="text" class="fieldLookUp" name="to_val" id="to_val" spellcheck="false" tabindex="1" readonly><button name="ItemCode" onclick="valideopenerform('to'); return false;">...</button></td>
-		</tr>
-		<tr id="amount_movement">
-			<td class="textLabel">Amount: <i class="required">*</i></td>
-			<td class="textField"><input type="text" class="field" name="amount" id="amount" spellcheck="false" tabindex="1"  value="0.00" onkeypress="return numbersonly(this, event)" onblur="round(this,2);">
-		</tr>
-		<tr>
-			<td class="textLabel" id="budgetLabel">Available Budget:</td>
-			<td class="textField"><input type="text" class="field" name="budget" id="budget" spellcheck="false" tabindex="1" readonly>
-			<input type="hidden" class="field" name="budget_fr" id="budget_fr" spellcheck="false" tabindex="1">
+			<tr>
+				<td class="textLabel" id="budgetLabel">Available Budget:</td>
+				<td class="textField" id="td_budget_to"><input type="text" class="field" name="budget" id="budget" spellcheck="false" tabindex="1" readonly>
+					<input type="hidden" class="field" name="budget_fr" id="budget_fr" spellcheck="false" tabindex="1"/>
+					<input type='hidden' value='<?php echo $total_available;?>' id='total_budget' name='total_budget' />
+					<input type='hidden' value='<?php echo $q1_available;?>' id='q1_budget' name='q1_budget' />
+					<input type='hidden' value='<?php echo $q2_available;?>' id='q2_budget' name='q2_budget' />
+					<input type='hidden' value='<?php echo $q3_available;?>' id='q3_budget' name='q3_budget' />
+					<input type='hidden' value='<?php echo $q4_available;?>' id='q4_budget' name='q4_budget' />
+					<!--<input type="hidden" class="field" name="budget_to" id="budget_to" spellcheck="false" tabindex="1">-->
+				</td>	
+				<td class="textField">
+					<input type="text" value='0'class="field" name="budget_to" id="budget_to" spellcheck="false" tabindex="1" readonly>
+					<input type='hidden' value='0' id='total_budget_to' name='total_budget_to' />
+					<input type='hidden' value='0' id='q1_budget_to' name='q1_budget_to' />
+					<input type='hidden' value='0' id='q2_budget_to' name='q2_budget_to' />
+					<input type='hidden' value='0' id='q3_budget_to' name='q3_budget_to' />
+					<input type='hidden' value='0' id='q4_budget_to' name='q4_budget_to' />
+					<!--<input type="hidden" class="field" name="budget_to" id="budget_to" spellcheck="false" tabindex="1">-->
+				</td>	
+			</tr>
 
-			<input type='hidden' value='<?php echo $total_available;?>' id='total_budget' name='total_budget' />
-			<input type='hidden' value='<?php echo $q1_available;?>' id='q1_budget' name='q1_budget' />
-			<input type='hidden' value='<?php echo $q2_available;?>' id='q2_budget' name='q2_budget' />
-			<input type='hidden' value='<?php echo $q3_available;?>' id='q3_budget' name='q3_budget' />
-			<input type='hidden' value='<?php echo $q4_available;?>' id='q4_budget' name='q4_budget' />
-			<!--<input type="hidden" class="field" name="budget_to" id="budget_to" spellcheck="false" tabindex="1">-->
-			</td>			
-		</tr>
-		<tr>
-			<td class="textLabel">Reason:</td>
-			<td class="textField" colspan="3"><textarea id="reason" name="reason"></textarea></td>		
-		</tr>
-		<tr>
-			<td class="textLabel">Remarks:</td>
-			<td class="textField" colspan="3"><textarea id="remarks" name="remarks" disabled></textarea></td>		
-		</tr>
-		<tr>
-			<td class="textLabel">Responsible:</td>
-			<td class="textField" colspan="3"><input type="text" class="field" name="responsible" id="responsible" spellcheck="false" tabindex="1" value="" readonly=""></td>
-		</tr>
-		<tr id="select-status" style="visibility:hidden">
-			<td class="textLabel">Change Status:</td>
-			<td>
-			<select name="status" id="status">
-				<option value="">-- Please select --</option>
-				<option value="Rejected">Rejected</option>
-			</select>
-			</td>
-		</tr>
-	</tbody>
-	</table>
+			<tr>
+				<td class="textLabel">Reallocated Budget:</td>
+				<td class="textField" id="td_reallocated_budget_fr">
+					<input type="text" class="field" name="reallocated_budget_fr" id="reallocated_budget_fr" spellcheck="false" tabindex="1" readonly>
+				</td>	
+				<td class="textField">
+					<input type="text" class="field" name="reallocated_budget_to" id="reallocated_budget_to" spellcheck="false" tabindex="1" readonly>
+				</td>	
+			</tr>
+			</table>
+			<br/>
+			<div style="margin: auto; text-align: center; width: 50%;">
+				<table class="procurement" style="margin: auto; text-align: center; width: 50%;" border="0" cellspacing="5px">
+
+					<tr id="amount_movement">
+						<td style="width:50%;" class="textLabel">Amount: <i class="required">*</i></td>
+						<td class="textField"><input type="text" class="field" name="amount" id="amount" spellcheck="false" tabindex="1"  value="0.00" onkeypress="return numbersonly(this, event)" onblur="round(this,2);">
+					</tr>
+				
+					<tr>
+						<td class="textLabel">Reason <i class="required">*</i></td>
+						<td class="textField" colspan="3"><textarea id="reason" name="reason"></textarea></td>		
+					</tr>
+					<tr>
+						<td class="textLabel" style="width:50%;">Remarks:</td>
+						<td class="textField" colspan="3"><textarea id="remarks" name="remarks" disabled></textarea></td>		
+					</tr>
+					<tr>
+						<td class="textLabel">Responsible:</td>
+						<td class="textField" colspan="3"><input type="text" class="field" name="responsible" id="responsible" spellcheck="false" tabindex="1" value="" readonly=""></td>
+					</tr>
+					<tr id="select-status" style="visibility:hidden">
+						<td class="textLabel">Change Status:</td>
+						<td>
+						<select name="status" id="status">
+							<option value="">-- Please select --</option>
+							<option value="Rejected">Rejected</option>
+						</select>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
 	<!--Action Button-->
 	<div class="actionButtonCenter">
-				<input type="submit" class="bold" name="submit" id="submit" value=" Save ">
-				<input type="button" value=" Cancel " Onclick="cancel(this.form);">&nbsp;&nbsp;
+		<input type="submit" class="bold" name="submit" id="submit" value=" Save ">
+		<input type="button" value=" Cancel " Onclick="cancel(this.form);">&nbsp;&nbsp;
 	</div>
 	</div>
 </div>
