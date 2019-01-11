@@ -1,6 +1,7 @@
 <?php
 $_GET['login'] = "EAMSYSADMIN";
 // $_GET['login'] = "JLOAYON";
+echo "user is hardcoded";
 class crudClass{
 
 	public $cognos_url = "http://fdcui-eamqas-38.fdcutilities.local:8080/crn/cgi-bin/mod_cognos.dll?";
@@ -13,8 +14,6 @@ $INS_DESC = 0;
 $UGR_SESSIONTIMEOUT = 0;
 $USR_SESSIONTIMEOUT = 0;
 if($user != " "){
-
-
 		$cnt = 0;
 		$sqlcnt = "SELECT COUNT(SES_USER) FROM dbo.R5SESSIONS WHERE SES_USER = ?";
 		$paramscnt = array($user);
@@ -1070,12 +1069,13 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			}
 			$ctr++;
 		}
-
+		
 		//Filter records if filter is not null
+		$order = "ORDER BY budget_year DESC, isActive DESC, year DESC, month DESC, date DESC";
 		if($filter!=""){
-			$sql = "SELECT $field FROM $table WHERE $filter ORDER BY budget_year DESC";
+			$sql = "SELECT $field FROM $table WHERE $filter $order";
 		}else{
-			$sql = "SELECT $field FROM $table ORDER BY budget_year DESC";
+			$sql = "SELECT $field FROM $table $order";
 		}
 		
 		$result = sqlsrv_query($conn,$sql);

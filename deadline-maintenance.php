@@ -28,12 +28,39 @@ $mrccode = $userinfo[0]['MRC_CODE'];
 $orgcode = $userinfo[0]['ORG_CODE'];
 
 $filter = array();
+if (isset($_POST['search'])){
+	$fieldname = $_POST['fieldname'];
+	$value = $_POST['value'];
+	$type = $_POST['type'];
+
+	//Form Validation
+	if ($fieldname == ""){
+	$errorMessage .= 'Please select a fieldname.\n\n';
+	$errorFlag = true;
+	}
+	
+	if ($value == ""){
+	$errorMessage .= 'Please select a value.\n\n';
+	$errorFlag = true;
+	}
+
+	if(!$errorFlag){
+		$filter = array($fieldname,$type,$value);
+	}else{
+		echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
+	}		
+}
+
 $cnd = "";
 $column = $crudapp->readColumn($conn,"R5_DEADLINE_MAINTENANCE");
 $requiredField = array('id','month','date','year','budget_year', array('isActive', 'IS ACTIVE') , array('Q1', 'Q1 Open'), array('Q2', 'Q2 Open'), array('Q3', 'Q3 Open'), array('Q4', 'Q4 Open'));
 // $column = array_intersect($column,$requiredField);
 $listView = $crudapp->listTableDeadline($conn,"R5_DEADLINE_MAINTENANCE",$column,$cnd);
+
+
 $tableView = $filterapp->filterViewURLXdelete($conn,$requiredField,$listView,$filter,"id");
+
+
 
 if (isset($_POST['submit'])){
 	//Passing of Data

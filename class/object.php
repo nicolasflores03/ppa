@@ -495,24 +495,30 @@ class filterClass{
 					if (strpos($listValue,$value) !== false){
 						foreach($column as $fieldName){
 							$_fieldName = is_array($fieldName) ? $fieldName[0] : $fieldName;
-							$val = $views[$_fieldName];
-							$content .= "<td width='5%'>".$val."</td>";
+							if ($_fieldName != "id"){
+								$val = $views[$_fieldName];
+								$content .= "<td width='5%'>".$val."</td>";
+							}
 						}
 					}				
 				}else if ($type == "sw"){
 					if (0 === strpos($listValue, $value)){
 						foreach($column as $fieldName){
 							$_fieldName = is_array($fieldName) ? $fieldName[0] : $fieldName;
-							$val = $views[$_fieldName];
-							$content .= "<td width='5%'>".$val."</td>";
+							if ($_fieldName != "id"){
+								$val = $views[$_fieldName];
+								$content .= "<td width='5%'>".$val."</td>";
+							}
 						}
 					}				
 				}else if ($type == "ew"){
 					if (stripos(strrev($listValue), strrev($value)) === 0){
 						foreach($column as $fieldName){
 							$_fieldName = is_array($fieldName) ? $fieldName[0] : $fieldName;
-							$val = $views[$_fieldName];
-							$content .= "<td width='5%'>".$val."</td>";
+							if ($_fieldName != "id"){
+								$val = $views[$_fieldName];
+								$content .= "<td width='5%'>".$val."</td>";
+							}
 						}
 					}				
 				}
