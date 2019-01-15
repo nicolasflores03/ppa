@@ -1,7 +1,7 @@
 <?php
-$_GET['login'] = "EAMSYSADMIN";
-// $_GET['login'] = "JLOAYON";
-echo "user is hardcoded";
+// $_GET['login'] = "EAMSYSADMIN";
+// // // $_GET['login'] = "JLOAYON";
+// echo "user is hardcoded";
 class crudClass{
 
 	public $cognos_url = "http://fdcui-eamqas-38.fdcutilities.local:8080/crn/cgi-bin/mod_cognos.dll?";
@@ -1099,6 +1099,11 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				if(strtolower($fieldName) == "isactive") {
 					$val["$fieldName"] = $val["$fieldName"] == 1 ? "Yes" : "No";
 				}
+				
+				if(strtolower($fieldName) == "updatedat") {
+					$val["$fieldName"] = $val["$fieldName"]->format('m/d/Y');
+				}
+
 				$data["$fieldName"] = $val["$fieldName"];
 			}	
 			array_push($resultArr,$data);

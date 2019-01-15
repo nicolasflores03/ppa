@@ -70,7 +70,7 @@ class filterClass{
 	}
 	
 	//FILTER VIEW WITH ONCLICK EVENT
-	   public function filterViewURL($conn,$column,$listView,$filter,$code)
+	public function filterViewURL($conn,$column,$listView,$filter,$code)
     {
 		$content = '';
 		//$content .= '<div class="Headers"><table class="NewHeader"><tr></tr></table></div>';
@@ -221,6 +221,217 @@ class filterClass{
 				$content .= "</tr>";
 			}
 		}
+		$content .= '</table></div>';
+		return $content;
+	}
+
+	//FILTER VIEW WITH ONCLICK EVENT
+	public function recordItemFilterView($conn,$column,$listView,$filter,$code)
+    {
+		$content = '';
+		//$content .= '<div class="Headers"><table class="NewHeader"><tr></tr></table></div>';
+		$content .= '<div class="TableView">';
+		$content .= '<table width="100%" cellspacing="0" cellpadding="0" border="1" class="list">';
+		$content .= '<tr>';
+		foreach($column as $fieldName){
+		$fieldName = str_replace('_', ' ', $fieldName);
+		$fieldName = strtoupper($fieldName);
+			if ($fieldName != "ID"){//-->Remove ID from the table header
+				//$content .= "<th>".$fieldName."</th>";
+				if ($fieldName == "TOTAL COST" || $fieldName == "UNIT COST"){//-->Remove ID from the table header
+					$content .= "<th>".$fieldName."(PHP)</th>";
+				}else{
+					$content .= "<th>".$fieldName."</th>";
+				}
+			}
+		}
+		$content .= "<th>Action</th>";
+		$content .= "</tr>";
+		$id = 0;
+		$hasStats = 0;
+		$stats = "";
+		$grand_total = 0;
+		$grand_jan = 0;
+		$grand_feb = 0;
+		$grand_mar = 0;
+		$grand_apr = 0;
+		$grand_may = 0;
+		$grand_jun = 0;
+		$grand_jul = 0;
+		$grand_aug = 0;
+		$grand_sep = 0;
+		$grand_oct = 0;
+		$grand_nov = 0;
+		$grand_dec = 0;
+
+		if(empty($filter)){
+			foreach($listView as $views){
+				$grand_total += floatval(str_replace(",", "", $views["total_cost"]));
+				$grand_jan += floatval(str_replace(",", "", $views["Jan"]));
+				$grand_feb += floatval(str_replace(",", "", $views["Feb"]));
+				$grand_mar += floatval(str_replace(",", "", $views["Mar"]));
+				$grand_apr += floatval(str_replace(",", "", $views["Apr"]));
+				$grand_may += floatval(str_replace(",", "", $views["may"]));
+				$grand_jun += floatval(str_replace(",", "", $views["Jun"]));
+				$grand_jul += floatval(str_replace(",", "", $views["Jul"]));
+				$grand_aug += floatval(str_replace(",", "", $views["Aug"]));
+				$grand_sep += floatval(str_replace(",", "", $views["Sept"]));
+				$grand_oct += floatval(str_replace(",", "", $views["Oct"]));
+				$grand_nov += floatval(str_replace(",", "", $views["Nov"]));
+				$grand_dec += floatval(str_replace(",", "", $views["Dec"]));
+
+				//  $_total_cost ;
+				$id = $views[$code];
+
+				$content .= "<tr class='test' onclick=\"onclickEvent('$id');\">";
+					foreach($column as $fieldName){
+						if ($fieldName != "id"){
+							$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+						}
+						if ($fieldName == "status"){
+							$hasStats = 1;
+							$stats = $views[$fieldName];
+						}
+					}
+				$stats = str_replace(" ","",$stats);
+				if ($hasStats > 0){
+					if ($stats == "Unfinish" || $stats == "Created"){
+					$content .= "<td><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'></td>";
+					}else{
+					$content .= "<td></td>";
+					}
+				}else{
+				$content .= "<td><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'></td>";
+				}
+				
+				
+				$content .= "</tr>";
+			}
+
+		}else{
+			foreach($listView as $views){
+				$grand_total .= $grand_total ." +  ". $views["total_cost"];
+
+				// echo $grand_total . "<br/>" ;
+				$field = $filter[0];
+				$type = $filter[1];
+				$value = $filter[2];
+				$id = $views[$code];
+				$content .= "<tr class='test' onclick=\"onclickEvent('$id');\">";
+				if ($type == "eq"){
+					if (strtolower($views["$field"]) == strtolower($value)){
+						foreach($column as $fieldName){
+							if ($fieldName != "id"){
+								$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+							}
+							if ($fieldName == "status"){
+								$hasStats = 1;
+								$stats = $views[$fieldName];
+							}
+						}
+											$stats = str_replace(" ","",$stats);
+						if ($hasStats > 0){
+							if ($stats == "Unfinish" || $stats == "Created"){
+							$content .= "<td><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'></td>";
+							}else{
+							$content .= "<td></td>";
+							}
+						}else{
+						$content .= "<td><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'></td>";
+						}
+					}
+				}else if ($type == "co"){
+					if (strpos(strtolower($views["$field"]),strtolower($value)) !== false){
+						foreach($column as $fieldName){
+							if ($fieldName != "id"){
+								$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+							}
+							if ($fieldName == "status"){
+								$hasStats = 1;
+								$stats = $views[$fieldName];
+							}
+						}
+											$stats = str_replace(" ","",$stats);
+						if ($hasStats > 0){
+							if ($stats == "Unfinish" || $stats == "Created"){
+							$content .= "<td><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'></td>";
+							}else{
+							$content .= "<td></td>";
+							}
+						}else{
+						$content .= "<td><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'></td>";
+						}
+					}				
+				}else if ($type == "sw"){
+					if (0 === strpos(strtolower($views["$field"]), strtolower($value))){
+						foreach($column as $fieldName){
+							if ($fieldName != "id"){
+								$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+							}
+							if ($fieldName == "status"){
+								$hasStats = 1;
+								$stats = $views[$fieldName];
+							}
+						}
+						$stats = str_replace(" ","",$stats);
+						if ($hasStats > 0){
+							if ($stats == "Unfinish" || $stats == "Created"){
+							$content .= "<td><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'></td>";
+							}else{
+							$content .= "<td></td>";
+							}
+						}else{
+						$content .= "<td><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'></td>";
+						}
+					}				
+				}else if ($type == "ew"){
+					if (stripos(strrev(strtolower($views["$field"])), strrev(strtolower($value))) === 0){
+						foreach($column as $fieldName){
+							if ($fieldName != "id"){
+								$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+							}
+							if ($fieldName == "status"){
+								$hasStats = 1;
+								$stats = $views[$fieldName];
+							}
+						}
+						$stats = str_replace(" ","",$stats);
+						if ($hasStats > 0){
+							if ($stats == "Unfinish" || $stats == "Created"){
+							$content .= "<td><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'></td>";
+							}else{
+							$content .= "<td></td>";
+							}
+						}else{
+						$content .= "<td><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'></td>";
+						}
+					}				
+				}
+
+				$content .= "</tr>";
+			}
+		}
+		
+		$formatted_grand_total = number_format($grand_total,2,".",",");
+		$content .= "<tr><td colspan='7' style='text-align: right'>Grand Total</td>";
+		$content .= "<td><strong>$formatted_grand_total</strong></td>";
+		$content .= "<td></td>";
+		//grand total months
+		$content .= "<td><strong>".number_format($grand_jan,2,".",",")."</strong></td>";
+		$content .= "<td><strong>".number_format($grand_feb,2,".",",")."</strong></td>";
+		$content .= "<td><strong>".number_format($grand_mar,2,".",",")."</strong></td>";
+		$content .= "<td><strong>".number_format($grand_apr,2,".",",")."</strong></td>";
+		$content .= "<td><strong>".number_format($grand_may,2,".",",")."</strong></td>";
+		$content .= "<td><strong>".number_format($grand_jun,2,".",",")."</strong></td>";
+		$content .= "<td><strong>".number_format($grand_jul,2,".",",")."</strong></td>";
+		$content .= "<td><strong>".number_format($grand_aug,2,".",",")."</strong></td>";
+		$content .= "<td><strong>".number_format($grand_sep,2,".",",")."</strong></td>";
+		$content .= "<td><strong>".number_format($grand_oct,2,".",",")."</strong></td>";
+		$content .= "<td><strong>".number_format($grand_nov,2,".",",")."</strong></td>";
+		$content .= "<td><strong>".number_format($grand_dec,2,".",",")."</strong></td>";
+		$content .= "<td></td>";
+		$content .= "</tr>";
+
 		$content .= '</table></div>';
 		return $content;
 	}

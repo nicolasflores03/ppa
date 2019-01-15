@@ -844,6 +844,9 @@ var type = $('#movementType').val();
 	$("#amount").change(function() {
 		changeAmount();
 	});
+
+	$('#source_tb').val("IB");
+	$('#destination_tb').val("IB");
 });
 
 function changeAmount() {
@@ -868,7 +871,7 @@ function changeAmount() {
 
 function movementTypeFields(){
 	$("#tr_quarter").show();
-	$("#tr_table").show();
+	// $("#tr_table").show();
 	$("#tr_item").show();
 
 	var type = $('#movementType').val();
@@ -924,7 +927,7 @@ function movementTypeFields(){
 			$('#fr_cost_center').hide();
 		}else{
 			$("#tr_quarter").hide();
-			$("#tr_table").hide();
+			// $("#tr_table").hide();
 			$("#tr_item").hide();
 	
 			$('#from').hide();
@@ -1222,19 +1225,17 @@ $("#destination_tb").change(function(e) {
 					</select>
 				</td>
 			</tr>
-			<tr id="tr_table">
+			<tr id="tr_table" class="hidden">
 				<td class="textLabel">Table <i class="required">*</i></td>
 				<td id="td_source_tb">
 					<select name="source_tb" id="source_tb">
-						<option value="">-- Please select --</option>
-						<option value="IB">ITEM-BASED</option>
+						<option value="IB" selected>ITEM-BASED</option>
 						<option value="CB">COST-BASED</option>
 					</select>
 				</td>
 				<td id="td_destination_tb">
 					<select name="destination_tb" id="destination_tb">
-						<option value="">-- Please select --</option>
-						<option value="IB">ITEM-BASED</option>
+						<option value="IB" selected>ITEM-BASED</option>
 						<option value="CB">COST-BASED</option>
 					</select>
 				</td>

@@ -86,7 +86,7 @@ $versionExist = $crudapp->checkRecordExist($conn,"R5_DPP_VERSION","ORG_CODE = '$
 $requiredField = array('id','code','Description','GL_Code','UOM','QTY','Foreign_Currency','foreign_cost','total_cost','Classification','Jan','Feb','Mar','Apr','may','Jun','Jul','Aug','Sept','Oct','Nov','Dec');
 $column = array_intersect($column,$requiredField);
 $listView = $crudapp->listTable($conn,"R5_VIEW_ITEMBASE_LINES",$column,$cndItem);
-$tableView = $filterapp->filterViewURL($conn,$column,$listView,$filter,"id");
+$tableView = $filterapp->recordItemFilterView($conn,$column,$listView,$filter,"id");
 
 
 //Item
@@ -107,7 +107,7 @@ $type = $_POST['typeItem'];
 
 	if(!$errorFlag){
 		$filter = array($fieldname,$type,$value);
-		$tableView = $filterapp->filterViewURL($conn,$column,$listView,$filter,"id");
+		$tableView = $filterapp->recordItemFilterView($conn,$column,$listView,$filter,"id");
 	}else{
 		echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
 	}	
@@ -903,7 +903,7 @@ if(bo > 0){
 if(dh > 0){
 	$('#endorsement_tmp').show();
 }else{
-$('#revise_tmp').hide();
+	$('#revise_tmp').hide();
 }
 	
 //IF DEADLINE
@@ -1192,6 +1192,18 @@ if(expired > 0 && version < 2){
 	$("#unit_cost").change(function() {
 		getTotalCost();
 	});
+
+	$("#upload_excel_btn").click(function(e){
+		var text = "";
+    	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	
+		for( var i=0; i < 5; i++ ) {
+        	text += possible.charAt(Math.floor(Math.random() * possible.length));
+		}
+		
+		var popup= window.open('popup-excel-upload.php?hash='+text,'popup_form','location=no,menubar=no,status=no,scrollbars=yes,top=50%,left=50%,height=550,width=750'); 
+		popup.focus(); 
+	});
 });
 </script>
 </head>
@@ -1205,6 +1217,7 @@ if(expired > 0 && version < 2){
 	<div class="divText">
 	<!--<img src="images/toolbar_previous.png" name="back_tmp" id="back_tmp" align="absmiddle">-->
 	<!--<img src="images/toolbar_save.png" name="save_tmp" id="save_tmp" align="absmiddle">-->
+	<!--<input type="button" class="bold" name="upload_excel_btn" id="upload_excel_btn" title="Import items via excel" value=" Import items "> -->
 	<input type="button" class="bold" name="endorsement_tmp" id="endorsement_tmp" value=" For Endorsement ">
 	<input type="button" class="bold" name="revise_tmp" id="revise_tmp" value=" Revision Request ">
 	<input type="button" class="bold" name="submitted_tmp" id="submitted_tmp" value=" Submit ">
@@ -1277,7 +1290,7 @@ if(expired > 0 && version < 2){
 <div class="headerText">Annual Procurement Plan Details</div>
 <div class="headerText">
 <input type="button" class="tabs selected" name="ITEM-BASE" value=" ITEM-BASED ">
-<input type="button" class="tabs" name="COST-BASE" id="tabURL" value=" COST-BASED ">
+<!-- <input type="button" class="tabs" name="COST-BASE" id="tabURL" value=" COST-BASED "> -->
 <input type="button" class="tabs" name="NEW-RECORD" id="newRecord" value=" New Record ">
 </div>
 	<div class="filters">
@@ -1315,7 +1328,7 @@ if(expired > 0 && version < 2){
 		<?php
 			echo $tableView;
 		?>
-	<!--APP Section-->
+		<!--APP Section-->
 	<a name="FormAnchor"></a>
 	<div class="formDiv">
 	<div class="headerText">Item Details</div>

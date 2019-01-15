@@ -53,7 +53,7 @@ if (isset($_POST['search'])){
 
 $cnd = "";
 $column = $crudapp->readColumn($conn,"R5_DEADLINE_MAINTENANCE");
-$requiredField = array('id','month','date','year','budget_year', array('isActive', 'IS ACTIVE') , array('Q1', 'Q1 Open'), array('Q2', 'Q2 Open'), array('Q3', 'Q3 Open'), array('Q4', 'Q4 Open'));
+$requiredField = array('id','month','date','year','budget_year', array('isActive', 'IS ACTIVE') , array('Q1', 'Q1 Open'), array('Q2', 'Q2 Open'), array('Q3', 'Q3 Open'), array('Q4', 'Q4 Open'), array('updatedAt', 'Date Created'));
 // $column = array_intersect($column,$requiredField);
 $listView = $crudapp->listTableDeadline($conn,"R5_DEADLINE_MAINTENANCE",$column,$cnd);
 
