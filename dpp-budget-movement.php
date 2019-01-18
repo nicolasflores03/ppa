@@ -12,7 +12,8 @@ if ( sqlsrv_begin_transaction( $conn ) === false ) {
 //Generate Object
 $crudapp = new crudClass();
 $filterapp = new filterClass();
-
+// var_dump($_GET);
+// exit();
 //VARIABLES
 $errorFlag = false;
 $errorMessage = "";
@@ -95,10 +96,10 @@ if(isset($_GET['movementType']))  {
 	$to_org_code = isset($_GET['to_org_code']) ?  $_GET['to_org_code'] : '';
 	$proceed_budget_query = false;
 	if($movementType == "reallocation" && isset($_GET['from_id'])){
-		$cnd = "year_budget = '$year' AND ORG_CODE = '$to_org_code' AND MRC_CODE = '$department_id' AND status = 'Approved' AND cost_center = '$costcenterfr'";
+		$cnd = "year_budget = '$year' AND ORG_CODE = '$orgcode' AND MRC_CODE = '$department_id' AND status = 'Approved' AND cost_center = '$costcenterfr' AND rowid = '$from_id'";
 		$proceed_budget_query = true;
 	} else if($movementType == "supplement" && isset($_GET['to_id'])) {
-		$cnd = "year_budget = '$year' AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$mrccode' AND status = 'Approved' AND cost_center = '$cost_center'";
+		$cnd = "year_budget = '$year' AND ORG_CODE = '$to_org_code' AND MRC_CODE = '$mrccode' AND status = 'Approved' AND cost_center = '$cost_center' AND rowid = '$to_id'";
 		$proceed_budget_query = true;
 	}
 	
@@ -229,7 +230,7 @@ if (isset($_POST['submit'])){
 	$errorFlag = true;
 	}
 
-	if ($amount == ""){
+	if ($reason == ""){
 		$errorMessage .= 'Please enter a reason for this request.\n\n';
 		$errorFlag = true;
 	}
@@ -381,6 +382,10 @@ xmlhttp.onreadystatechange=function()
   if (xmlhttp.readyState==4 && xmlhttp.status==200)
     {
 	 var json = $.parseJSON(xmlhttp.responseText);
+	 var type = json['type'];
+	 $('#movementType').val(type);
+	 movementTypeFields(true);
+
 	 var FR_MRC_CODE = json['FR_MRC_CODE'];
 	 var Destination_Department = json['Destination_Department'];
 	 var TO_MRC_CODE = json['TO_MRC_CODE'];
@@ -391,7 +396,6 @@ xmlhttp.onreadystatechange=function()
 	 var Destination = json['Destination'];
 	 var amount = json['Amount'];
 	 var year_budget = json['year_budget'];
-	 var type = json['type'];
 	 var fr_cost_center = json['fr_cost_center'];
 	 var status = json['status'];
 	 var to_table = json['to_table'];
@@ -404,14 +408,15 @@ xmlhttp.onreadystatechange=function()
 	 var to_org_code = json['to_org_code'];
 	 var responsible ='';
 
+	 var available_from = json['available_from'];
+	 var available_to = json['available_to'];
 
 	 if (status != 'Approved'){
 	  responsible = json['USR_DESC'];
 	 }else{
 	  responsible = '';
 	 }
-	 
-	 
+
 	 fr_cost_center = fr_cost_center.replace(/ /g, '');
 	 status = status.replace(/ /g, '');
 	 to_table = to_table.replace(/ /g, '');
@@ -425,7 +430,7 @@ xmlhttp.onreadystatechange=function()
 	 $('#year_budget').val(year_budget);
 	 $('#to_id').val(to_code);
 	 $('#from_id').val(fr_code);
-	 $('#movementType').val(type);
+	 
 	 $('#id').val(id);
 	 $('#to_val').val(Destination);
 	 $('#from_val').val(Source);
@@ -439,15 +444,28 @@ xmlhttp.onreadystatechange=function()
 	 $('#fr_quarter_tb').val(fr_quarter_tb);
 	 $('#to_org_code').val(to_org_code);
 
-	 if (status == "RevisionRequest" || status == ""){
-	 $('#select-status').css('visibility', 'visible');
-	 $('.actionButtonCenter').show();
-	 }else{
-	 $('#select-status').css('visibility', 'hidden');
-	 $('.actionButtonCenter').hide();
-	 }
-	 //movementType(type); 
-	 movementTypeFields();
+	 
+	$('#total_budget').val(json['available_from'].total_available);
+	$('#q1_budget').val( json['available_from'].q1_available );
+	$('#q2_budget').val( json['available_from'].q2_available );
+	$('#q3_budget').val( json['available_from'].q3_available );
+	$('#q4_budget').val( json['available_from'].q4_available );
+
+	$('#total_budget_to').val(json['available_to'].total_available);
+	$('#q1_budget_to').val( json['available_to'].q1_available );
+	$('#q2_budget_to').val( json['available_to'].q2_available );
+	$('#q3_budget_to').val( json['available_to'].q3_available );
+	$('#q4_budget_to').val( json['available_to'].q4_available );
+
+		if (status == "RevisionRequest" || status == ""){
+			$('#select-status').css('visibility', 'visible');
+			$('.actionButtonCenter').show();
+		}else{
+			$('#select-status').css('visibility', 'hidden');
+			$('.actionButtonCenter').hide();
+		}
+	setBudgetValue('from');
+	setBudgetValue('to');
     }
   }
 xmlhttp.open("GET","ajax/app-get-budget-movement-info.php?hash="+text+"&id="+id,true);
@@ -485,7 +503,7 @@ xmlhttp.open("GET","ajax/app-get-itembase-info2.php?hash="+text+"&id="+id+"&tabl
 xmlhttp.send();
 }
 
-function movementType(type){
+function movementType(type) {
 
 	if (type == "reallocation"){
 		// $('#budgetLabel').html('Available Budget:');
@@ -653,11 +671,10 @@ $(document).ready(function(){
 	$("#to_quarter_tb").val('<?php echo $to_quarter_tb; ?>');
 	$("#to_org_code").val('<?php echo $to_org_code; ?>');
 
-
-	if($("#to_id").val() != ""){ 
-		var table = $("#destination_tb").val();
-		getFromToInfo($("#to_id").val(),"to_code",table);
-	}
+	// if($("#to_id").val() != ""){ 
+	// 	var table = $("#destination_tb").val();
+	// 	getFromToInfo($("#to_id").val(),"to_code",table);
+	// }
 
 	if($("#department_id").val() != ""){ 
 		getFromCostCenter($("#department_id").val(),"<?php echo $costcenterfr; ?>");
@@ -820,7 +837,10 @@ var type = $('#movementType').val();
 		}
 	});
 
-	movementTypeFields();
+	
+	<?php if($movementType == "") { ?>
+		movementTypeFields();
+	<?php } ?>
 	$('#movementType').change(function() {
 		movementTypeFields();
 	});
@@ -850,7 +870,9 @@ var type = $('#movementType').val();
 });
 
 function changeAmount() {
-	var amount = parseFloat($("#amount").val());
+
+	var amount = $("#amount").val();
+	amount = parseFloat(amount.replace(/,/g, ''));
 	var budget_to = parseFloat($("#budget_to").val());
 	var budget = parseFloat($("#budget").val());
 
@@ -869,20 +891,23 @@ function changeAmount() {
 	$("#reallocated_budget_fr").val(reallocated_fr);
 }
 
-function movementTypeFields(){
-	$("#tr_quarter").show();
-	// $("#tr_table").show();
-	$("#tr_item").show();
-
+function movementTypeFields(fromTableView){
+	// if(!fromTableView){
+	// 	fromTableView = false;
+	// }
+	
 	var type = $('#movementType').val();
-		$('#to_org_code').val("");
-		$('#departmen_id').val("");
-		$('#departmen_val').val("");
+		$("#tr_quarter").show();
+		// $("#tr_table").show();
+		$("#tr_item").show();
 		$("#td_reallocated_budget_fr").hide();
 		$("#td_budget_to").hide();
 		$("#th_from").hide();
 
-
+	// if(fromTableView){
+		$('#to_org_code').val("");
+		$('#departmen_id').val("");
+		$('#departmen_val').val("");
 		$('#from_val').val("");
 		$('#to_val').val("");
 		$('#to_id').val("");
@@ -891,7 +916,7 @@ function movementTypeFields(){
 		$('#budget').val("");
 		$('#budget_fr').val("");
 		//$('#budget_to').val("");
-	
+	// }
 		if (type == "reallocation"){
 			$('#to_org_code').val("<?php echo $orgcode; ?>");
 			$('#department_id').val("<?php echo $mrccode; ?>");
