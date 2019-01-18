@@ -127,11 +127,11 @@ if(!$errorFlag){
 	$data = array("year"=>$year,"month"=>$month,"date"=>$date,"year"=>$year,"budget_year"=>$budget_year,"isActive"=>$active,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user, "Q1"=>$Q1, "Q2"=>$Q2, "Q3"=>$Q3, "Q4"=>$Q4 );	
 	$dataupdate = array("year"=>$year,"month"=>$month,"date"=>$date,"year"=>$year,"budget_year"=>$budget_year,"isActive"=>$active,"updatedAt"=>$today,"updatedBy"=>$user, "Q1"=>$Q1, "Q2"=>$Q2, "Q3"=>$Q3, "Q4"=>$Q4);	
 		
-	// if($id != ""){
-	// 	$result = $crudapp->updateRecord($conn,$dataupdate,$table,"id",$id);
-	// }else{
+	if($id != ""){
+		$result = $crudapp->updateRecord($conn,$dataupdate,$table,"id",$id);
+	}else{
 		$result = $crudapp->insertRecord($conn,$data,$table);
-	// }
+	}
 	
 	if($result) {
 		sqlsrv_commit( $conn );
