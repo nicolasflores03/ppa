@@ -221,17 +221,17 @@ xmlhttp.open("GET","ajax/app-endorsement-type.php?hash="+text+"&id="+id,true);
 xmlhttp.send();
 
 //Cost Base
-var xmlhttp2=new XMLHttpRequest();
-xmlhttp2.onreadystatechange=function()
-  {
-  if (xmlhttp2.readyState==4 && xmlhttp2.status==200)
-    {
-	//alert(xmlhttp.responseText);
-	 $('.costType').html(xmlhttp2.responseText);
-    }
-  }
-xmlhttp2.open("GET","ajax/app-endorsement-cost.php?hash="+text+"&id="+id,true);
-xmlhttp2.send();
+// var xmlhttp2=new XMLHttpRequest();
+// xmlhttp2.onreadystatechange=function()
+//   {
+//   if (xmlhttp2.readyState==4 && xmlhttp2.status==200)
+//     {
+// 	//alert(xmlhttp.responseText);
+// 	 $('.costType').html(xmlhttp2.responseText);
+//     }
+//   }
+// xmlhttp2.open("GET","ajax/app-endorsement-cost.php?hash="+text+"&id="+id,true);
+// xmlhttp2.send();
 
 
 //GET REFERENCENO
@@ -446,7 +446,7 @@ if(res !=""){
 				<th colspan="2">Item Based</th>
 			</tr>
 			<tr>
-				<th style="background:#d1cab0;">Commodity</th>
+				<th style="background:#d1cab0;">GL Description Code</th>
 				<th style="background:#d1cab0;">Cost (PHP)</th>
 			</tr>
 			<tr>
@@ -455,7 +455,7 @@ if(res !=""){
 			</tr>
 		</table>
 	</div>
-	<div class="costType">
+	<div class="costType hidden" >
 		<table border="1" cellspacing="5px" width="70%" style="margin:0 auto;">
 			<tr>
 				<th colspan="2">Cost Based</th>

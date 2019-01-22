@@ -54,7 +54,6 @@ $code = $_POST['code'];
 $ORG_CODE = $_POST['ORG_CODE'];
 $MRC_CODE = $_POST['MRC_CODE'];
 $CUR_CODE = @$_POST['CUR_CODE'];
-echo $CUR_CODE;
 $CUR_CODE_VAL = @$_POST['CUR_CODE_VAL'];
 $quantity = $_POST['quantity_val'];
 $january = $_POST['january'];
@@ -70,13 +69,16 @@ $october = $_POST['october'];
 $november = $_POST['november'];
 $december = $_POST['december'];
 $unit_cost = $_POST['unit_cost'];
+$reason = $_POST['reason'];
+
 $unit_cost = str_replace(",","",$unit_cost);
 $rate = "";
 $foreign_cost = 0;
 $available = 0.00;
 
 $to_quarter_tb = $_POST['to_quarter_tb'];
-$to_org_code = $_POST['to_org_code'];
+// $to_org_code = $orgcode;
+$to_org_code = null;
 
 if($CUR_CODE != "PHP" && $CUR_CODE != ""){
 $today = date("m/d/Y H:i");	
@@ -122,6 +124,10 @@ $errorFlag = true;
 }
 if ((int)$unit_cost <= 0){
 	$errorMessage .= 'Please enter a budget amount.\n\n';
+	$errorFlag = true;
+}
+if ($reason == ""){
+	$errorMessage .= 'Please enter a reason for this request.\n\n';
 	$errorFlag = true;
 }
 	
@@ -185,6 +191,7 @@ $today = date("m/d/Y H:i");
 						"fr_cost_center"=>"",
 						"fr_code"=>0,
 						"to_quarter"=>$to_quarter_tb, 
+						"reason"=>$reason,
 						"fr_quarter"=>null,
 						"to_org_code"=>null
 					);
@@ -570,7 +577,7 @@ if(res !=""){
 			<tr>
 				<td class="textLabel">Item Description: </td>
 				<td class="textField"><input type="text" class="field" name="description" id="description" spellcheck="false" tabindex="1" readonly></td>				
-				<td class="textLabel">Amount:</td>
+				<td class="textLabel">Amount: <i class="required">*</i></td>
 				<td class="textField hidden"><input type="text" class="field" name="cost" id="cost" spellcheck="false" tabindex="1" value="0.00" onkeypress="return numbersonly(this, event)" onblur="round(this,2);"></td>								
 				<td class="textField " colspan="3"><input type="text" class="field" name="unit_cost" id="unit_cost" spellcheck="false" tabindex="1" value="0.00" onkeypress="return numbersonly(this, event)" onblur="round(this,2);">
 				</td>				
@@ -601,8 +608,10 @@ if(res !=""){
 				<td class="textField">
 					<input type="text" class="field" name="gl_description" id="gl_description" spellcheck="false" tabindex="1" readonly>
 				</td>	
+				<td class="textLabel">Reason: <i class="required">*</i></td>
+				<td class="textField"><textarea id="reason" name="reason"></textarea></td>		
 			</tr>
-			<tr>
+			<tr style="display:none">
 				
 				<td class="textLabel">Item Classification:</td>
 				<td class="textField">

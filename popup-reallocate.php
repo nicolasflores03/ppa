@@ -77,8 +77,8 @@ var to_org_code = "<?php echo $to_org_code; ?>";
 
 
 $("#new_tmp").click(function() {
-//	var _amount = "<?php echo $_GET['amount']; ?>";
-//	if(parseInt(_amount) > 0)  {
+	var destination_quarter = "<?php echo $destination_quarter; ?>";
+	if(parseInt(destination_quarter) > 0)  {
 		var r=confirm("Are you sure you want to add a new record?");
 		if (r==true){
 				//window.opener.close();
@@ -88,10 +88,10 @@ $("#new_tmp").click(function() {
 				self.close();
 				//window.open("dpp-record-lines-item-addmore.php?year="+year_budget+"&login="+login+"&mrccode="+mrccode+"&org_code="+org_code+"&cost_center="+cost_center);
 		}
-	// } else {
-	// 	alert("Please enter budget movement amount.");
-	// 	self.close();
-	// }
+	} else {
+		alert("Please select a target quarter.");
+		// self.close();
+	}
 });
 
 $("#new_tmp_reallocate").click(function() {
@@ -249,8 +249,8 @@ $("#new_tmp_reallocate").click(function() {
 	?>
 	
 	<div class="divText">
-		<input type="button" class="bold" name="new_tmp" id="new_tmp" value=" Add Item ">
-		<input type="button" class="bold" name="new_tmp_reallocate" id="new_tmp_reallocate" value=" Add Item ">
+		<input type="button" class="bold" name="new_tmp" id="new_tmp" value=" Add Item " style="display:none;">
+		<input type="button" class="bold" name="new_tmp_reallocate" id="new_tmp_reallocate" value=" Add Item " style="display:none;">
 	</div>
 </body> 
 </html>

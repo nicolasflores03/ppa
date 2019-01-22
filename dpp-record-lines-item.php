@@ -80,11 +80,11 @@ $column = $crudapp->readColumn($conn,"R5_VIEW_ITEMBASE_LINES");
 $record_id = $crudapp->readID($conn,"R5_EAM_DPP_ITEMBASE_LINES");
 $record_id = $record_id + 1;
 
-
 $versionExist = $crudapp->checkRecordExist($conn,"R5_DPP_VERSION","ORG_CODE = '$orgcode' AND MRC_CODE = '$mrccode' AND year_budget = '$year'");
 
-$requiredField = array('id','code','Description','GL_Code','UOM','QTY','Foreign_Currency','foreign_cost','total_cost','Classification','Jan','Feb','Mar','Apr','may','Jun','Jul','Aug','Sept','Oct','Nov','Dec');
-$column = array_intersect($column,$requiredField);
+$requiredField = array('id','code','Description','GL_Code','UOM','QTY','Foreign_Currency','total_cost', 'available', 'Jan','Feb','Mar','Apr','may','Jun','Jul','Aug','Sept','Oct','Nov','Dec');
+$column = $requiredField;
+// $column = array_intersect($column,$requiredField);
 $listView = $crudapp->listTable($conn,"R5_VIEW_ITEMBASE_LINES",$column,$cndItem);
 $tableView = $filterapp->recordItemFilterView($conn,$column,$listView,$filter,"id");
 
@@ -686,6 +686,7 @@ popup.focus();
 
 
 function getItemInfo(){
+
 //HASH - To random string that will reload pages with ajax call
 var text = "";
 var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -701,11 +702,13 @@ xmlhttp.onreadystatechange=function()
     {
 	//alert(xmlhttp.responseText);
 	 var json = $.parseJSON(xmlhttp.responseText);
+	 //var item_classification = json['PAR_CLASS'];
 	 var unit_cost = "1";
 	 //Protect Unit Cost if base price is greater than 0
 	 var description = json['PAR_DESC'];
-	 var itemtype = json['CMD_DESC'];classification
-	 var classification = json['PAR_UDFCHAR07'];
+	 var itemtype = json['CMD_DESC'];
+	//  var classification = json['PAR_UDFCHAR07'];
+	 var classification = json['PAR_CLASS'];
 	 var PAR_LASTPRICE = json['PAR_LASTPRICE'];
 	 var uom = json['UOM_DESC'];
 	 var gl = json['gl'];
@@ -1217,7 +1220,7 @@ if(expired > 0 && version < 2){
 	<div class="divText">
 	<!--<img src="images/toolbar_previous.png" name="back_tmp" id="back_tmp" align="absmiddle">-->
 	<!--<img src="images/toolbar_save.png" name="save_tmp" id="save_tmp" align="absmiddle">-->
-	<!--<input type="button" class="bold" name="upload_excel_btn" id="upload_excel_btn" title="Import items via excel" value=" Import items "> -->
+	<input type="button" class="bold hidden" name="upload_excel_btn" id="upload_excel_btn" title="Import items via excel" value=" Import items ">
 	<input type="button" class="bold" name="endorsement_tmp" id="endorsement_tmp" value=" For Endorsement ">
 	<input type="button" class="bold" name="revise_tmp" id="revise_tmp" value=" Revision Request ">
 	<input type="button" class="bold" name="submitted_tmp" id="submitted_tmp" value=" Submit ">
@@ -1390,9 +1393,9 @@ if(expired > 0 && version < 2){
 
 				<td class="textLabel quantity_td" style="display:none;">Quantity:</td>
 				<td class="textField quantity_td" style="display:none;"><input type="text" class="field" name="quantity" id="quantity" spellcheck="false" tabindex="1" value="0" readonly><input type="hidden" class="field" name="quantity_val" id="quantity_val" spellcheck="false" tabindex="1" value="0"></td>						
-			
+
 			</tr>
-			<tr>
+			<tr style="display:none">
 				
 				<td class="textLabel">Item Classification:</td>
 				<td class="textField">

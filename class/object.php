@@ -229,6 +229,7 @@ class filterClass{
 	public function recordItemFilterView($conn,$column,$listView,$filter,$code)
     {
 		$content = '';
+		
 		//$content .= '<div class="Headers"><table class="NewHeader"><tr></tr></table></div>';
 		$content .= '<div class="TableView">';
 		$content .= '<table width="100%" cellspacing="0" cellpadding="0" border="1" class="list">';
@@ -240,6 +241,8 @@ class filterClass{
 				//$content .= "<th>".$fieldName."</th>";
 				if ($fieldName == "TOTAL COST" || $fieldName == "UNIT COST"){//-->Remove ID from the table header
 					$content .= "<th>".$fieldName."(PHP)</th>";
+				}else if ($fieldName == "FOREIGN CURRENCY"){//-->Remove ID from the table header
+					$content .= "<th>CURRENCY</th>";
 				}else{
 					$content .= "<th>".$fieldName."</th>";
 				}
@@ -251,6 +254,7 @@ class filterClass{
 		$hasStats = 0;
 		$stats = "";
 		$grand_total = 0;
+		$total_available = 0;
 		$grand_jan = 0;
 		$grand_feb = 0;
 		$grand_mar = 0;
@@ -267,6 +271,7 @@ class filterClass{
 		if(empty($filter)){
 			foreach($listView as $views){
 				$grand_total += floatval(str_replace(",", "", $views["total_cost"]));
+				$total_available += $views["available"];
 				$grand_jan += floatval(str_replace(",", "", $views["Jan"]));
 				$grand_feb += floatval(str_replace(",", "", $views["Feb"]));
 				$grand_mar += floatval(str_replace(",", "", $views["Mar"]));
@@ -286,7 +291,11 @@ class filterClass{
 				$content .= "<tr class='test' onclick=\"onclickEvent('$id');\">";
 					foreach($column as $fieldName){
 						if ($fieldName != "id"){
-							$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+							if($fieldName == "available") {
+								$content .= "<td class='$fieldName'>".number_format($views[$fieldName],2,".",",")."</td>";
+							} else {
+								$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+							}
 						}
 						if ($fieldName == "status"){
 							$hasStats = 1;
@@ -309,10 +318,9 @@ class filterClass{
 			}
 
 		}else{
+			
 			foreach($listView as $views){
-				$grand_total .= $grand_total ." +  ". $views["total_cost"];
-
-				// echo $grand_total . "<br/>" ;
+				$column_inserted = false;
 				$field = $filter[0];
 				$type = $filter[1];
 				$value = $filter[2];
@@ -320,9 +328,14 @@ class filterClass{
 				$content .= "<tr class='test' onclick=\"onclickEvent('$id');\">";
 				if ($type == "eq"){
 					if (strtolower($views["$field"]) == strtolower($value)){
+						$column_inserted = true;
 						foreach($column as $fieldName){
 							if ($fieldName != "id"){
-								$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+								if($fieldName == "available") {
+									$content .= "<td class='$fieldName'>".number_format($views[$fieldName],2,".",",")."</td>";
+								} else {
+									$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+								}
 							}
 							if ($fieldName == "status"){
 								$hasStats = 1;
@@ -342,9 +355,14 @@ class filterClass{
 					}
 				}else if ($type == "co"){
 					if (strpos(strtolower($views["$field"]),strtolower($value)) !== false){
+						$column_inserted = true;
 						foreach($column as $fieldName){
 							if ($fieldName != "id"){
-								$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+								if($fieldName == "available") {
+									$content .= "<td class='$fieldName'>".number_format($views[$fieldName],2,".",",")."</td>";
+								} else {
+									$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+								}
 							}
 							if ($fieldName == "status"){
 								$hasStats = 1;
@@ -364,9 +382,14 @@ class filterClass{
 					}				
 				}else if ($type == "sw"){
 					if (0 === strpos(strtolower($views["$field"]), strtolower($value))){
+						$column_inserted = true;
 						foreach($column as $fieldName){
 							if ($fieldName != "id"){
-								$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+								if($fieldName == "available") {
+									$content .= "<td class='$fieldName'>".number_format($views[$fieldName],2,".",",")."</td>";
+								} else {
+									$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+								}
 							}
 							if ($fieldName == "status"){
 								$hasStats = 1;
@@ -386,9 +409,14 @@ class filterClass{
 					}				
 				}else if ($type == "ew"){
 					if (stripos(strrev(strtolower($views["$field"])), strrev(strtolower($value))) === 0){
+						$column_inserted = true;
 						foreach($column as $fieldName){
 							if ($fieldName != "id"){
-								$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+								if($fieldName == "available") {
+									$content .= "<td class='$fieldName'>".number_format($views[$fieldName],2,".",",")."</td>";
+								} else {
+									$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
+								}
 							}
 							if ($fieldName == "status"){
 								$hasStats = 1;
@@ -408,15 +436,31 @@ class filterClass{
 					}				
 				}
 
+				if($column_inserted){
+					$grand_total += floatval(str_replace(",", "", $views["total_cost"]));
+					$total_available += $views["available"];
+					$grand_jan += floatval(str_replace(",", "", $views["Jan"]));
+					$grand_feb += floatval(str_replace(",", "", $views["Feb"]));
+					$grand_mar += floatval(str_replace(",", "", $views["Mar"]));
+					$grand_apr += floatval(str_replace(",", "", $views["Apr"]));
+					$grand_may += floatval(str_replace(",", "", $views["may"]));
+					$grand_jun += floatval(str_replace(",", "", $views["Jun"]));
+					$grand_jul += floatval(str_replace(",", "", $views["Jul"]));
+					$grand_aug += floatval(str_replace(",", "", $views["Aug"]));
+					$grand_sep += floatval(str_replace(",", "", $views["Sept"]));
+					$grand_oct += floatval(str_replace(",", "", $views["Oct"]));
+					$grand_nov += floatval(str_replace(",", "", $views["Nov"]));
+					$grand_dec += floatval(str_replace(",", "", $views["Dec"]));
+				}
+
 				$content .= "</tr>";
 			}
 		}
 		
 		$formatted_grand_total = number_format($grand_total,2,".",",");
-		$content .= "<tr><td colspan='7' style='text-align: right'>Grand Total</td>";
+		$content .= "<tr><td colspan='6' style='text-align: right'>Grand Total</td>";
 		$content .= "<td><strong>$formatted_grand_total</strong></td>";
-		$content .= "<td></td>";
-		//grand total months
+		$content .= "<td><strong>".number_format($total_available,2,".",",")."</td>";
 		$content .= "<td><strong>".number_format($grand_jan,2,".",",")."</strong></td>";
 		$content .= "<td><strong>".number_format($grand_feb,2,".",",")."</strong></td>";
 		$content .= "<td><strong>".number_format($grand_mar,2,".",",")."</strong></td>";
@@ -452,7 +496,7 @@ class filterClass{
 				//$content .= "<th>".$fieldName."</th>";
 				if ($fieldName == "TOTAL COST" || $fieldName == "UNIT COST"){//-->Remove ID from the table header
 					$content .= "<th>".$fieldName."(PHP)</th>";
-				}else{
+				} else {
 					$content .= "<th>".$fieldName."</th>";
 				}
 			}
@@ -535,7 +579,7 @@ class filterClass{
 							}
 						}
 						$stats = str_replace(" ","",$stats);
-					
+
 					}				
 				}
 
