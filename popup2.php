@@ -46,7 +46,6 @@ $tableView .= "</tr>";
 $tableView .= '</table>';
 
 }
-
 //Item
 if (isset($_POST['search'])){
 $tableView = "";
@@ -117,7 +116,6 @@ $type = $_POST['type'];
 <script type='text/javascript'>  
 $(document).ready(function(){
 	$("tr.tbitem").click(function() {        // function_tr
-	debugger;
 		var id = $(this).find("td").eq(0).text();
 		var name = $(this).find("td").eq(1).text();
 		//name = name.replace(/-/g, ' ');
