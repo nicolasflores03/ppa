@@ -46,8 +46,10 @@ $data = $crudapp->readRecord3($conn,"R5_BUDGET_REALLOCATION_LOOKUP",$cnd);
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script type='text/javascript'> 
 $(document).ready(function(){
-var type = "<?php echo $type; ?>";
-var field = "<?php echo $field; ?>";
+	var type = "<?php echo $type; ?>";
+	var field = "<?php echo $field; ?>";
+
+/*
 	if (type == "reallocation" && field == "to"){
 		$('#new_tmp').hide();
 		$('#new_tmp_reallocate').show();
@@ -58,6 +60,7 @@ var field = "<?php echo $field; ?>";
 		$('#new_tmp').hide();
 		$('#new_tmp_reallocate').hide();
 	}
+*/
 
 var year_budget = "<?php echo $year_budget; ?>";
 var login = "<?php echo $login; ?>";
@@ -249,8 +252,19 @@ $("#new_tmp_reallocate").click(function() {
 	?>
 	
 	<div class="divText">
-		<input type="button" class="bold" name="new_tmp" id="new_tmp" value=" Add Item " style="display:none;">
-		<input type="button" class="bold" name="new_tmp_reallocate" id="new_tmp_reallocate" value=" Add Item " style="display:none;">
+		<?php 
+			$new_tmp = "display:none;";
+			$new_tmp_reallocate = "display:none;";
+			if ($type == "reallocation" && $field == "to"){
+				$new_tmp = "display:none;";
+				$new_tmp_reallocate = "";
+			} else if ($type == "supplement"){
+				$new_tmp = "";
+				$new_tmp_reallocate = "display:none;";
+			} 
+		?>
+		<input type="button" style="<?php echo $new_tmp;?>" class="bold" name="new_tmp" id="new_tmp" value=" Add Item "">
+		<input type="button" style="<?php echo $new_tmp_reallocate;?>" class="bold" name="new_tmp_reallocate" id="new_tmp_reallocate" value=" Add Item "">
 	</div>
 </body> 
 </html>
