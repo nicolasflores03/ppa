@@ -16,7 +16,8 @@ if (isset($_FILES["item-based-file"])){
 	$name = $_FILES["item-based-file"]["name"];
 	//$ext = end((explode(".", $name)));
 	$new_name = $random_str . $name;
-	$filepath = "upload/".$new_name;
+	$filepath = "upload/" . $new_name;
+	
 	if(move_uploaded_file($filepath_tmp,$filepath)){
 		
 		//$new_name;
@@ -39,21 +40,33 @@ if (isset($_FILES["item-based-file"])){
 
 			$Spreadsheet -> ChangeSheet($Index);
 
-			foreach ($Spreadsheet as $Key => $Row)
+			$budget_data = array();
+			$row_number = 0;
+			$record_items = array();
+			foreach ($Spreadsheet as $key => $rows)
 			{
-				echo $Key . "<br/>";
-				
-				
-				// if ($Row)
-				// {
-				// 	print_r($Row);
-				// }
-				// else
-				// {
-				// 	var_dump($Row);
-				// }
-		
+
+				if($key > 0){
+					$tmp = array();
+					$tmp[] = $rows[0];
+					$tmp[] = $rows[1];
+					$tmp[] = $rows[2];
+					$tmp[] = $rows[3];
+					$tmp[] = $rows[4];
+					$tmp[] = $rows[5];
+					$tmp[] = $rows[6];
+					$tmp[] = $rows[7];
+					$tmp[] = $rows[8];
+					$tmp[] = $rows[9];
+					$tmp[] = $rows[10];
+					$tmp[] = $rows[11];
+					$tmp[] = $rows[12];
+
+					array_push($record_items, $tmp);
+				}
 			}
+
+	var_dump($record_items);
 	
 		}
 			exit();

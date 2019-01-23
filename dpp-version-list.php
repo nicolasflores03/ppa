@@ -214,7 +214,7 @@ background:#fff;
 </style>
 </head>
 <body>
-<div class="headerText">Department APP List</div>
+<div class="headerText">Department Budget Plan List</div>
 <div class="filterContainer">
 	<div class="deptFilter">
 		<table width="33%" border="0" cellspacing="0" cellpadding="0" class="tablefilter">

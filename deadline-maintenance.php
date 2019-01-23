@@ -500,7 +500,7 @@ var user ="<?php echo $user; ?>";
 <body>
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user; ?>" method="post" name="theForm" enctype="multipart/form-data">
 <div class="mainContainer">
-<div class="headerText">Budget Cut-Off Maintenance</div>
+<div class="headerText">Budget Parameter</div>
 
 <div class="headerText">
 <input type="button" class="tabs" name="NEW-RECORD" id="newRecord" value=" New Record ">

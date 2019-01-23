@@ -134,10 +134,10 @@ $generateAPP = $crudapp->generateApp($conn,$year,$ORG_CODE);
 	} else {
 		sqlsrv_rollback( $conn );
 		//echo "Transaction rolled back.<br />";
-		header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&password=".$password."&year=".$year."&res=fail&msg=Error on creating a new version of APP!");
+		header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&password=".$password."&year=".$year."&res=fail&msg=Error on creating a new version of Budget Plan!");
 	}
 }else{
-echo '<script>alert("Validation Error:\n\nYou have an existing APP!");</script>';
+echo '<script>alert("Validation Error:\n\nYou have an existing Budget Plan!");</script>';
 }
 }
 
@@ -251,13 +251,13 @@ if(res !=""){
 </head>
 <body>
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&password=".$password."&ORG_CODE=".$ORG_CODE."&year=".$year; ?>" method="post" name="theForm" enctype="multipart/form-data">
-<div class="headerText2"><div id="divText">Endorsed APP</div></div>
+<div class="headerText2"><div id="divText">Endorsed Budget Plan</div></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>
 <div class="actionBar">
 	<div class="divText">
 		<!--<input type="button" class="bold" name="back_tmp" id="back_tmp" value=" Back ">-->
-		<input type="submit" class="bold" name="generateApp" id="generateApp" value=" Generate APP ">
+		<input type="submit" class="bold" name="generateApp" id="generateApp" value=" Generate Budget Plan ">
 		<div class="hidden">
 			<input type="submit" class="bold" name="back" id="back" value=" Back ">
 		</div>
@@ -324,7 +324,7 @@ if(res !=""){
 	<?php
 	echo $tableView2;
 	?>	
-	<!--APP Section-->
+	<!--Budget Plan Section-->
 	<div class="formDiv">
 	<div class="headerText">Budget Details</div>
 	<table class="procurement" border="0" cellspacing="5px" width="100%">

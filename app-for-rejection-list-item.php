@@ -36,7 +36,7 @@ $column = array_intersect($column,$requiredField);
 $listView = $crudapp->listTable($conn,"R5_ENDORESED_APP",$column,$cnd1);
 $tableView = $filterapp->filterViewURL2($conn,$column,$listView,$filter,"id");
 
-//ENDORSE or REJECT DEPT APP
+//ENDORSE or REJECT DEPT Budget Plan
 if (isset($_POST['submit_item'])){
 $reference_no = $_POST['reference_no_item'];
 $status = $_POST['status_item'];
@@ -74,7 +74,7 @@ $auditData = array("reference_no"=>$reference_no,"version"=>$version,"updatedBy"
 		sqlsrv_rollback( $conn );
 		echo "Transaction rolled back.<br />";
 	}
-	header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&id=".$id."&orgcode=".$orgcode."&res=pass&msg=You have successfully updated this APP!");
+	header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&id=".$id."&orgcode=".$orgcode."&res=pass&msg=You have successfully updated this Budget Plan!");
 }
 
 ?>
@@ -186,7 +186,7 @@ if(res !=""){
 </head>
 <body>
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&id=".$id."&orgcode=".$orgcode; ?>" method="post" name="theForm" enctype="multipart/form-data">
-<div class="headerText2"><div id="divText">APP for Rejection List</div></div>
+<div class="headerText2"><div id="divText">Budget Plan for Rejection List</div></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>
 <div class="mainContainer">
@@ -242,7 +242,7 @@ if(res !=""){
 <?php
 		echo $tableView;
 	?>	
-	<!--APP Section-->
+	<!--Budget Plan Section-->
 	<div class="formDiv">
 	<div class="headerText">Budget Details</div>
 	<table class="procurement" border="0" cellspacing="5px" width="100%">

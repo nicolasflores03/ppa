@@ -176,7 +176,7 @@ if (mrc == ""){
 	
 	
 	$("#continue_tmp").click(function() {
-		var r=confirm("Are you sure you want to create a new version of APP?");
+		var r=confirm("Are you sure you want to create a new version of Budget Plan?");
 		if (r==true){
 				$("#continue").click();
 		}
@@ -205,7 +205,7 @@ if (mrc == ""){
 <body>
 
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&ORG_CODE=".$ORG_CODE."&MRC_CODE=".$MRC_CODE."&yr=".$year?>" method="post" name="theForm" enctype="multipart/form-data">
-<div class="headerText2"><div id="divText">Create APP</div></div>
+<div class="headerText2"><div id="divText">Create Budget Plan</div></div>
 <div class="actionBar">
 	<div class="divText">
 	<!--<img src="images/toolbar_previous.png" name="back_tmp" id="back_tmp" align="absmiddle">-->
