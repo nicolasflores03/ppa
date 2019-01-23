@@ -458,7 +458,7 @@ class filterClass{
 		}
 		
 		$formatted_grand_total = number_format($grand_total,2,".",",");
-		$content .= "<tr><td colspan='6' style='text-align: right'>Grand Total</td>";
+		$content .= "<tr><td colspan='4' style='text-align: right'>Grand Total</td>";
 		$content .= "<td><strong>$formatted_grand_total</strong></td>";
 		$content .= "<td><strong>".number_format($total_available,2,".",",")."</td>";
 		$content .= "<td><strong>".number_format($grand_jan,2,".",",")."</strong></td>";

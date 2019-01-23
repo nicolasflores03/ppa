@@ -82,7 +82,7 @@ $record_id = $record_id + 1;
 
 $versionExist = $crudapp->checkRecordExist($conn,"R5_DPP_VERSION","ORG_CODE = '$orgcode' AND MRC_CODE = '$mrccode' AND year_budget = '$year'");
 
-$requiredField = array('id','code','Description','GL_Code','UOM','QTY','Foreign_Currency','total_cost', 'available', 'Jan','Feb','Mar','Apr','may','Jun','Jul','Aug','Sept','Oct','Nov','Dec');
+$requiredField = array('id','code','Description','GL_Code','Foreign_Currency','total_cost', 'available', 'Jan','Feb','Mar','Apr','may','Jun','Jul','Aug','Sept','Oct','Nov','Dec');
 $column = $requiredField;
 // $column = array_intersect($column,$requiredField);
 $listView = $crudapp->listTable($conn,"R5_VIEW_ITEMBASE_LINES",$column,$cndItem);
@@ -896,12 +896,14 @@ if(res !=""){
 	var dh = parseInt("<?php echo $dh; ?>");
 	var cfo = parseInt("<?php echo $cfo; ?>");
 	
+	$('#upload_excel_btn').hide();
 	$('#submitted_tmp').hide();
 	$('#endorsement_tmp').hide();
 	
 //Hide Endorsement Button
 if(bo > 0){
 	$('#submitted_tmp').show();
+	$('#upload_excel_btn').show();
 }
 if(dh > 0){
 	$('#endorsement_tmp').show();
@@ -914,6 +916,7 @@ var expired = "<?php echo $expired; ?>";
 if(expired > 0 && version < 2){
 	$('#endorsement_tmp').attr("disabled", true); 
 	$('#submitted_tmp').attr("disabled", true); 
+	$('#upload_excel_btn').attr("disabled", true); ;
 	$('#save_tmp').hide();
 	$('.actionButtonCenter').hide(); 
 	$('#copy_tmp').hide();
@@ -924,6 +927,7 @@ if(expired > 0 && version < 2){
 	if(status=="Submitted"){
 		$('#endorsement_tmp').attr("disabled", false);
 		$('#submitted_tmp').attr("disabled", true);
+		$('#upload_excel_btn').attr("disabled", true); ;
 		$('#save_tmp').hide();
 		$('.actionButtonCenter').hide();
 		$('#copy_tmp').hide();
@@ -932,6 +936,7 @@ if(expired > 0 && version < 2){
 	}else if(status=="ForEndorsement"){
 		$('#endorsement_tmp').attr("disabled", true);
 		$('#submitted_tmp').attr("disabled", true);
+		$('#upload_excel_btn').attr("disabled", true); ;
 		$('#save_tmp').hide();
 		$('.actionButtonCenter').hide();
 		$('#copy_tmp').hide();
@@ -941,6 +946,7 @@ if(expired > 0 && version < 2){
 	}else if(status=="Endorsed"){
 		$('#endorsement_tmp').attr("disabled", true);
 		$('#submitted_tmp').attr("disabled", true);
+		$('#upload_excel_btn').attr("disabled", true);
 		$('#save_tmp').hide();
 		$('.actionButtonCenter').hide();
 		$('#copy_tmp').hide();
@@ -950,6 +956,7 @@ if(expired > 0 && version < 2){
 	}else if(status=="RevisionRequest"){
 		$('#endorsement_tmp').hide();
 		$('#submitted_tmp').hide();
+		$('#upload_excel_btn').hide();
 		$('#save_tmp').hide();
 		$('.actionButtonCenter').hide();
 		$('#copy_tmp').show();
@@ -959,6 +966,7 @@ if(expired > 0 && version < 2){
 	}else if(status=="Approved"){
 		$('#endorsement_tmp').hide();
 		$('#submitted_tmp').hide();
+		$('#upload_excel_btn').hide();
 		$('#save_tmp').hide();
 		$('.actionButtonCenter').hide();
 		$('#copy_tmp').hide();
@@ -968,6 +976,7 @@ if(expired > 0 && version < 2){
 	}else if(status=="ForRevision"){
 		$('#endorsement_tmp').attr("disabled", true);
 		$('#submitted_tmp').attr("disabled", false);
+		$('#upload_excel_btn').attr("disabled", false);
 		$('.actionButtonCenter').show();
 		$('#copy_tmp').hide();
 		$('#new_tmp').hide();
@@ -975,6 +984,7 @@ if(expired > 0 && version < 2){
 	}else{
 		$('#endorsement_tmp').attr("disabled", true);
 		$('#submitted_tmp').attr("disabled", false);
+		$('#upload_excel_btn').attr("disabled", false);
 		$('.actionButtonCenter').show();
 		$('#copy_tmp').hide();
 		$('#new_tmp').hide();
