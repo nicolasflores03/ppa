@@ -71,7 +71,7 @@ $expired = 1;
 $expired = 0;
 }
 
-
+ 
 $filter = array();
 $cndItem = "id IN (SELECT rowid FROM dbo.R5_EAM_DPP_ITEMBASE_BRIDGE WHERE reference_no = '$reference_no' AND version = '$version') AND reference_no = '$reference_no' AND version = '$version'";
 
@@ -450,7 +450,7 @@ $today = date("m/d/Y H:i");
 				$result2 = $crudapp->updateRecord($conn,$data4,$table2,"id",$id);
 				$result4 = $crudapp->updateRecord($conn,$data6,$table4,"id",$id);
 			}
-		
+			
 			//Insert Record to Audit by Benjie Manalaysay 3/28/2016
 			$auditData = array("record_id"=>$id,"updatedBy"=>$user,"updatedAt"=>$today,"table_name"=>$table,"update_type"=>"Edit");	
 			$audit = $crudapp->insertRecord($conn,$auditData,"R5_CUSTOM_AUDIT_APP_LINES");
@@ -1213,8 +1213,8 @@ if(expired > 0 && version < 2){
 		for( var i=0; i < 5; i++ ) {
         	text += possible.charAt(Math.floor(Math.random() * possible.length));
 		}
-		
-		var popup= window.open('popup-excel-upload.php?hash='+text,'popup_form','location=no,menubar=no,status=no,scrollbars=yes,top=50%,left=50%,height=550,width=750'); 
+
+		var popup= window.open('popup-excel-upload.php?hash='+text+'&login='+ user +'&year='+ year + '&reference_no=' + reference_no + '&version=' + version,'popup_form','location=no,menubar=no,status=no,scrollbars=yes,top=50%,left=50%,height=550,width=750'); 
 		popup.focus(); 
 	});
 });

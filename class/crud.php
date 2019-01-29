@@ -1243,6 +1243,39 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		return false;
 		}	
 	}
+
+	public function insertRecordBatch($conn,$data,$table)
+    {			
+		$fields = "";
+		$sql = ""; 
+		foreach( $data as $key => $rows ) {
+			$sql_values = "";
+			foreach($rows as $col => $val) {
+				if($key > 0){
+					$fields .= $col . ", ";
+				}
+				$sql_values .= "'" .$val . "', ";
+			}
+			$sql .= "(".rtrim($sql_values,", ")."), ";
+		}
+
+		$fields = rtrim($fields,", ");
+
+		
+		$sql = "INSERT INTO $table ($fields) VALUES ".rtrim($sql,", "); 
+
+		$result = sqlsrv_query($conn,$sql);
+		
+		if( $result === false) {
+			die( print_r( sqlsrv_errors(), true) );
+		}
+		
+		if($result){
+			return true;
+		} else{
+			return false;
+		}	
+	}
 	
 	
 /*SPECIAL HANDLING FOR INSERT MILESTONE*/

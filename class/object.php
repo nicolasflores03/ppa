@@ -342,7 +342,7 @@ class filterClass{
 								$stats = $views[$fieldName];
 							}
 						}
-											$stats = str_replace(" ","",$stats);
+						$stats = str_replace(" ","",$stats);
 						if ($hasStats > 0){
 							if ($stats == "Unfinish" || $stats == "Created"){
 							$content .= "<td><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'></td>";
