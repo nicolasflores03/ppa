@@ -7,6 +7,7 @@ $errorFlag = false;
 $errorMessage = "";
 
 $crudapp = new crudClass();
+$uniqid = uniqid(); 
 
 $ref_no = @$_GET['reference_no'];
 $version = @$_GET['version'];
@@ -21,10 +22,10 @@ $MRC_CODE = @$_GET['MRC_CODE'];
 $success = isset($_GET['success']) ? $_GET['success'] : false;
 $error = isset($_GET['error']) ? $_GET['error'] : false;
 $url = $_SERVER['PHP_SELF'] . "?login=" . $login . "&year=" . $year . "&version=" . $version;
-				
+$save_file_path = "";	
+
 //Item
 if (isset($_FILES["item-based-file"])){ 
-
 	$random_str = substr(md5(mt_rand()), 0, 7);
 	$filepath_tmp = $_FILES["item-based-file"]["tmp_name"];
 	$name = $_FILES["item-based-file"]["name"];
@@ -33,6 +34,7 @@ if (isset($_FILES["item-based-file"])){
 	$filepath = "upload/" . $new_name;
 	
 	if(move_uploaded_file($filepath_tmp,$filepath)){
+
 		//$new_name;
 		ini_set('display_errors', TRUE);
 		ini_set('display_startup_errors', TRUE);
@@ -70,7 +72,7 @@ if (isset($_FILES["item-based-file"])){
 						if(trim($row->getValue()) != ""){
 							$has_data= true;
 						}
-
+						
 						if ($col == "A" ) {
 							if($row->getValue() == "" || !isValidItemCode($conn,$crudapp,$row->getValue())){
 								$tmp_errorMessage .= 'Invalid item code. ';
@@ -135,8 +137,6 @@ if (isset($_FILES["item-based-file"])){
 					}
 				}
 			}
-			// var_dump($record_items);
-
 
 			if($all_data_error_flag){
 				//$objPHPExcel = new PHPExcel("");
@@ -153,26 +153,26 @@ if (isset($_FILES["item-based-file"])){
 					$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(14, $indx, $msg);
 				}
 			
-				// Redirect output to a client’s web browser (Excel2007)
-				header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-				header('Content-Disposition: attachment;filename="import_fail_' . $name . '"');
-				header('Cache-Control: max-age=0');
-				// If you're serving to IE 9, then the following may be needed
-				header('Cache-Control: max-age=1');
+				// // Redirect output to a client’s web browser (Excel2007)
+				// header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+				// header('Content-Disposition: attachment;filename="import_fail_' . $name . '"');
+				// header('Cache-Control: max-age=0');
+				// // If you're serving to IE 9, then the following may be needed
+				// header('Cache-Control: max-age=1');
 
-				// If you're serving to IE over SSL, then the following may be needed
-				header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-				header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
-				header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-				header ('Pragma: public'); // HTTP/1.0
+				// // If you're serving to IE over SSL, then the following may be needed
+				// header ('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
+				// header ('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT'); // always modified
+				// header ('Cache-Control: cache, must-revalidate'); // HTTP/1.1
+				// header ('Pragma: public'); // HTTP/1.0
 
 				$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 				ob_end_clean();
-				
-				$objWriter->save('php://output');
-				//echo '<script>location.href = "' . $url . '" </script>';
-				exit;
-			
+				$milliseconds = round(microtime(true) * 1000);
+				$save_file_path = 'upload/import_fail_' . $milliseconds . "_" . $name;
+				$objWriter->save($save_file_path);
+				//exit;
+				$error = true;
 			} else{
 				// $ref_no = $_POST['ref_no'];
 				// $ORG_CODE = $_POST['ORG_CODE'];
@@ -321,6 +321,7 @@ function isValidItemCode($conn,$crudapp,$code){
 	} 
 	return $errorFlag;
 }
+
 ?>
 <html> 
 <head> 
@@ -329,17 +330,24 @@ function isValidItemCode($conn,$crudapp,$code){
 <title>Opener</title> 
 <script src="js/jquery.min.js"></script>
 <script type='text/javascript'>  
-	$(document).ready(function(){
-		$("#submit_form").click(function(e){
-			if($("#item-based-file").val() == "") {
+	var progressStarted = false;
+
+	function on_submit_form() {
+		$(".isa_error").css("display","none");
+		$(".actionButtonCenter input[type=submit]").prop("disabled", true);
+		if($("#item-based-file").val() == "") {
 				alert("Please Select File to Upload.");
+				$(".actionButtonCenter input[type=button]").prop("disabled", false);
 				return false;
-			} else {
-				$("form#form_uploader").submit();
-			}
-		});
-	});
+		} else {
+			// window.setTimeout("getProgress()", 500);
+			$('#iframe-progress').attr('src','iframe/iframe_progress_bar.php?id=<?php echo $uniqid; ?>&'+new Date()).show();
+			// $("form#form_uploader").submit();
+			return true;
+		}
 	
+	}
+
 	function uploadFile(type) {
 		if(type == "cost") {
 			$("#cost-based-file").trigger('click');
@@ -355,41 +363,39 @@ function isValidItemCode($conn,$crudapp,$code){
 		$(e).closest("tr").find("td:eq(1)").html(filename);
 	}
 </script>
-<style>
-	.alert {
-		padding: 20px;
-		background-color: #f44336;
-		color: white;
-		opacity: 0.83;
-		transition: opacity 0.6s;
-		margin-bottom: 15px;
-	}
-</style>
 </head> 
 <body> 
 <div class="filters"></div>
 	<div class="isa_success" style="<?php echo $success ? 'display: block;' : 'display: none;'; ?>">Record(s) has been successfully inserted!</div>
-	<div class="isa_error" style="<?php echo $error ? 'display: block;' : 'display: none;'; ?>">Record(s) has not been inserted! Please check the downloaded files for more details.</div>
+	<div class="isa_error" style="<?php echo $error ? 'display: block;' : 'display: none;'; ?>">Record(s) has not been inserted! <a href="<?php echo $save_file_path;?>">Please click this link for more details</a>.</div>
 	<!--Start of FORM-->
 	<div class="headerText">Budget Upload</div>
-	<form id="form_uploader" name="form_uploader" action="<?php echo $_SERVER['PHP_SELF']?>?login=<?php echo $login;?>&year=<?php echo $year?>&version=<?php echo $version?>&reference_no=<?php echo $ref_no?>" method="post" enctype="multipart/form-data">
-		
-		<table width="100%" cellspacing="0" cellpadding="0" border="1" class="listpop">
-			<tr style="cursor: auto">
+	<form id="form_uploader" onsubmit="on_submit_form()" name="form_uploader" action="<?php echo $_SERVER['PHP_SELF']?>?login=<?php echo $login;?>&year=<?php echo $year?>&version=<?php echo $version?>&reference_no=<?php echo $ref_no?>" method="post" enctype="multipart/form-data">
+		<input type="hidden" name="UPLOAD_IDENTIFIER" id="progress_key" value="<?php echo $uniqid;?>" /> 
+		<table width="100%" cellspacing="0" cellpadding="0" border="1" class="listpop-progress">
+			<tr >
 				<td>Item-Based</td>
-				<td></td>
+				<td class="file-name-td"></td>
 				<td style="text-align:center; padding-left: 0px;">
-					<button name="btn-item-based" onclick="uploadFile('item'); return false;">...</button>
+					<button name="btn-item-based" style="cursor: pointer;" onclick="uploadFile('item'); return false;">...</button>
 					<input type="file" name="item-based-file" id="item-based-file"  onchange="fileChange(this);" class="hidden"/>
 				</td>
 			</tr>
-
+			<!-- <tr id="tr_progress">
+				<td>Uploading Progress</td>
+				<td colspan="2">
+					<div id="progress">
+						<div id="bar" style="width:0%">0%</div>
+					</div>
+				</td>
+			</tr> -->
 		</table>
-	</form>
-	<div class="actionButtonCenter">
-		<input type="button" class="bold" name="submit_form" id="submit_form" value=" Save ">&nbsp;&nbsp;
-		<input type="button" value=" Close " onclick="self.close();">&nbsp;&nbsp;
-	</div>
 
+		<iframe id="iframe-progress" name="iframe-progress" frameborder="0" border="0" scrolling="no" scrollbar="no" style="width: 100%; height: 51px; display:none;"></iframe>
+		<div class="actionButtonCenter">
+			<input type="submit" class="bold" name="submit_form" id="submit_form" value=" Save ">&nbsp;&nbsp;
+			<input type="button" value=" Close " onclick="self.close();">&nbsp;&nbsp;
+		</div>
+	</form>
 </body> 
 </html>

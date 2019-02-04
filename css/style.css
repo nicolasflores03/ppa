@@ -77,10 +77,6 @@ text-align: left;
 border:none;
 }
 
-.Headers{
-
-}
-
 .Table{
 	margin-bottom: 20px;
     height: 300px;
@@ -380,3 +376,41 @@ select.readonly {
     pointer-events: none;
     touch-action: none;
 }
+
+/* added by Nick 1/30/2019 */
+.alert {
+    padding: 20px;
+    background-color: #f44336;
+    color: white;
+    opacity: 0.83;
+    transition: opacity 0.6s;
+    margin-bottom: 15px;
+}
+
+#progress {
+    height: 30px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+}
+
+#bar {
+    float: left;
+    width: 20%;
+    height: 100%;
+    font-size: 12px;
+    line-height: 30px;
+    color: #fff;
+    text-align: center;
+    background-color: #5cb85c;
+}
+
+.listpop-progress tr:hover  { 
+    cursor: default;
+}
+.listpop-progress tr td:first-child { 
+    width: 20%; 
+}
+.listpop-progress .file-name-td { 
+    width: 60%; 
+}
+
