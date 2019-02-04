@@ -3142,8 +3142,8 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 	/*SEND EMAIL*/
     public function sentEmail($conn,$from,$to,$subject,$message)
     {   
-	$status = '';
-	$errorMsg = '';
+		$status = '';
+		$errorMsg = '';
          //check if the email address is invalid
 		  $field=filter_var($to, FILTER_SANITIZE_EMAIL);
        
@@ -3194,12 +3194,12 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		   if(@mail("$to", "Subject: $subject",
            $message, $headers ))
 			{
-			echo "Mail Sent Successfully";
+			// echo "Mail Sent Successfully";
 					   $status = 'S';
 		   $errorMsg = 'Mail Sent Successfully';
 			}else{
-			echo "Mail Not Sent";
-		   echo "Mail Not Sent";
+			// echo "Mail Not Sent";
+		 	// echo "Mail Not Sent";
 		   $status = 'E';
 		   $errorMsg = 'Mail Not Sent';
 			}
@@ -3215,7 +3215,7 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		$resultaudit = sqlsrv_query($conn,$sqlaudit,$paramsaudit);
 		
 		if( $resultaudit === false) {
-		die( print_r( sqlsrv_errors(), true) );
+			die( print_r( sqlsrv_errors(), true) );
 		}		   
 		   //error_get_last()		   
      }	
@@ -3272,8 +3272,8 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			$status = 'S';
 		   $errorMsg = 'Mail Sent Successfully';
 			}else{
-			echo "Mail Not Sent";
-		   echo "Mail Not Sent";
+		// 	echo "Mail Not Sent";
+		//  echo "Mail Not Sent";
 		   $status = 'E';
 		   $errorMsg = 'Mail Not Sent';
 			}
@@ -3357,8 +3357,8 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 					   $status = 'S';
 		   $errorMsg = 'Mail Sent Successfully';
 			}else{
-			echo "Mail Not Sent";
-		   echo "Mail Not Sent";
+		// 	echo "Mail Not Sent";
+		//  echo "Mail Not Sent";
 		   $status = 'E';
 		   $errorMsg = 'Mail Not Sent';
 			}
