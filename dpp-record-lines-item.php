@@ -405,7 +405,7 @@ $errorFlag = true;
 
 $today = date("m/d/Y H:i");	
 	if(!$errorFlag){
-		$data = array("record_id"=>$record_id,"id"=>$record_id,"code"=>$code,"quantity"=>$quantity,"available"=>$available,"total_cost"=>$available,"unit_cost"=>$unit_cost,"saveFlag"=>1,"version"=>1,"foreign_curr"=>$CUR_CODE_VAL,"foreign_cost"=>$foreign_cost,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);	
+		$data = array("record_id"=>$record_id,"id"=>$record_id,"code"=>$code,"quantity"=>$quantity,"available"=>$available,"total_cost"=>$available,"unit_cost"=>$unit_cost,"saveFlag"=>0,"version"=>1,"foreign_curr"=>$CUR_CODE_VAL,"foreign_cost"=>$foreign_cost,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);	
 		$data2 = array("id"=>$record_id,"january"=>$january,"february"=>$february,
 		"march"=>$march,"april"=>$april,"may"=>$may,"june"=>$june,"july"=>$july,
 		"august"=>$august,"september"=>$september,"october"=>$october,"november"=>$november,"december"=>$december,"createdAt"=>$today,"createdBy"=>$user,"updatedAt"=>$today,"updatedBy"=>$user);
@@ -910,7 +910,6 @@ if(dh > 0){
 }else{
 	$('#revise_tmp').hide();
 }
-	
 //IF DEADLINE
 var expired = "<?php echo $expired; ?>";
 if(expired > 0 && version < 2){
@@ -1214,10 +1213,14 @@ if(expired > 0 && version < 2){
         	text += possible.charAt(Math.floor(Math.random() * possible.length));
 		}
 
-		var popup= window.open('popup-excel-upload.php?hash='+text+'&login='+ user +'&year='+ year + '&reference_no=' + reference_no + '&version=' + version,'popup_form','location=no,menubar=no,status=no,scrollbars=yes,top=50%,left=50%,height=550,width=750'); 
+		var popup= window.open('popup-excel-upload.php?hash='+text+'&login='+ user +'&year='+ year + '&reference_no=' + reference_no + '&version=' + version + '&cost_center=<?php echo trim($cost_center); ?>&MRC_CODE=' + "<?php echo $dppinfo[0]['MRC_CODE']; ?>" + "&ORG_CODE=" + "<?php echo $dppinfo[0]['ORG_CODE']; ?>",'popup_form','location=no,menubar=no,status=no,scrollbars=yes,top=50%,left=50%,height=550,width=750'); 
 		popup.focus(); 
 	});
 });
+
+function reloadPage() {
+	location.reload();
+}
 </script>
 </head>
 <body>

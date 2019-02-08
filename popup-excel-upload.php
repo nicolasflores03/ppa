@@ -13,12 +13,14 @@ $ref_no = @$_GET['reference_no'];
 $version = @$_GET['version'];
 $year = @$_GET['year'];
 $user = $_GET['login'];
+$cost_center = @$_GET['cost_center'];
+
 $login = $user;
 $updateSession = $crudapp->updateSession($conn,$user);
 
 $ORG_CODE = @$_GET['ORG_CODE'];
 $MRC_CODE = @$_GET['MRC_CODE'];
-
+$reference_no = $ref_no;
 $success = isset($_GET['success']) ? $_GET['success'] : false;
 $error = isset($_GET['error']) ? $_GET['error'] : false;
 $url = $_SERVER['PHP_SELF'] . "?login=" . $login . "&year=" . $year . "&version=" . $version;
@@ -182,7 +184,7 @@ if (isset($_FILES["item-based-file"])){
 				$data2 = array();
 				$data3 = array();
 				$data4 = array();
-				$reference_no = $ref_no;
+
 
 				//ITEMBASE
 				$column = $crudapp->readColumn($conn,"R5_VIEW_ITEMBASE_LINES");
@@ -270,7 +272,10 @@ if (isset($_FILES["item-based-file"])){
 					$record_id++;
 				}
 
-
+				if ( sqlsrv_begin_transaction( $conn ) === false ) {
+					die( print_r( sqlsrv_errors(), true ));
+			    }
+			   
 				$table = "R5_EAM_DPP_ITEMBASE_LINES";
 				$table2 = "R5_REF_ITEMBASE_BUDGET_MONTH";
 				$table3 = "R5_EAM_DPP_ITEMBASE_BRIDGE";
@@ -282,7 +287,53 @@ if (isset($_FILES["item-based-file"])){
 				$result4 = $crudapp->insertRecordBatch($conn,$data4,$table4);
 
 				if( $result == 1 && $result2 == 1 && $result3 == 1 && $result4 == 1) {
-					sqlsrv_commit( $conn );
+					//sqlsrv_commit( $conn );
+					$condition = " ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$MRC_CODE' AND year_budget = '$year' AND cost_center = '$cost_center' ";
+					$dppcolumn = $crudapp->readColumn($conn,"R5_DPP_VERSION");
+					$endorsementCtr = $crudapp->listTable($conn,"R5_DPP_VERSION", $dppcolumn,$condition);
+					$result_update_status = false;
+					
+					if (isset($endorsementCtr[0]['id']) ) {
+						$result_update_status = $crudapp->updateRecord($conn,array('status' => 'For Endorsement'),"R5_DPP_VERSION","id", $endorsementCtr[0]['id']);
+					} 
+
+					$data = array($ORG_CODE,$MRC_CODE,$year,$reference_no,$version);
+						$endorse = $crudapp->endorseApp($conn,$data);
+						
+						$today = date("m/d/Y H:i");	
+						$auditData = array("reference_no"=>$reference_no,"version"=>$version,"updatedBy"=>$user,"updatedAt"=>$today,"status_from"=>"Submitted","status_to"=>"For Endorsement");	
+						$audit = $crudapp->insertRecord($conn,$auditData,"R5_CUSTOM_AUDIT_DPP");
+								
+							if( $endorse == 1 && $result_update_status ) {
+								sqlsrv_commit( $conn );
+												
+								//SEND EMAIL
+								$emailfilter = "id = 1";
+								$emailcolumn = $crudapp->readColumn($conn,"R5_EMAIL_TEMPLATE");
+								$emailinfo = $crudapp->listTable($conn,"R5_EMAIL_TEMPLATE",$emailcolumn,$emailfilter);
+								$subject = @$emailinfo[0]['subject'];
+								$body = @$emailinfo[0]['body'];
+
+								$content = "This is to inform you that you have a pending for review items on your Department Annual Procurement Plan as of $today";
+								$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>Department: $MRC_CODE<br>Reference #: $reference_no<br>Version: $version<br>";
+								
+								$body = str_replace("\$content",$content,$body);
+								
+								//EMAIL Receiver
+								$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$MRC_CODE' AND ORG_CODE = '$ORG_CODE' AND FI = 1) AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$MRC_CODE'";
+								$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
+								$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
+								$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
+								$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);			
+								
+								
+							//	header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=pass&msg=You have successfully submitted this Budget Plan for endorsement!");
+							} else {
+								//sqlsrv_rollback( $conn );
+								//echo "Transaction rolled back.<br />";
+							//	header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=fail&msg=Transaction rolled back!");
+							}
+
 					// echo "Import success.<br />";
 					header('Location: '. $url . "&success=true");
 				} else {
@@ -290,6 +341,13 @@ if (isset($_FILES["item-based-file"])){
 					// echo "Transaction rolled back.<br />";
 					header('Location: '. $url . "&error=true");
 				}
+
+
+				// $ORG_CODE = $_POST['ORG_CODE'];
+				// $MRC_CODE = $_POST['MRC_CODE'];
+				// $reference_no = $_POST['ref_no'];
+
+				
 			}
 		} catch(Exception $e){
 			echo $e->getMessage();
@@ -370,7 +428,7 @@ function isValidItemCode($conn,$crudapp,$code){
 	<div class="isa_error" style="<?php echo $error ? 'display: block;' : 'display: none;'; ?>">Record(s) has not been inserted! <a href="<?php echo $save_file_path;?>">Please click this link for more details</a>.</div>
 	<!--Start of FORM-->
 	<div class="headerText">Budget Upload</div>
-	<form id="form_uploader" onsubmit="on_submit_form()" name="form_uploader" action="<?php echo $_SERVER['PHP_SELF']?>?login=<?php echo $login;?>&year=<?php echo $year?>&version=<?php echo $version?>&reference_no=<?php echo $ref_no?>" method="post" enctype="multipart/form-data">
+	<form id="form_uploader" onsubmit="on_submit_form()" name="form_uploader" action="<?php echo $_SERVER['PHP_SELF']?>?login=<?php echo $login;?>&MRC_CODE=<?php echo $MRC_CODE ?>&ORG_CODE=<?php echo $ORG_CODE ?>&year=<?php echo $year?>&version=<?php echo $version?>&reference_no=<?php echo $ref_no?>&cost_center=<?php echo $cost_center; ?>" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="UPLOAD_IDENTIFIER" id="progress_key" value="<?php echo $uniqid;?>" /> 
 		<table width="100%" cellspacing="0" cellpadding="0" border="1" class="listpop-progress">
 			<tr >

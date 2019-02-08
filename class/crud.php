@@ -91,7 +91,6 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		$stringCurrentTime = $currentTime->format('Y-m-d H:i:s');
 				
 		$currentDate = strtotime($stringCurrentTime);
-		
 
 		$futureDate = $currentDate+$additionalTime;
 		$formatDate = date("Y-m-d H:i:s", $futureDate);
@@ -433,21 +432,28 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		die( print_r( sqlsrv_errors(), true) );
 		}
 		
+		//Commented cost base
 		//Cost Base
-		$sql2 = "UPDATE dbo.R5_EAM_DPP_COSTBASE_LINES SET 
-        saveFlag = 1		
-		WHERE saveFlag = 0 AND id IN (SELECT rowid FROM dbo.R5_EAM_DPP_COSTBASE_BRIDGE WHERE reference_no = ? AND version = ?)";
-		$params2 = array($reference_no,$version);
-		$result2 = sqlsrv_query($conn,$sql2,$params2);
-		if( $result2 === false) {
-		die( print_r( sqlsrv_errors(), true) );
-		}
-		
-		if($result && $result2){
-		return true;
+		// $sql2 = "UPDATE dbo.R5_EAM_DPP_COSTBASE_LINES SET 
+        // saveFlag = 1		
+		// WHERE saveFlag = 0 AND id IN (SELECT rowid FROM dbo.R5_EAM_DPP_COSTBASE_BRIDGE WHERE reference_no = ? AND version = ?)";
+		// $params2 = array($reference_no,$version);
+		// $result2 = sqlsrv_query($conn,$sql2,$params2);
+		// if( $result2 === false) {
+		// die( print_r( sqlsrv_errors(), true) );
+		// }
+		// if($result && $result2){
+		// return true;
+		// }
+		// else{
+		// return false;
+		// }	
+
+		if($result){
+			return true;
 		}
 		else{
-		return false;
+			return false;
 		}	
     }
 	
