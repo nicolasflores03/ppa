@@ -100,7 +100,7 @@ $type = $_POST['type'];
 	}	
 }
 
-//Save Project to Budget Plan
+//Save Project to Budget
 if (isset($_POST['save'])){
 $reference_no = $_POST['ref_no'];
 $save = $crudapp->saveProjectApp($conn,$reference_no,$version);
@@ -108,7 +108,7 @@ $save = $crudapp->saveProjectApp($conn,$reference_no,$version);
 	header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=pass&msg=You have successfully saved the records!");
 }
 
-//Back Project Budget Plan
+//Back Project Budget
 if (isset($_POST['back'])){
 $ORG_CODE = $_POST['ORG_CODE'];
 //$year_budget = $_POST['year_budget'];
@@ -117,7 +117,7 @@ $back = $crudapp->backProjApp($conn,$ORG_CODE,$year);
 	header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version);
 }
 
-//COPY Project Budget Plan
+//COPY Project Budget
 if (isset($_POST['copy'])){
 $ORG_CODE = $_POST['ORG_CODE'];
 $reference_no = $_POST['ref_no'];
@@ -126,7 +126,7 @@ sqlsrv_commit( $conn );
 header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$createCopy);
 }
 
-//Endorsed Project Budget Plan
+//Endorsed Project Budget
 if (isset($_POST['endorsement'])){
 $ORG_CODE = $_POST['ORG_CODE'];
 //$year_budget = $_POST['year_budget'];
@@ -917,7 +917,7 @@ if(expired > 0 && version < 2){
     });
 	//Save Button
 	$("#back_tmp").click(function() {
-		var r=confirm("Are you sure you want to go back to the main menu? \n\nNote: Please make sure to save first before leaving this page or else your updates on the Budget Plan will not be reflected.");
+		var r=confirm("Are you sure you want to go back to the main menu? \n\nNote: Please make sure to save first before leaving this page or else your updates on the Budget will not be reflected.");
 		if (r==true){
 				$("#back").click();
 		}
@@ -927,7 +927,7 @@ if(expired > 0 && version < 2){
 	$(this).attr("disabled", true);
 		var expired = "<?php echo $expired; ?>";
 		if(expired < 1 || (expired > 0 && version > 1)){
-			var r=confirm("Are you sure you want to save this Budget Plan?");
+			var r=confirm("Are you sure you want to save this Budget?");
 			if (r==true){
 				$("#save").click();
 			}else{
@@ -941,7 +941,7 @@ if(expired > 0 && version < 2){
 	$("#new_tmp").click(function() {
 	var expired = "<?php echo $expired; ?>";
 	if(expired < 1){
-		var r=confirm("Are you sure you want to create a new Project Budget Plan?");
+		var r=confirm("Are you sure you want to create a new Project Budget?");
 		if (r==true){
 				window.location = "create-project-version.php?login="+user;
 		}
@@ -959,7 +959,7 @@ if(expired > 0 && version < 2){
 	$(this).attr("disabled", true);
 	var expired = "<?php echo $expired; ?>";
 	if(expired < 1 || (expired > 0 && version > 1)){
-		var r=confirm("Are you sure you want to create a new Project Budget Plan?");
+		var r=confirm("Are you sure you want to create a new Project Budget?");
 		if (r==true){
 				$("#copy").click();
 		}else{
@@ -994,7 +994,7 @@ if(expired > 0 && version < 2){
 				{
 				unsave = xmlhttp.responseText;
 					if(unsave < 1){
-					var r=confirm("Are you sure you want to endorse this Budget Plan?");
+					var r=confirm("Are you sure you want to endorse this Budget?");
 						if (r==true){
 								$("#endorsement").click();
 						}else{
@@ -1038,7 +1038,7 @@ if(expired > 0 && version < 2){
 </head>
 <body>
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."#FormAnchor"; ?>" method="post" name="theForm" enctype="multipart/form-data">
-<div class="headerText2"><div id="divText">Budget Plan Project List</div></div>
+<div class="headerText2"><div id="divText">Budget Project List</div></div>
 <div class="isa_info"><b>Deadline of budget submission is on: </b><?php echo $expiration_orig; ?></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>
@@ -1047,13 +1047,13 @@ if(expired > 0 && version < 2){
 		<!--<img src="images/toolbar_previous.png" name="back_tmp" id="back_tmp" align="absmiddle">-->
 		<!--<img src="images/toolbar_save.png" name="save_tmp" id="save_tmp" align="absmiddle">-->
 		<input type="button" class="bold" name="endorsement_tmp" id="endorsement_tmp" value=" For Endorsement ">
-		<input type="button" class="bold" name="copy_tmp" id="copy_tmp" value=" Create a Copy from this Project Budget Plan ">
-		<input type="button" class="bold" name="new_tmp" id="new_tmp" value=" Create New Project Budget Plan ">
+		<input type="button" class="bold" name="copy_tmp" id="copy_tmp" value=" Create a Copy from this Project Budget ">
+		<input type="button" class="bold" name="new_tmp" id="new_tmp" value=" Create New Project Budget ">
 		<div class="hidden">
 			<input type="submit" class="bold" name="back" id="back" value=" Back ">
 			<input type="submit" class="bold" name="save" id="save" value=" Save ">
 			<input type="submit" class="bold" name="endorsement" id="endorsement" value=" For Endorsement ">
-		    <input type="submit" class="bold" name="copy" id="copy" value=" Create a Copy from this Project Budget Plan ">
+		    <input type="submit" class="bold" name="copy" id="copy" value=" Create a Copy from this Project Budget ">
 		</div>
 	</div>
 </div>

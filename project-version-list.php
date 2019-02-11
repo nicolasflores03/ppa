@@ -35,19 +35,19 @@ $type = $_POST['type'];
 
 	//Form Validation
 	if ($fieldname == ""){
-	$errorMessage .= 'Please select a fieldname.\n\n';
-	$errorFlag = true;
+		$errorMessage .= 'Please select a fieldname.\n\n';
+		$errorFlag = true;
 	}
 	
 	if ($value == ""){
-	$errorMessage .= 'Please select a value.\n\n';
-	$errorFlag = true;
+		$errorMessage .= 'Please select a value.\n\n';
+		$errorFlag = true;
 	}
 
 	if(!$errorFlag){
 		$filter = array($fieldname,$type,$value);
 		$tableView = $filterapp->filterViewURL($conn,$column,$listView,$filter,"id");
-	}else{
+	} else {
 		echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
 	}		
 }
@@ -156,7 +156,7 @@ background:#fff;
 </style>
 </head>
 <body>
-<div class="headerText">Budget Plan Project List</div>
+<div class="headerText">Budget Project List</div>
 <div class="filterContainer">
 	<div class="deptFilter">
 		<table width="33%" border="0" cellspacing="0" cellpadding="0" class="tablefilter">

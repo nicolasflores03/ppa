@@ -189,14 +189,14 @@ $endorsementCtr = $crudapp->matchRecord2($conn,"R5_DPP_VERSION",'id',$condition)
 				
 				
 				
-				header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=pass&msg=You have successfully submitted this Budget Plan for endorsement!");
+				header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=pass&msg=You have successfully submitted this Budget for endorsement!");
 			} else {
 				sqlsrv_rollback( $conn );
 				//echo "Transaction rolled back.<br />";
 				header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=fail&msg=Transaction rolled back!");
 			}
 	}else{
-	$errorMessage ="You have an active endoresed Budget Plan!";
+	$errorMessage ="You have an active endoresed Budget!";
 	echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
 	}
 }
@@ -242,14 +242,14 @@ $endorsementCtr = $crudapp->matchRecord2($conn,"R5_DPP_VERSION",'id',$condition)
 				$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
 				$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);			
 				
-				header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=pass&msg=You have successfully submitted this Budget Plan for review!");
+				header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=pass&msg=You have successfully submitted this Budget for review!");
 			} else {
 				sqlsrv_rollback( $conn );
 				//echo "Transaction rolled back.<br />";
 				header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=fail&msg=Transaction rolled back!");
 			}
 	}else{
-	$errorMessage ="You have an active endoresed Budget Plan!";
+	$errorMessage ="You have an active endoresed Budget!";
 	echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
 	}
 }
@@ -300,7 +300,7 @@ $reference_no = $_POST['ref_no'];
 				}
 				
 				//echo "Transaction committed.<br />";
-				header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=pass&msg=You have successfully submitted this Budget Plan for revision!");
+				header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=pass&msg=You have successfully submitted this Budget for revision!");
 			} else {
 				sqlsrv_rollback( $conn );
 				//echo "Transaction rolled back.<br />";
@@ -1016,7 +1016,7 @@ if(expired > 0 && version < 2){
     });*/
 	//Save Button
 	$("#back_tmp").click(function() {
-		var r=confirm("Are you sure you want to go back to the main menu? \n\nNote: Please make sure to save first before leaving this page or else your updates on the Budget Plan will not be reflected.");
+		var r=confirm("Are you sure you want to go back to the main menu? \n\nNote: Please make sure to save first before leaving this page or else your updates on the Budget will not be reflected.");
 		if (r==true){
 				$("#back").click();
 		}
@@ -1056,7 +1056,7 @@ if(expired > 0 && version < 2){
 	$(this).attr("disabled", true);
 	var expired = "<?php echo $expired; ?>";
 	if(expired < 1 || (expired > 0 && version > 1)){
-		var r=confirm("Are you sure you want to save this Budget Plan?");
+		var r=confirm("Are you sure you want to save this Budget?");
 		if (r==true){
 				$("#save").click();
 		}else{
@@ -1070,7 +1070,7 @@ if(expired > 0 && version < 2){
 	$("#new_tmp").click(function() {
 	var expired = "<?php echo $expired; ?>";
 	if(expired < 1){
-		var r=confirm("Are you sure you want to create a new Budget Plan?");
+		var r=confirm("Are you sure you want to create a new Budget?");
 		if (r==true){
 				window.location = "create-dpp-version.php?login="+user;
 		}
@@ -1083,7 +1083,7 @@ if(expired > 0 && version < 2){
 	$(this).attr("disabled", true);
 	var expired = "<?php echo $expired; ?>";
 	if(expired < 1 || (expired > 0 && version > 1)){
-		var r=confirm("Are you sure you want to create a new Budget Plan?");
+		var r=confirm("Are you sure you want to create a new Budget?");
 		if (r==true){
 				$("#copy").click();
 		}else{
@@ -1113,7 +1113,7 @@ if(expired > 0 && version < 2){
 			{
 			unsave = xmlhttp.responseText;
 				if(unsave < 1){
-				var r=confirm("Are you sure you want to endorse this Budget Plan?");
+				var r=confirm("Are you sure you want to endorse this Budget?");
 					if (r==true){
 							$("#endorsement").click();
 					}else{
@@ -1169,7 +1169,7 @@ if(expired > 0 && version < 2){
 			{
 			unsave = xmlhttp.responseText;
 				if(unsave < 1){
-				var r=confirm("Are you sure you want to Submit this Budget Plan?");
+				var r=confirm("Are you sure you want to Submit this Budget?");
 					if (r==true){
 							$("#submitted").click();
 					}else{
@@ -1208,7 +1208,7 @@ if(expired > 0 && version < 2){
 	
 	$("#revise_tmp").click(function() {
 	$(this).attr("disabled", true);
-	 	var r=confirm("Are you sure you want to revise this Budget Plan?");
+	 	var r=confirm("Are you sure you want to revise this Budget?");
 		if (r==true){
 			$("#revise").click();
 		}else{
@@ -1242,15 +1242,15 @@ if(expired > 0 && version < 2){
 	<input type="button" class="bold" name="endorsement_tmp" id="endorsement_tmp" value=" For Endorsement ">
 	<input type="button" class="bold" name="revise_tmp" id="revise_tmp" value=" Revision Request ">
 	<input type="button" class="bold" name="submitted_tmp" id="submitted_tmp" value=" Submit ">
-	<input type="button" class="bold" name="copy_tmp" id="copy_tmp" value=" Create a Copy from this Budget Plan ">
-	<input type="button" class="bold" name="new_tmp" id="new_tmp" value=" Create New Budget Plan ">
+	<input type="button" class="bold" name="copy_tmp" id="copy_tmp" value=" Create a Copy from this Budget ">
+	<input type="button" class="bold" name="new_tmp" id="new_tmp" value=" Create New Budget ">
 		<div class="hidden">
 			<!--<input type="submit" class="bold" name="back" id="back" value=" Back ">-->
 			<input type="submit" class="bold" name="save" id="save" value=" Save ">
 			<input type="submit" class="bold" name="revise" id="revise" value=" Revision Request ">
 			<input type="submit" class="bold" name="endorsement" id="endorsement" value=" For Endorsement ">
 			<input type="submit" class="bold" name="submitted" id="submitted" value=" Submit ">
-			<input type="submit" class="bold" name="copy" id="copy" value=" Create a Copy from this Budget Plan ">
+			<input type="submit" class="bold" name="copy" id="copy" value=" Create a Copy from this Budget ">
 		</div>
 	</div>
 </div>

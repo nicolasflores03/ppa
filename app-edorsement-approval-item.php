@@ -35,7 +35,7 @@ $column = array_intersect($column,$requiredField);
 $listView = $crudapp->listTable($conn,"R5_ENDORESED_APP",$column,$cnd);
 $tableView = $filterapp->filterViewURLXdelete($conn,$column,$listView,$filter,"id");
 
-//ENDORSE or REJECT DEPT BUDGET PLAN
+//ENDORSE or REJECT DEPT BUDGET
 if (isset($_POST['submit_item'])){
 $reference_no = $_POST['reference_no_item'];
 $status = $_POST['status_item'];
@@ -61,9 +61,9 @@ $today = date("m/d/Y H:i");
 		
 		//update rejectFlag
 		if($status == "Revision Request"){
-		$data = array("rejectFlag"=>1);
-		$recordStatus = $crudapp->updateRecordStatus($conn,$data,$reference_no,$version);
-		$auditData = array("reference_no"=>$reference_no,"version"=>$version,"updatedBy"=>$user,"updatedAt"=>$today,"status_from"=>"For Endorsement","status_to"=>"Revision Request");	
+			$data = array("rejectFlag"=>1);
+			$recordStatus = $crudapp->updateRecordStatus($conn,$data,$reference_no,$version);
+			$auditData = array("reference_no"=>$reference_no,"version"=>$version,"updatedBy"=>$user,"updatedAt"=>$today,"status_from"=>"For Endorsement","status_to"=>"Revision Request");	
 		
 		
 				//SEND EMAIL
@@ -116,14 +116,11 @@ $today = date("m/d/Y H:i");
 				$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
 				$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
 				$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);			
-				
-		
 		}
 
 		$audit = $crudapp->insertRecord($conn,$auditData,"R5_CUSTOM_AUDIT_DPP");
 		
-		
-		if( $updateStats == 1) {
+		if( $updateStats == 1 && $audit) {
 			sqlsrv_commit( $conn );
 			echo "Transaction committed.<br />";
 		} else {
@@ -131,7 +128,7 @@ $today = date("m/d/Y H:i");
 			echo "Transaction rolled back.<br />";
 		}
 		header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&password=".$password."&ORG_CODE=".$ORG_CODE."&year=".$year."&res=pass&msg=Record has been successfully updated!");
-	}else{
+	} else {
 		echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
 	}
 }
@@ -173,10 +170,10 @@ $generateAPP = $crudapp->generateApp($conn,$year,$ORG_CODE);
 	} else {
 		sqlsrv_rollback( $conn );
 		//echo "Transaction rolled back.<br />";
-		header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&password=".$password."&ORG_CODE=".$ORG_CODE."&year=".$year."&res=fail&msg=Error on creating a new version of Budget Plan!");
+		header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&password=".$password."&ORG_CODE=".$ORG_CODE."&year=".$year."&res=fail&msg=Error on creating a new version of Budget!");
 	}
 }else{
-echo '<script>alert("Validation Error:\n\nYou have an existing Budget Plan!");</script>';
+echo '<script>alert("Validation Error:\n\nYou have an existing Budget!");</script>';
 }
 }
 
@@ -337,13 +334,13 @@ if(res !=""){
 </head>
 <body>
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&password=".$password."&year=".$year."&ORG_CODE=".$ORG_CODE; ?>" method="post" name="theForm" enctype="multipart/form-data">
-<div class="headerText2"><div id="divText">Endorsed Budget Plan</div></div>
+<div class="headerText2"><div id="divText">Endorsed Budget</div></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>
 <div class="actionBar">
 	<div class="divText">
 		<!--<input type="button" class="bold" name="back_tmp" id="back_tmp" value=" Back ">-->
-		<input type="submit" class="bold" name="generateApp" id="generateApp" value=" Generate Budget Plan ">
+		<input type="submit" class="bold" name="generateApp" id="generateApp" value=" Generate Budget ">
 		<div class="hidden">
 			<input type="submit" class="bold" name="back" id="back" value=" Back ">
 		</div>
@@ -410,7 +407,7 @@ if(res !=""){
   	<?php
 		echo $tableView;
 	?>	
-	<!--Budget Plan Section-->
+	<!--Budget Section-->
 	<div class="formDiv">
 	<div class="headerText">Budget Details</div>
 	<table class="procurement" border="0" cellspacing="5px" width="100%">

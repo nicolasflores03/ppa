@@ -191,7 +191,7 @@ background:#fff;
 </style>
 </head>
 <body>
-<div class="headerText">Consolidated Budget Plan</div>
+<div class="headerText">Consolidated Budget</div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>
 <div class="filterContainer">

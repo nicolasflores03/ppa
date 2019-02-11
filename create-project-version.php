@@ -146,7 +146,7 @@ if (org == ""){
 
 	
 	$("#continue_tmp").click(function() {
-		var r=confirm("Are you sure you want to create a new verson of project Budget Plan?");
+		var r=confirm("Are you sure you want to create a new verson of project Budget?");
 		if (r==true){
 				$("#continue").click();
 		}
@@ -168,7 +168,7 @@ if (org == ""){
 <body>
 
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&yr=".$year."&ORG_CODE=".$ORG_CODE?>" method="post" name="theForm" enctype="multipart/form-data">
-<div class="headerText2"><div id="divText">Budget Plan Project List</div></div>
+<div class="headerText2"><div id="divText">Budget Project List</div></div>
 <div class="actionBar">
 	<div class="divText">
 	<!--<img src="images/toolbar_previous.png" name="back_tmp" id="back_tmp" align="absmiddle">-->

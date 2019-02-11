@@ -632,7 +632,7 @@ if(expired > 0){
     });
 	//Save Button
 	$("#back_tmp").click(function() {
-		var r=confirm("Are you sure you want to go back to the main menu? \n\nNote: Please make sure to save first before leaving this page or else your updates on the Budget Plan will not be reflected.");
+		var r=confirm("Are you sure you want to go back to the main menu? \n\nNote: Please make sure to save first before leaving this page or else your updates on the Budget will not be reflected.");
 		if (r==true){
 				$("#back").click();
 		}
@@ -641,7 +641,7 @@ if(expired > 0){
 	$("#save_tmp").click(function() {
 		var expired = "<?php echo $expired; ?>";
 		if(expired < 1){
-			var r=confirm("Are you sure you want to save this Budget Plan?");
+			var r=confirm("Are you sure you want to save this Budget?");
 			if (r==true){
 				$("#save").click();
 			}
@@ -653,7 +653,7 @@ if(expired > 0){
 	$("#new_tmp").click(function() {
 	var expired = "<?php echo $expired; ?>";
 	if(expired < 1){
-		var r=confirm("Are you sure you want to create a new Project Budget Plan?");
+		var r=confirm("Are you sure you want to create a new Project Budget?");
 		if (r==true){
 				window.location = "create-project-version.php?login="+user;
 		}
@@ -670,7 +670,7 @@ if(expired > 0){
 	$("#copy_tmp").click(function() {
 	var expired = "<?php echo $expired; ?>";
 	if(expired < 1){
-		var r=confirm("Are you sure you want to create a new Project Budget Plan?");
+		var r=confirm("Are you sure you want to create a new Project Budget?");
 		if (r==true){
 				$("#copy").click();
 		}
@@ -702,7 +702,7 @@ if(expired > 0){
 				{
 				unsave = xmlhttp.responseText;
 					if(unsave < 1){
-					var r=confirm("Are you sure you want to endorse this Budget Plan?");
+					var r=confirm("Are you sure you want to endorse this Budget?");
 						if (r==true){
 								$("#endorsement").click();
 						}
@@ -743,7 +743,7 @@ if(expired > 0){
 </head>
 <body>
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&org_code=".$org_code."&;project_id=".$project_id; ?>" method="post" name="theForm" enctype="multipart/form-data">
-<div class="headerText2"><div id="divText">Budget Plan Project List</div></div>
+<div class="headerText2"><div id="divText">Budget Project List</div></div>
 <div class="isa_info"><b>Deadline of budget submission is on: </b><?php echo $expiration_orig; ?></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>

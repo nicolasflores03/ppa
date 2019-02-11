@@ -36,7 +36,7 @@ $column2 = array_intersect($column2,$requiredField2);
 $listView2 = $crudapp->listTable($conn,"R5_ENDORESED_APP_PROJECTBASE",$column2,$cnd2);
 $tableView2 = $filterapp->filterViewURL2($conn,$column2,$listView2,$filter,"id");
 
-//ENDORSE or REJECT DEPT Budget Plan
+//ENDORSE or REJECT DEPT Budget
 if (isset($_POST['submit_project'])){
 $reference_no = $_POST['reference_no_project'];
 $status = $_POST['status_project'];
@@ -173,7 +173,7 @@ if(res !=""){
 </head>
 <body>
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&id=".$id."&orgcode=".$orgcode; ?>" method="post" name="theForm" enctype="multipart/form-data">
-<div class="headerText2"><div id="divText">Budget Plan for Rejection List</div></div>
+<div class="headerText2"><div id="divText">Budget for Rejection List</div></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>
 <div class="mainContainer">
@@ -230,7 +230,7 @@ if(res !=""){
 	<?php
 	echo $tableView2;
 	?>	
-	<!--Budget Plan Section-->
+	<!--Budget Section-->
 	<div class="formDiv">
 	<div class="headerText">Budget Details</div>
 	<table class="procurement" border="0" cellspacing="5px" width="100%">
