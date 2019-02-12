@@ -829,8 +829,20 @@ var type = $('#movementType').val();
 		budget_fr = parseFloat(budget_fr.replace(/,/g, ''));
 		var movementType = $('#movementType').val();
 		if (movementType == "reallocation"){
-			//alert(amount+"---"+budget_fr);
-			if (amount > budget_fr){
+			if (amount > budget_fr ){
+				alert('Insufficient budget!');
+				$(this).val("");
+			}
+
+			if(amount < 0 ) {
+				alert('Negative amount is not allowed on re-allocation.');
+				$(this).val("");
+			} 
+		}else if(movementType == "supplement" && amount < 0) {
+			//check negative values
+			var budget_to = $("#budget_to").val();
+			budget_to = parseFloat(budget_to.replace(/,/g, ''));
+			if (parseFloat(budget_to + amount).toFixed(2) < 0){
 				alert('Insufficient budget!');
 				$(this).val("");
 			}
