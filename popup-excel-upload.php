@@ -325,17 +325,11 @@ if (isset($_FILES["item-based-file"])){
 								$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
 								$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
 								$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);			
-								
-								
-							//	header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=pass&msg=You have successfully submitted this Budget Plan for endorsement!");
-							} else {
-								//sqlsrv_rollback( $conn );
-								//echo "Transaction rolled back.<br />";
-							//	header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=fail&msg=Transaction rolled back!");
 							}
 
 					// echo "Import success.<br />";
-					header('Location: '. $url . "&success=true");
+					$success = true;
+					//header('Location: '. $url . "&success=true");
 				} else {
 					sqlsrv_rollback( $conn );
 					// echo "Transaction rolled back.<br />";
@@ -379,7 +373,6 @@ function isValidItemCode($conn,$crudapp,$code){
 	} 
 	return $errorFlag;
 }
-
 ?>
 <html> 
 <head> 
@@ -388,6 +381,10 @@ function isValidItemCode($conn,$crudapp,$code){
 <title>Opener</title> 
 <script src="js/jquery.min.js"></script>
 <script type='text/javascript'>  
+	<?php if($success) { ?>
+		opener.reloadPage("&res=pass&msg=You have successfully imported new item(s)!");
+		self.close()
+	<?php } ?>
 	var progressStarted = false;
 
 	function on_submit_form() {

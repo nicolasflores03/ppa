@@ -474,6 +474,8 @@ $today = date("m/d/Y H:i");
 		echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
 	}	
 }
+
+$self_url = $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version;
 ?>
 
 
@@ -1218,8 +1220,11 @@ if(expired > 0 && version < 2){
 	});
 });
 
-function reloadPage() {
-	location.reload();
+function reloadPage(param) {
+	if(!param) {
+		param = "";
+	}
+	location.href = "<?php echo  $self_url ?>" + param;
 }
 </script>
 </head>
