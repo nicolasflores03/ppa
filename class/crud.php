@@ -2414,10 +2414,10 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				WHERE id = ?";	
 				
 				$quarterly_params = array($amount,$to_code,$amount,$to_code,$to_code);	
-
+				
 			}else{
 				//check why does the available amount needs to be replaced not add to existing amount
-				
+					
 				$sql_quarterly_update = "UPDATE $quarterly_table SET 
 				$quarterly_adjustments = ? + (SELECT $quarterly_adjustments FROM $quarterly_table WHERE id = ?), 
 				$quarterly_available = ?
@@ -2545,8 +2545,8 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				die( print_r( sqlsrv_errors(), true) );
 			}
 			//END BALANCE FROM				
-						
-
+			
+			
 			
 			if( $result2 && $result3 && $sql_quarterly_result) {
 				return true;
@@ -2713,13 +2713,21 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		if( $result === false) {
 		die( print_r( sqlsrv_errors(), true) );
 		}
+
 		while($val = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)){
 			$amount = $val['amount'];
 			$fr_table= $val['fr_table'];
 			$fr_code= $val['fr_code'];
+			$to_table= $val['to_table'];
+			$to_code= $val['to_code'];
 			$type= $val['type'];
+			$to_quarter = $val['to_quarter'];
+			$fr_quarter = $val['fr_quarter'];
 		}
-	$fr_table = str_replace(" ","",$fr_table);			
+					
+		$fr_table = str_replace(" ","",$fr_table);
+		$to_table = str_replace(" ","",$to_table);		
+			
 		if ($type == 'reallocation'){
 			
 			$available = 0;
@@ -2744,7 +2752,45 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				return true;
 			}
 		}else{
-		return true;
+			if( $amount < 0 ) {
+				$table = "";
+				$quarterly_table = "";
+
+				$quarterly_adjustments = "q" . $to_quarter ."_adjustments";
+				$quarterly_available = "q" . $to_quarter ."_available";
+
+				if ($to_table == 'IB'){
+					$table = "dbo.R5_EAM_DPP_ITEMBASE_LINES";
+					$quarterly_table = "dbo.R5_REF_ITEMBASE_BUDGET_QUARTERLY";
+				}else{
+					$table = "dbo.R5_EAM_DPP_COSTBASE_LINES";
+					$quarterly_table = "dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY";
+				}
+				$sql_quarterly_update = "Select ? + (SELECT $quarterly_available  FROM $quarterly_table WHERE id = ?) as available 
+											 FROM $quarterly_table WHERE id = ?";	
+				
+				$quarterly_params = array($amount, $to_code,$to_code);	
+
+				$sql_quarterly_result = sqlsrv_query($conn,$sql_quarterly_update,$quarterly_params);
+
+				if( $sql_quarterly_result === false) {
+					die( print_r( sqlsrv_errors(), true) );
+				}
+
+				$has_available = false ;
+				while($val = sqlsrv_fetch_array($sql_quarterly_result, SQLSRV_FETCH_ASSOC)){
+					if($val['available'] >= 0){
+						$has_available = true;
+					}
+				}
+				
+				if(!$has_available){
+					return false;
+				}
+			
+			} 
+
+			return true;
 		}
     }
 	
