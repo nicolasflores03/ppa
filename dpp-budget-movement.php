@@ -1032,6 +1032,8 @@ function setBudgetValue(field) {
 				break;
 			}
 			$("#budget").val(budget);
+			$("#budget_fr").val(budget);
+			
 		} else {
 			var quarter = $("#to_quarter_tb").val();
 			switch(quarter){
