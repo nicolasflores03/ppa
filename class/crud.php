@@ -2729,22 +2729,27 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		$to_table = str_replace(" ","",$to_table);		
 			
 		if ($type == 'reallocation'){
-			
+			$table2 = "";
+			$quarterly_table2 = "";
+			if ($fr_table == 'IB'){
+				$quarterly_table2 = "dbo.R5_REF_ITEMBASE_BUDGET_QUARTERLY";
+			}else{
+				$quarterly_table2 = "dbo.R5_REF_COSTBASE_BUDGET_QUARTERLY";
+			}
+		
+			$quarterly_available2 = "q" . $fr_quarter ."_available";
+
 			$available = 0;
 			$selectItem = "";
-			if ($fr_table == "IB"){
-				$selectItem = "SELECT available FROM dbo.R5_EAM_DPP_ITEMBASE_LINES WHERE id = ?";
-			}else{
-				$selectItem = "SELECT available FROM dbo.R5_EAM_DPP_COSTBASE_LINES WHERE id = ?";
-			}
-			
+			$selectItem = "SELECT $quarterly_available2 FROM $quarterly_table2  WHERE id = ?";
+
 			$paramsItem = array($fr_code);
 			$resultItem = sqlsrv_query($conn,$selectItem,$paramsItem);
 			if( $resultItem === false) {
 			die( print_r( sqlsrv_errors(), true) );
 			}
 			while($valItem = sqlsrv_fetch_array($resultItem, SQLSRV_FETCH_ASSOC)){
-				$available = $valItem['available'];
+				$available = $valItem[$quarterly_available2];
 			}
 			//echo $amount."--".$available;
 			if ($available < $amount){
