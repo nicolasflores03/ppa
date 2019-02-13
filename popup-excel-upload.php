@@ -28,6 +28,10 @@ $save_file_path = "";
 
 //Item
 if (isset($_FILES["item-based-file"])){ 
+	if ( sqlsrv_begin_transaction( $conn ) === false ) {
+		die( print_r( sqlsrv_errors(), true ));
+	}
+
 	$random_str = substr(md5(mt_rand()), 0, 7);
 	$filepath_tmp = $_FILES["item-based-file"]["tmp_name"];
 	$name = $_FILES["item-based-file"]["name"];
@@ -37,7 +41,6 @@ if (isset($_FILES["item-based-file"])){
 	
 	if(move_uploaded_file($filepath_tmp,$filepath)){
 
-		//$new_name;
 		ini_set('display_errors', TRUE);
 		ini_set('display_startup_errors', TRUE);
 
@@ -155,7 +158,7 @@ if (isset($_FILES["item-based-file"])){
 					$objPHPExcel->getActiveSheet()->setCellValueByColumnAndRow(14, $indx, $msg);
 				}
 			
-				// // Redirect output to a client’s web browser (Excel2007)
+				// // Redirect output to a clients web browser (Excel2007)
 				// header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 				// header('Content-Disposition: attachment;filename="import_fail_' . $name . '"');
 				// header('Cache-Control: max-age=0');
@@ -173,9 +176,9 @@ if (isset($_FILES["item-based-file"])){
 				$milliseconds = round(microtime(true) * 1000);
 				$save_file_path = 'upload/import_fail_' . $milliseconds . "_" . $name;
 				$objWriter->save($save_file_path);
-				//exit;
 				$error = true;
-			} else{
+				sqlsrv_rollback( $conn );
+			} else {
 				// $ref_no = $_POST['ref_no'];
 				// $ORG_CODE = $_POST['ORG_CODE'];
 				// $MRC_CODE = $_POST['MRC_CODE'];
@@ -272,9 +275,6 @@ if (isset($_FILES["item-based-file"])){
 					$record_id++;
 				}
 
-				if ( sqlsrv_begin_transaction( $conn ) === false ) {
-					die( print_r( sqlsrv_errors(), true ));
-			    }
 			   
 				$table = "R5_EAM_DPP_ITEMBASE_LINES";
 				$table2 = "R5_REF_ITEMBASE_BUDGET_MONTH";
@@ -294,7 +294,7 @@ if (isset($_FILES["item-based-file"])){
 					$result_update_status = false;
 					
 					if (isset($endorsementCtr[0]['id']) ) {
-						$result_update_status = $crudapp->updateRecord($conn,array('status' => 'For Endorsement'),"R5_DPP_VERSION","id", $endorsementCtr[0]['id']);
+						$result_update_status = $crudapp->updateRecord($conn, array('status' => 'For Endorsement'), "R5_DPP_VERSION","id", $endorsementCtr[0]['id']);
 					} 
 
 					$data = array($ORG_CODE,$MRC_CODE,$year,$reference_no,$version);
@@ -306,7 +306,6 @@ if (isset($_FILES["item-based-file"])){
 								
 							if( $endorse == 1 && $result_update_status ) {
 								sqlsrv_commit( $conn );
-												
 								//SEND EMAIL
 								$emailfilter = "id = 1";
 								$emailcolumn = $crudapp->readColumn($conn,"R5_EMAIL_TEMPLATE");
@@ -335,13 +334,6 @@ if (isset($_FILES["item-based-file"])){
 					// echo "Transaction rolled back.<br />";
 					header('Location: '. $url . "&error=true");
 				}
-
-
-				// $ORG_CODE = $_POST['ORG_CODE'];
-				// $MRC_CODE = $_POST['MRC_CODE'];
-				// $reference_no = $_POST['ref_no'];
-
-				
 			}
 		} catch(Exception $e){
 			echo $e->getMessage();
