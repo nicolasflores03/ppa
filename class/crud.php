@@ -4,7 +4,7 @@
 // echo "user is hardcoded";
 class crudClass{
 
-	public $cognos_url = "http://fdcui-eamqas-38.fdcutilities.local:8080/crn/cgi-bin/mod_cognos.dll?";
+	public $cognos_url = "http://192.168.1.38:8080/crn/cgi-bin/mod_cognos.dll?";
 /* Update Session*/
 public function updateSession($conn,$user)
 {
@@ -774,7 +774,7 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			echo "failed";
 			}
 		}
-		
+
 		return $newVersion;
 	}
 	
