@@ -62,6 +62,7 @@ $type = $_POST['type'];
 <script>
 function reject(id){
 var user = "<?php echo $user;?>";
+var password = "<?php echo $password;?>";
 //HASH - To random string that will reload pages with ajax call
 var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -84,8 +85,9 @@ xmlhttp.onreadystatechange=function()
 			{
 			var json = $.parseJSON(xmlhttp2.responseText);
 			var org_code = json['ORG_CODE'];
-			var year_budget = json['year_budget'];
-			window.location ="app-for-rejection-list-item.php?hash="+text+"&login="+user+"&year="+year_budget+"&id="+id+"&orgcode="+org_code;
+			var year_budget = json['year_budget'];														  
+				window.location ="app-version-list.php?hash="+text+"&login="+user+"&password="+password+"&ORG_CODE="+org_code+"&res=pass&msg=You have successfully updated this Budget!";
+				// window.location ="app-version-list.php?hash="+text+"&login="+user+"&password="+password+"&orgcode="+org_code;
 			}
 		}
 		xmlhttp2.open("GET","ajax/get-app-version-info.php?hash="+text+"&id="+id,true);

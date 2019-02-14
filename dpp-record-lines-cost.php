@@ -196,7 +196,7 @@ $endorsementCtr = $crudapp->matchRecord2($conn,"R5_DPP_VERSION",'id',$condition)
 				header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=fail&msg=Transaction rolled back!");
 			}
 	}else{
-	$errorMessage ="You have an active endoresed Budget!";
+	$errorMessage ="You have an active endorsed Budget!";
 	echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
 	}
 }
@@ -249,7 +249,7 @@ $endorsementCtr = $crudapp->matchRecord2($conn,"R5_DPP_VERSION",'id',$condition)
 				header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."&res=fail&msg=Transaction rolled back!");
 			}
 	}else{
-	$errorMessage ="You have an active endoresed Budget!";
+	$errorMessage ="You have an active endorsed Budget!";
 	echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
 	}
 }

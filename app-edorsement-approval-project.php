@@ -317,7 +317,7 @@ if(res !=""){
 <div class="headerText">Budget Breakdown</div>
 
 <div class="headerText">
-<input type="button" class="tabs" id="tabURL" name="ITEM-BASE" value=" ITEM-BASE / COST-BASED ">
+<input type="button" class="tabs" id="tabURL" name="ITEM-BASE" value=" ITEM-BASE ">
 <input type="button" class="tabs selected" name="PROJECT-BASE" value=" PROJECT-BASED ">
 </div>
 
