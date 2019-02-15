@@ -101,7 +101,7 @@ if(isset($_GET['movementType']))  {
 	} else if($movementType == "supplement" && isset($_GET['to_id'])) {
 		$cnd = "year_budget = '$year' AND ORG_CODE = '$to_org_code' AND MRC_CODE = '$mrccode' AND status = 'Approved' AND cost_center = '$cost_center' AND rowid = '$to_id'";
 		$proceed_budget_query = true;
-	}
+	} 
 	
 	if($proceed_budget_query) {
 		$from_data = $crudapp->readRecord3($conn,"R5_BUDGET_REALLOCATION_LOOKUP",$cnd);
@@ -238,7 +238,7 @@ if (isset($_POST['submit'])){
 	if(!$errorFlag){	
 		$table = "dbo.R5_BUDGET_MOVEMENT";
 		$today = date("m/d/Y H:i");	
-		$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "to_quarter"=>$to_quarter_tb, "to_org_code" => null);
+		$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>null,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "to_quarter"=>$to_quarter_tb, "to_org_code" => null);
 		if($id != ""){
 			if($status != "") {
 				// $data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>$status,"cost_center"=>$cost_center,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "to_quarter"=>$to_quarter_tb);
@@ -246,19 +246,23 @@ if (isset($_POST['submit'])){
 			} 
 			
 			if ($type == "reallocation"){
+				// $data["ORG_CODE"] = $orgcode;
+				$data["FR_MRC_CODE"] = $department_id;
 				$data["to_org_code"] = $to_org_code;
 			}
 
 			$result2 = $crudapp->updateRecord($conn,$data,$table,"id",$id);
 		
-		}else{
+		} else{
 		
 			$record_id = $crudapp->readID($conn,"R5_BUDGET_MOVEMENT");
 			$id = $record_id + 1;
-			$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>$department_id,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"createdBy"=>$user,"createdAt"=>$today,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "to_quarter"=>$to_quarter_tb, "fr_quarter"=>$fr_quarter_tb, "to_org_code"=>null);
+			$data = array("app_id"=>$app_id,"ORG_CODE"=>$orgcode,"TO_MRC_CODE"=>$mrccode,"FR_MRC_CODE"=>null,"fr_code"=>$fr_code,"to_code"=>$to_code,"amount"=>$amount,"year_budget"=>$year_budget,"type"=>$type,"status"=>"Created","cost_center"=>$cost_center,"createdBy"=>$user,"createdAt"=>$today,"updatedAt"=>$today,"fr_cost_center"=>$costcenterfr,"reason"=>$reason,"fr_table"=>$source_tb,"to_table"=>$destination_tb, "to_quarter"=>$to_quarter_tb, "fr_quarter"=>$fr_quarter_tb, "to_org_code"=>null);
 			if ($type == "reallocation"){
+				// $data["ORG_CODE"] = $orgcode;
+				$data["FR_MRC_CODE"] = $department_id;
 				$data["to_org_code"] = $to_org_code;
-			}
+			} 
 			$result2 = $crudapp->insertRecord($conn,$data,$table);
 		}
 
@@ -493,9 +497,9 @@ xmlhttp.onreadystatechange=function()
 	 }
 	 var available = json['available'];
 	 if (column =="to_code"){		 
-		$('#from_val').val(code);
-	 }else{
 		$('#to_val').val(code);
+	 }else{
+		$('#from_val').val(code);
 	 }
   }
  }
@@ -546,11 +550,13 @@ function movementType(type) {
 function valideopenerform(field){	
 	var from_id = $('#from_id').val();
 	var id = $('#id').val();
-	var from_val = encodeURIComponent($('#from_val').val());
+	// var from_val = encodeURIComponent($('#from_val').val());
+	var from_val = "";
 	var source_tb = $('#source_tb').val();
 	var destination_tb = $('#destination_tb').val();
 	var to_id = $('#to_id').val();
-	var to_val = encodeURIComponent($('#to_val').val());
+	// var to_val = encodeURIComponent($('#to_val').val());
+	var to_val = "";
 	var amount = $('#amount').val();
 	var year_budget = $('#year_budget').val();
 	var type = $('#movementType').val();
@@ -559,6 +565,7 @@ function valideopenerform(field){
 	var frmrccode = $('#department_id').val();
 	var tomrccode = "<?php echo $mrccode; ?>";
 	var mrcdesc = encodeURIComponent($('#department_val').val());
+	// var mrcdesc = "";
 	var cost_center = $('#CST_CODE').val();
 	var costcenterfr = $('#costcenterfr').val();
 	var to_quarter_tb = $('#to_quarter_tb').val();
@@ -653,6 +660,14 @@ $('#costcenterfr').val(id);
 }
 
 $(document).ready(function(){
+	$('#budget_form').submit(function() {
+		if ($.trim($("#reason").val()) == ""){
+			alert("Please enter a reason for this request.");
+			return false;
+		} else {
+			return true;
+		}
+	});
 	$("#movementType").attr("disabled", true);
 	$("#ORG_CODE").val("<?php echo $orgcode;?>");
 	$("#MRC_CODE").val("<?php echo $mrccode;?>");
@@ -671,10 +686,14 @@ $(document).ready(function(){
 	$("#to_quarter_tb").val('<?php echo $to_quarter_tb; ?>');
 	$("#to_org_code").val('<?php echo $to_org_code; ?>');
 
-	// if($("#to_id").val() != ""){ 
-	// 	var table = $("#destination_tb").val();
-	// 	getFromToInfo($("#to_id").val(),"to_code",table);
-	// }
+	if($("#to_id").val() != ""){ 
+		var table = $("#destination_tb").val();
+		getFromToInfo($("#to_id").val(),"to_code",table);
+	}
+	if($("#from_id").val() != ""){ 
+		var table = $("#destination_tb").val();
+		getFromToInfo($("#from_id").val(),"from_code",table);
+	}
 
 	if($("#department_id").val() != ""){ 
 		getFromCostCenter($("#department_id").val(),"<?php echo $costcenterfr; ?>");
@@ -1069,7 +1088,7 @@ $("#destination_tb").change(function(e) {
 </script>
 </head>
 <body>
-<form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&cost_center=".$cost_center."&MRC_CODE=".$mrccode."&ORG_CODE=".$orgcode."&id=".$id."&from_id=".$from_id."&from_val=".$from_val."&to_id=".$to_id."&to_val=".$to_val."&amount=".$amount."&movementType=".$movementType."&costcenterfr=".$costcenterfr."&department_id=".$department_id."&department_val=".$department_val;?>" method="post" name="theForm" enctype="multipart/form-data">
+<form id="budget_form" action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&cost_center=".$cost_center."&MRC_CODE=".$mrccode."&ORG_CODE=".$orgcode."&id=".$id."&from_id=".$from_id."&from_val=".$from_val."&to_id=".$to_id."&to_val=".$to_val."&amount=".$amount."&movementType=".$movementType."&costcenterfr=".$costcenterfr."&department_id=".$department_id."&department_val=".$department_val;?>" method="post" name="theForm" enctype="multipart/form-data">
 <div class="headerText2"><div id="divText">Budget Re-allocation / Supplement</div></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>

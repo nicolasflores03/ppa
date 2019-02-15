@@ -148,11 +148,11 @@ $("#new_tmp_reallocate").click(function() {
 		window.opener.document.theForm.department_id.value=frmrccode;  
 		window.opener.document.theForm.to_id.value=to_id;  
 
-		// if(field == "from") {
+		if(field == "from") {
 			window.opener.document.theForm.from_val.value=from_val; 
-		// } else {
+		} else {
 			window.opener.document.theForm.to_val.value=to_val; 
-		// }
+		}
 		window.opener.document.theForm.budget.value=budgetOrig; 
 		//window.opener.document.theForm.budget_fr.value=budgetOrig;
 		
