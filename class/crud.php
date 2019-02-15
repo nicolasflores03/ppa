@@ -2303,11 +2303,15 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 	    $selection .= "<select name='".$select_name."' id='".$select_name."'>";
 	    $selection .= "<option value=''>-- Please select --</option>";
         while($ors = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {		
-		$fieldVal = str_replace(" ","",$ors[$tbfield]);
-		$fieldVal2 = str_replace(" "," ",$ors[$tbfield2]);
-		if ($fieldVal != "" && $fieldVal2 != ""){
-			  $selection .= "<option name='". $tbfield . "' value='" . $fieldVal . "'>". $fieldVal2 . "</option>";
-		}
+			$fieldVal = str_replace(" ","",$ors[$tbfield]);
+			$fieldVal2 = str_replace(" "," ",$ors[$tbfield2]);
+			if ($fieldVal != "" && $fieldVal2 != ""){
+				if( ($tbname == "R5_VIEW_USERINFO" || $tbname == "R5MRCS" )&& $tbfield == "MRC_CODE" && $tbfield2 == "MRC_DESC" ){
+					$selection .= "<option name='". $tbfield . "' value='" . $fieldVal . "'>" .  $fieldVal . " - " . $fieldVal2 . "</option>";
+				} else {
+					$selection .= "<option name='". $tbfield . "' value='" . $fieldVal . "'>". $fieldVal2 . "</option>";
+				}
+			}
 		}
     
 		$selection .= "</select>";
