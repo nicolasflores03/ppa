@@ -73,8 +73,7 @@ if (isset($_FILES["item-based-file"])){
 					$has_data = false;
 					$tmp_errorMessage = "";
 					foreach($rows as $col => $row){
-
-						if(trim($row->getValue()) != ""){
+						if(trim($row->getCalculatedValue()) != ""){
 							$has_data= true;
 						}
 						
@@ -113,6 +112,8 @@ if (isset($_FILES["item-based-file"])){
 
 						$row_data[] = $row->getValue();
 					}
+
+					exit();
 
 					if($has_data){
 						$tmp["code"] = $row_data[0];
