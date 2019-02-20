@@ -91,6 +91,10 @@ if(isset($_GET['year'])) {
 
 $from_data = array();
 if(isset($_GET['movementType']))  {
+	/**
+	 * @Note: Please note that the column 'to_org_code' under the R5_BUDGET_MOVEMENT is the source organization 
+	 * and the 'ORG_CODE' is the destination organization.
+	 */
 	$source_quarter = isset($_GET['source_quarter']) ? $_GET['source_quarter'] : '';
 	$destination_quarter = isset($_GET['destination_quarter']) ?  $_GET['destination_quarter'] : '';
 	$to_org_code = isset($_GET['to_org_code']) ?  $_GET['to_org_code'] : '';
