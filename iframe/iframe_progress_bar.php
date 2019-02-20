@@ -21,8 +21,10 @@
                         progressStarted = true;
                     }
                     percent = parseInt(data.bytes_uploaded / data.bytes_total * 100);
-                    $('#bar').css("width", percent + "%");	
-                    $('#bar').html(percent + "%");
+                    if(!isNaN(percent){
+                        $('#bar').css("width", percent + "%");	
+                        $('#bar').html(percent + "%");
+                    }
                 } else if(data == null &&  progressStarted ) {
                     percent = 100;
                     $('#bar').css("width", "100%");	

@@ -73,25 +73,32 @@ if (isset($_FILES["item-based-file"])){
 					$has_data = false;
 					$tmp_errorMessage = "";
 					foreach($rows as $col => $row){
-						if(trim($row->getCalculatedValue()) != ""){
+						$_value = trim($row->getCalculatedValue());
+						if( $_value != ""){
 							$has_data= true;
 						}
 						
 						if ($col == "A" ) {
-							if($row->getValue() == "" || !isValidItemCode($conn,$crudapp,$row->getValue())){
-								$tmp_errorMessage .= 'Invalid item code. ';
+
+							if(in_array( $_value, $item_codes )){
+								$tmp_errorMessage .= 'Duplicate item code in this excel file. ';
 								$errorFlag = true;
-							} else if (checkIfItemExist($conn, $crudapp, $row->getValue(), $ref_no, $version)) { 
+							}
+
+							if($_value == "" || !isValidItemCode($conn,$crudapp,$_value)){
+								$tmp_errorMessage .= 'Item code not found. Please check Materials -> Items for more details.';
+								$errorFlag = true;
+							} else if (checkIfItemExist($conn, $crudapp, $_value, $ref_no, $version)) { 
 								$tmp_errorMessage .= 'Item already exist for this budget year. ';
 								$errorFlag = true;
 							} else {
-								array_push($item_codes, $row->getValue());
+								array_push($item_codes, $_value);
 							}
 						} 
 
 						if ($col == "B" ) {
 							$rate = "";
-							$CUR_CODE = strtoupper(trim($row->getValue()));
+							$CUR_CODE = strtoupper(trim($_value));
 							$rate = "";
 
 							if($CUR_CODE == "" ){
@@ -110,10 +117,8 @@ if (isset($_FILES["item-based-file"])){
 							}		
 						} 
 
-						$row_data[] = $row->getValue();
+						$row_data[] = $_value;
 					}
-
-					exit();
 
 					if($has_data){
 						$tmp["code"] = $row_data[0];
@@ -380,12 +385,18 @@ function isValidItemCode($conn,$crudapp,$code){
 	<?php } ?>
 	var progressStarted = false;
 
+	$(document).ready(function() {
+		$("form#form_uploader").submit(function(){
+			return on_submit_form();
+		});
+	});
 	function on_submit_form() {
 		$(".isa_error").css("display","none");
 		$(".actionButtonCenter input[type=submit]").prop("disabled", true);
 		if($("#item-based-file").val() == "") {
 				alert("Please Select File to Upload.");
-				$(".actionButtonCenter input[type=button]").prop("disabled", false);
+				$(".actionButtonCenter input[type=submit]").prop("disabled", false);
+				
 				return false;
 		} else {
 			// window.setTimeout("getProgress()", 500);
@@ -418,7 +429,7 @@ function isValidItemCode($conn,$crudapp,$code){
 	<div class="isa_error" style="<?php echo $error ? 'display: block;' : 'display: none;'; ?>">Record(s) has not been inserted! <a href="<?php echo $save_file_path;?>">Please click this link for more details</a>.</div>
 	<!--Start of FORM-->
 	<div class="headerText">Budget Upload</div>
-	<form id="form_uploader" onsubmit="on_submit_form()" name="form_uploader" action="<?php echo $_SERVER['PHP_SELF']?>?login=<?php echo $login;?>&MRC_CODE=<?php echo $MRC_CODE ?>&ORG_CODE=<?php echo $ORG_CODE ?>&year=<?php echo $year?>&version=<?php echo $version?>&reference_no=<?php echo $ref_no?>&cost_center=<?php echo $cost_center; ?>" method="post" enctype="multipart/form-data">
+	<form id="form_uploader" name="form_uploader" action="<?php echo $_SERVER['PHP_SELF']?>?login=<?php echo $login;?>&MRC_CODE=<?php echo $MRC_CODE ?>&ORG_CODE=<?php echo $ORG_CODE ?>&year=<?php echo $year?>&version=<?php echo $version?>&reference_no=<?php echo $ref_no?>&cost_center=<?php echo $cost_center; ?>" method="post" enctype="multipart/form-data">
 		<input type="hidden" name="UPLOAD_IDENTIFIER" id="progress_key" value="<?php echo $uniqid;?>" /> 
 		<table width="100%" cellspacing="0" cellpadding="0" border="1" class="listpop-progress">
 			<tr >

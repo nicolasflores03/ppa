@@ -293,7 +293,7 @@ xmlhttp.onreadystatechange=function()
   if (xmlhttp.readyState==4 && xmlhttp.status==200)
     {
 	 var json = $.parseJSON(xmlhttp.responseText);
-	  var status = json['status'];type
+	  var status = json['status'];
 	  var type = json['type'];
 	  var FR_MRC_CODE = json['FR_MRC_CODE'];
 	  var TO_MRC_CODE = json['TO_MRC_CODE'];
