@@ -18,7 +18,8 @@ GO
 
   ALTER VIEW [dbo].[R5_VIEW_BUDGET_MOVEMENT]
 AS
-SELECT     id, app_id, dbo.R5_BUDGET_MOVEMENT.ORG_CODE, to_table, fr_table,
+SELECT     id, app_id, replace(convert(NVARCHAR, dbo.R5_BUDGET_MOVEMENT.createdAt, 101), ' ', '/') as created_date,
+					dbo.R5_BUDGET_MOVEMENT.ORG_CODE, to_table, fr_table,
                           (SELECT     TOP (1) MRC_DESC
                             FROM          dbo.R5MRCS
                             WHERE      (MRC_CODE COLLATE Latin1_General_CI_AS = dbo.R5_BUDGET_MOVEMENT.FR_MRC_CODE)) AS Source_Department, FR_MRC_CODE,

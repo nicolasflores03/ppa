@@ -40,7 +40,7 @@ $cnd = "year_budget = $year AND ORG_CODE = '$ORG_CODE' AND (TO_MRC_CODE = '$MRC_
 }
 //PROJECT BASE
 $column2 = $crudapp->readColumn($conn,"R5_VIEW_BUDGET_MOVEMENT");
-$requiredField2 = array('id','Source_Department','Source','source_quarter','Destination_Organization','Destination_Department','Destination','destination_quarter','amount','year_budget','type','status','reason');
+$requiredField2 = array('created_date','Source_Department','Source','source_quarter','Destination_Organization','Destination_Department','Destination','destination_quarter','amount','year_budget','type','status','reason');
 // $requiredField2 = array('id','Source_Department','Destination_Department','Source','Destination','amount','year_budget','type','status','reason');
 // $column2 = array_intersect($column2,$requiredField2);
 $column2 = $requiredField2;
