@@ -130,7 +130,7 @@ $appinfo = $crudapp->listTable($conn,"R5_APP_VERSION",$appcolumn,$appfilter);
 $filter = array();
 $cnd = "year_budget = '$year' AND cost_center = '$cost_center' ORDER BY ID DESC";
 $column = $crudapp->readColumn($conn,"R5_VIEW_BUDGET_MOVEMENT");
-$requiredField = array('created_date','Source_Department','Source', 'source_quarter','Destination_Organization','Destination_Department','Destination', 'destination_quarter','amount','year_budget', 'type','status','reason');
+$requiredField = array('id','created_date','Source_Department','Source', 'source_quarter','Destination_Organization','Destination_Department','Destination', 'destination_quarter','amount','year_budget', 'type','status','reason');
 $column = array_intersect($column,$requiredField);
 
 $listView = $crudapp->listTable($conn,"R5_VIEW_BUDGET_MOVEMENT",$requiredField,$cnd);
