@@ -116,7 +116,7 @@ var text = "";
 				location.reload();
 			}
 		}
-		xmlhttp2.open("GET","ajax/app-delete-record.php?hash="+text+"&id="+id+"&obj="+objid+"&updatedBy="+updatedBy,true);
+		xmlhttp2.open("GET","ajax/app-delete-record.php?hash="+text+"&id="+id+"&obj="+obj+"&updatedBy="+updatedBy,true);
 		xmlhttp2.send();
 	}
 }

@@ -615,7 +615,7 @@ class filterClass{
 		if(empty($filter)){
 			foreach($listView as $views){
 				$id = $views[$code];
-				$content .= "<tr class='test' onclick=\"onclickEvent('$id');\">";
+				$content .= "<tr class='test' onclick=\"onclickEvent('$id'); if(event.stopPropagation) event.stopPropagation();\">";
 					foreach($column as $fieldName){
 						if ($fieldName != "id"){
 							//$fielVal = str_replace(' ', '', $views[$fieldName]);
@@ -631,12 +631,12 @@ class filterClass{
 				$stats = str_replace(" ","",$stats);
 				if ($hasStats > 0){
 					if ($stats == "Unfinish" || $stats == "Created"){
-					$content .= "<td width='5%'><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'>";
+					$content .= "<td width='5%'><input type='button' class='deleteButton' onClick=' event.stopPropagation(); deleteRecord($id); ' value='X'>";
 					}else{
 					$content .= "<td width='5%'>";
 					}
 				}else{
-				$content .= "<td width='5%'><input type='button' class='deleteButton' onClick='deleteRecord($id)' value='X'>";
+				$content .= "<td width='5%'><input type='button' class='deleteButton' onClick='event.stopPropagation(); deleteRecord($id); ' value='X'>";
 				}
 				
 				//$content .= "<td width='5%'><input type='button' onClick='deleteRecord($id)' value='X'>";

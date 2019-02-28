@@ -294,14 +294,10 @@ if (isset($_FILES["item-based-file"])){
 
 				if( $result == 1 && $result2 == 1 && $result3 == 1 && $result4 == 1) {
 					//sqlsrv_commit( $conn );
-					$condition = " ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$MRC_CODE' AND year_budget = '$year' AND cost_center = '$cost_center' ";
-					$dppcolumn = $crudapp->readColumn($conn,"R5_DPP_VERSION");
-					$endorsementCtr = $crudapp->listTable($conn,"R5_DPP_VERSION", $dppcolumn,$condition);
 					$result_update_status = false;
+					$condition = " ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$MRC_CODE' AND year_budget = '$year' AND cost_center = '$cost_center' AND reference_no = '$reference_no'";
+					$result_update_status = $crudapp->updateRecord2($conn, array('status' => 'For Endorsement'), "R5_DPP_VERSION", $condition);
 					
-					if (isset($endorsementCtr[0]['id']) ) {
-						$result_update_status = $crudapp->updateRecord($conn, array('status' => 'For Endorsement'), "R5_DPP_VERSION","id", $endorsementCtr[0]['id']);
-					} 
 
 					$data = array($ORG_CODE,$MRC_CODE,$year,$reference_no,$version);
 						$endorse = $crudapp->endorseApp($conn,$data);
