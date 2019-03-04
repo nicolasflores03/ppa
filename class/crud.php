@@ -2283,7 +2283,12 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 
    public function optionValue4($conn,$tbname,$tbfield,$tbfield2,$cnd,$select_name=null)
     {
-		$str = "SELECT $tbfield,$tbfield2 FROM $tbname $cnd ORDER BY $tbfield2";
+			if( ($tbname == "R5_VIEW_USERINFO" || $tbname == "R5MRCS" ) && $tbfield == "MRC_CODE" && $tbfield2 == "MRC_DESC" ){
+				$str = "SELECT $tbfield, $tbfield2 FROM $tbname $cnd ORDER BY $tbfield";
+			} else {
+				$str = "SELECT $tbfield,$tbfield2 FROM $tbname $cnd ORDER BY $tbfield2";
+			}
+			
 		$result = sqlsrv_query($conn,$str);
 		
 		$tbfield = str_replace("DISTINCT","",$tbfield);
@@ -2303,10 +2308,10 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 	    $selection .= "<select name='".$select_name."' id='".$select_name."'>";
 	    $selection .= "<option value=''>-- Please select --</option>";
         while($ors = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {		
-			$fieldVal = str_replace(" ","",$ors[$tbfield]);
-			$fieldVal2 = str_replace(" "," ",$ors[$tbfield2]);
+					$fieldVal = str_replace(" ","",$ors[$tbfield]);
+					$fieldVal2 = str_replace(" "," ",$ors[$tbfield2]);
 			if ($fieldVal != "" && $fieldVal2 != ""){
-				if( ($tbname == "R5_VIEW_USERINFO" || $tbname == "R5MRCS" )&& $tbfield == "MRC_CODE" && $tbfield2 == "MRC_DESC" ){
+				if( ($tbname == "R5_VIEW_USERINFO" || $tbname == "R5MRCS" ) && $tbfield == "MRC_CODE" && $tbfield2 == "MRC_DESC" ){
 					$selection .= "<option name='". $tbfield . "' value='" . $fieldVal . "'>" .  $fieldVal . " - " . $fieldVal2 . "</option>";
 				} else {
 					$selection .= "<option name='". $tbfield . "' value='" . $fieldVal . "'>". $fieldVal2 . "</option>";
