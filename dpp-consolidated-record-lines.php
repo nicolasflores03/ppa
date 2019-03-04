@@ -50,7 +50,7 @@ $orgcode = $userinfo[0]['ORG_CODE'];
 </head>
 <body>
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version; ?>" method="post" name="theForm" enctype="multipart/form-data">
-<div class="headerText2"><div id="divText">Annual Procurement Plan</div></div>
+<div class="headerText2"><div id="divText">Budget</div></div>
 <div class="actionBar">
 	<div class="divText">
 	<img src="images/toolbar_previous.png" name="back_tmp" id="back_tmp" align="absmiddle">
@@ -115,7 +115,7 @@ $orgcode = $userinfo[0]['ORG_CODE'];
 	</tbody>
 </table>
 </div>
-<div class="headerText">Annual Procurement Plan Details</div>
+<div class="headerText">Budget Details</div>
 </div>
 </form>
 </body>

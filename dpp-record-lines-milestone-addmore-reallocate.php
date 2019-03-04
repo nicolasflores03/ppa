@@ -800,7 +800,7 @@ if(expired > 0){
 	</tbody>
 </table>
 </div>
-<div class="headerText">Annual Procurement Plan Details</div>
+<div class="headerText">Budget Details</div>
 <!--PROJECT MILESTONE-->
 <div class="formDiv2">
 <div class="headerText">Project Details</div>

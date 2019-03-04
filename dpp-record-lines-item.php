@@ -179,7 +179,7 @@ $endorsementCtr = $crudapp->matchRecord2($conn,"R5_DPP_VERSION",'id',$condition)
 				$subject = @$emailinfo[0]['subject'];
 				$body = @$emailinfo[0]['body'];
 
-				$content = "This is to inform you that you have a pending for review items on your Department Annual Procurement Plan as of $today";
+				$content = "This is to inform you that you have a pending for review items on your Department Budget as of $today";
 				$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>Department: $MRC_CODE<br>Reference #: $reference_no<br>Version: $version<br>";
 				
 				$body = str_replace("\$content",$content,$body);
@@ -232,7 +232,7 @@ $endorsementCtr = $crudapp->matchRecord2($conn,"R5_DPP_VERSION",'id',$condition)
 				$subject = @$emailinfo[0]['subject'];
 				$body = @$emailinfo[0]['body'];
 
-				$content = "This is to inform you that you have a pending for review items on your Department Annual Procurement Plan as of $today";
+				$content = "This is to inform you that you have a pending for review items on your Department Budget as of $today";
 				$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>Department: $MRC_CODE<br>Reference #: $reference_no<br>Version: $version<br>";
 				$body = str_replace("\$content",$content,$body);
 
@@ -279,7 +279,7 @@ $reference_no = $_POST['ref_no'];
 				$subject = @$emailinfo[0]['subject'];
 				$body = @$emailinfo[0]['body'];
 				
-				$content = "This is to inform you that your Department Annual Procurement Plan has been returned for revision as of $today<br>";
+				$content = "This is to inform you that your Department Budget has been returned for revision as of $today<br>";
 				$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>Department: $MRC_CODE<br>Reference #: $reference_no<br>Version: $version<br>";
 				$body = str_replace("\$content",$content,$body);
 
@@ -1230,7 +1230,7 @@ function reloadPage(param) {
 </head>
 <body>
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&reference_no=".$reference_no."&version=".$version."#FormAnchor"; ?>" method="post" name="theForm" enctype="multipart/form-data">
-<div class="headerText2"><div id="divText">Annual Procurement Plan</div></div>
+<div class="headerText2"><div id="divText">Budget</div></div>
 <div class="isa_info"><b>Deadline of budget submission is on: </b><?php echo $expiration_orig; ?></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>
@@ -1308,7 +1308,7 @@ function reloadPage(param) {
 	</tbody>
 </table>
 </div>
-<div class="headerText">Annual Procurement Plan Details</div>
+<div class="headerText">Budget Details</div>
 <div class="headerText">
 <input type="button" class="tabs selected" name="ITEM-BASE" value=" ITEM-BASED ">
 <!-- <input type="button" class="tabs" name="COST-BASE" id="tabURL" value=" COST-BASED "> -->

@@ -315,7 +315,7 @@ if (isset($_FILES["item-based-file"])){
 								$subject = @$emailinfo[0]['subject'];
 								$body = @$emailinfo[0]['body'];
 
-								$content = "This is to inform you that you have a pending for review items on your Department Annual Procurement Plan as of $today";
+								$content = "This is to inform you that you have a pending for review items on your Department Budget as of $today";
 								$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>Department: $MRC_CODE<br>Reference #: $reference_no<br>Version: $version<br>";
 								
 								$body = str_replace("\$content",$content,$body);

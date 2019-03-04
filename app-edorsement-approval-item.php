@@ -73,7 +73,7 @@ $today = date("m/d/Y H:i");
 				$subject = @$emailinfo[0]['subject'];
 				$body = @$emailinfo[0]['body'];
 				
-				$content = "This is to inform you that your Department Annual Procurement Plan has been revised as of $today<br>";
+				$content = "This is to inform you that your Department Budget has been revised as of $today<br>";
 				$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>Department: $MRC_CODE<br>Reference #: $reference_no<br>Version: $version<br>";
 				$body = str_replace("\$content",$content,$body);
 
@@ -105,7 +105,7 @@ $today = date("m/d/Y H:i");
 				$subject = @$emailinfo[0]['subject'];
 				$body = @$emailinfo[0]['body'];
 
-				$content = "This is to inform you that your Department Annual Procurement Plan has been endorsed as of $today";
+				$content = "This is to inform you that your Department Budget has been endorsed as of $today";
 				$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>Department: $MRC_CODE<br>Reference #: $reference_no<br>Version: $version<br>";
 				
 				$body = str_replace("\$content",$content,$body);
@@ -152,7 +152,7 @@ $generateAPP = $crudapp->generateApp($conn,$year,$ORG_CODE);
 		$subject = @$emailinfo[0]['subject'];
 		$body = @$emailinfo[0]['body'];
 		$today = date("m/d/Y H:i");	
-		$content = "This is to inform you that the Annual Procurement Plan for $year is pending for your approval as of $today";
+		$content = "This is to inform you that the Budget for $year is pending for your approval as of $today";
 		$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>Year: $year<br>";
 		
 		$body = str_replace("\$content",$content,$body);

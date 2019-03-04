@@ -209,7 +209,7 @@ $(document).ready(function(){
 </form>
 </div>
 <!--Start of FORM-->
-<div class="headerText">Annual Procurement Plan</div>
+<div class="headerText">Budget</div>
   <table width="100%" cellspacing="0" cellpadding="0" border="1" class="listpop">
 	<tr>
 		<th>CODE</th>

@@ -483,7 +483,7 @@ if(res !=""){
 </head>
 <body>
 <form action="<?php echo $_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&mrccode=".$mrccode."&org_code=".$orgcode."&cost_center=".$cost_center."&source_tb=".$source_tb."&destination_tb=".$destination_tb."&destination_quarter=".$destination_quarter; ?>" method="post" name="theForm" enctype="multipart/form-data">
-<div class="headerText2"><div id="divText">Annual Procurement Plan</div></div>
+<div class="headerText2"><div id="divText">Budget</div></div>
 <div class="isa_success"><?php echo $msg; ?></div>
 <div class="isa_error"><?php echo $msg; ?></div>
 <div class="mainContainer">
@@ -549,7 +549,7 @@ if(res !=""){
 	</tbody>
 </table>
 </div>
-<div class="headerText">Annual Procurement Plan Details</div>
+<div class="headerText">Budget Details</div>
 	<!--APP Section-->
 	<div class="formDiv">
 	<div class="headerText">Details</div>

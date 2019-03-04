@@ -1109,7 +1109,7 @@ if(expired > 0 && version < 2){
 	</tbody>
 </table>
 </div>
-<div class="headerText">Annual Procurement Plan Details</div>
+<div class="headerText">Budget Details</div>
 
 <div class="headerText">
 <input type="button" class="tabs" name="NEW-RECORD" id="newRecord" value=" New Record ">
