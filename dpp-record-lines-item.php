@@ -320,19 +320,19 @@ $ORG_CODE = $_POST['ORG_CODE'];
 $MRC_CODE = $_POST['MRC_CODE'];
 $CUR_CODE = @$_POST['CUR_CODE'];
 $CUR_CODE_VAL = @$_POST['CUR_CODE_VAL'];
-$quantity = $_POST['quantity_val'];
-$january = $_POST['january'];
-$february = $_POST['february'];
-$march =  $_POST['march'];
-$april =  $_POST['april'];
-$may =  $_POST['may'];
-$june = $_POST['june'];
-$july = $_POST['july'];
-$august = $_POST['august'];
-$september = $_POST['september'];
-$october = $_POST['october'];
-$november = $_POST['november'];
-$december = $_POST['december'];
+$quantity = floatVal($_POST['quantity_val']);
+$january = floatVal($_POST['january']);
+$february = floatVal($_POST['february']);
+$march =  floatVal($_POST['march']);
+$april =  floatVal($_POST['april']);
+$may =  floatVal($_POST['may']);
+$june = floatVal($_POST['june']);
+$july = floatVal($_POST['july']);
+$august = floatVal($_POST['august']);
+$september = floatVal($_POST['september']);
+$october = floatVal($_POST['october']);
+$november = floatVal($_POST['november']);
+$december = floatVal($_POST['december']);
 $unit_cost = $_POST['unit_cost'];
 $unit_cost = str_replace(",","",$unit_cost);
 $rate = "";
@@ -439,7 +439,7 @@ $today = date("m/d/Y H:i");
 				$result4New = $crudapp->insertRecord($conn,$data6,$table4);
 				$cnd = "reference_no = '$ref_no' AND rowid = '$id' AND version =$version";
 				$result3New = $crudapp->updateRecord2($conn,$data5,$table3,$cnd);
-				
+
 			} else {
 				$data3 = array("code"=>$code,"quantity"=>$quantity,"available"=>$available,"total_cost"=>$available,"unit_cost"=>$unit_cost,"saveFlag"=>0,"foreign_curr"=>$CUR_CODE_VAL,"foreign_cost"=>$foreign_cost,"updatedAt"=>$today,"updatedBy"=>$user);	
 				$data4 = array("january"=>$january,"february"=>$february,
@@ -449,6 +449,7 @@ $today = date("m/d/Y H:i");
 				$result = $crudapp->updateRecord($conn,$data3,$table,"id",$id);
 				$result2 = $crudapp->updateRecord($conn,$data4,$table2,"id",$id);
 				$result4 = $crudapp->updateRecord($conn,$data6,$table4,"id",$id);
+
 			}
 			
 			//Insert Record to Audit by Benjie Manalaysay 3/28/2016
@@ -456,6 +457,7 @@ $today = date("m/d/Y H:i");
 			$audit = $crudapp->insertRecord($conn,$auditData,"R5_CUSTOM_AUDIT_APP_LINES");
 		
 		} else {
+
 			$result  = $crudapp->insertRecord($conn,$data,$table);
 			$result2 = $crudapp->insertRecord($conn,$data2,$table2);
 			$result3 = $crudapp->insertRecord($conn,$data5,$table3);

@@ -122,20 +122,33 @@ if (isset($_FILES["item-based-file"])){
 
 					if($has_data){
 						$tmp["code"] = $row_data[0];
-						$tmp["CUR_CODE"] = $row_data[1];
-						$tmp["january"] = $row_data[2];
-						$tmp["february"] = $row_data[3];
-						$tmp["march"] = $row_data[4];
-						$tmp["april"] = $row_data[5];
-						$tmp["may"] = $row_data[6];
-						$tmp["june"] = $row_data[7];
-						$tmp["july"] = $row_data[8];
-						$tmp["august"] = $row_data[9];
-						$tmp["september"] = $row_data[10];
-						$tmp["october"] = $row_data[11];
-						$tmp["november"] = $row_data[12];
-						$tmp["december"] = $row_data[13];
-
+						$tmp["CUR_CODE"] = floatval($row_data[1]);
+						$tmp["january"] = floatval($row_data[2]);
+						$tmp["february"] = floatval($row_data[3]);
+						$tmp["march"] = floatval($row_data[4]);
+						$tmp["april"] = floatval($row_data[5]);
+						$tmp["may"] = floatval($row_data[6]);
+						$tmp["june"] = floatval($row_data[7]);
+						$tmp["july"] = floatval($row_data[8]);
+						$tmp["august"] = floatval($row_data[9]);
+						$tmp["september"] = floatval($row_data[10]);
+						$tmp["october"] = floatval($row_data[11]);
+						$tmp["november"] = floatval($row_data[12]);
+						$tmp["december"] = floatval($row_data[13]);
+						// $tmp["code"] = $row_data[0];
+						// $tmp["CUR_CODE"] = $row_data[1];
+						// $tmp["january"] = $row_data[2];
+						// $tmp["february"] = $row_data[3];
+						// $tmp["march"] = $row_data[4];
+						// $tmp["april"] = $row_data[5];
+						// $tmp["may"] = $row_data[6];
+						// $tmp["june"] = $row_data[7];
+						// $tmp["july"] = $row_data[8];
+						// $tmp["august"] = $row_data[9];
+						// $tmp["september"] = $row_data[10];
+						// $tmp["october"] = $row_data[11];
+						// $tmp["november"] = $row_data[12];
+						// $tmp["december"] = $row_data[13];
 						array_push($record_items, $tmp);
 
 						if($errorFlag){
@@ -149,6 +162,8 @@ if (isset($_FILES["item-based-file"])){
 				}
 			}
 
+			// var_dump($record_items);
+			// exit();
 			if($all_data_error_flag){
 				//$objPHPExcel = new PHPExcel("");
 				$objPHPExcel->setActiveSheetIndex(0);
@@ -286,8 +301,10 @@ if (isset($_FILES["item-based-file"])){
 				$table2 = "R5_REF_ITEMBASE_BUDGET_MONTH";
 				$table3 = "R5_EAM_DPP_ITEMBASE_BRIDGE";
 				$table4 = "R5_REF_ITEMBASE_BUDGET_QUARTERLY";
-
+				// var_dump($data);
+				// exit();
 				$result  = $crudapp->insertRecordBatch($conn,$data,$table);
+				
 				$result2 = $crudapp->insertRecordBatch($conn,$data2,$table2);
 				$result3 = $crudapp->insertRecordBatch($conn,$data3,$table3);
 				$result4 = $crudapp->insertRecordBatch($conn,$data4,$table4);

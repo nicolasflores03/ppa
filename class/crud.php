@@ -1221,14 +1221,24 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		$values = "";
 		$cnt = count($data);
 		$ctr = 1;
-		
+	
 		foreach ($data as $key => $value){
 			if ($cnt != $ctr){
 				$fields .= $key.", ";
-				$values .= "'$value', ";
+				
+				if(gettype($value) == "string" ) {
+					$values .= "'$value', ";
+				} else {
+					$values .= "$value, ";
+				}
 			}else{
 				$fields .= $key;
-				$values .= "'$value'";
+				// $values .= "'$value'";
+				if(gettype($value) == "string" ) {
+					$values .= "'$value' ";
+				} else {
+					$values .= "$value";
+				}
 			}			
 			$ctr++;
 		}
@@ -1260,7 +1270,11 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				if($key == 0){
 					$fields .= $col . ", ";
 				}
-				$sql_values .= "'" .$val . "', ";
+				if(gettype($val) == "string" ) {
+					$sql_values .= "'" .$val . "', ";
+				} else {
+					$sql_values .=  $val . ", ";
+				}
 			}
 			$sql .= "(".rtrim($sql_values,", ")."), ";
 		}

@@ -291,7 +291,7 @@ class filterClass{
 				$content .= "<tr class='test' onclick=\"onclickEvent('$id');\">";
 					foreach($column as $fieldName){
 						if ($fieldName != "id"){
-							if($fieldName == "available") {
+							if(in_array($fieldName, array("available",'Jan','Feb','Mar','Apr','may','Jun','Jul','Aug','Sept','Oct','Nov','Dec')) ) {
 								$content .= "<td class='$fieldName'>".number_format($views[$fieldName],2,".",",")."</td>";
 							} else {
 								$content .= "<td class='$fieldName'>".$views[$fieldName]."</td>";
