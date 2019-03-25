@@ -4,7 +4,7 @@
 // echo "user is hardcoded";
 class crudClass{
 
-	public $cognos_url = "http://192.168.1.38:8080/crn/cgi-bin/mod_cognos.dll?";
+	public $cognos_url = "http://report.eam.fdcutilities.com:8080/crn/cgi-bin/mod_cognos.dll?";
 /* Update Session*/
 public function updateSession($conn,$user)
 {
@@ -1226,7 +1226,7 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			if ($cnt != $ctr){
 				$fields .= $key.", ";
 				
-				if(gettype($value) == "string" ) {
+				if(!is_numeric($value)) {
 					$values .= "'$value', ";
 				} else {
 					$values .= "$value, ";
@@ -1234,7 +1234,7 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			}else{
 				$fields .= $key;
 				// $values .= "'$value'";
-				if(gettype($value) == "string" ) {
+				if(!is_numeric($value) ) {
 					$values .= "'$value' ";
 				} else {
 					$values .= "$value";
@@ -1243,9 +1243,11 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 			$ctr++;
 		}
 
+		$values .= rtrim($values,", ");
+
 		$sql = "INSERT INTO $table($fields) 
 		VALUES($values)"; 
-				
+		
 		$result = sqlsrv_query($conn,$sql);
 		
 		if( $result === false) {
@@ -1270,7 +1272,7 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 				if($key == 0){
 					$fields .= $col . ", ";
 				}
-				if(gettype($val) == "string" ) {
+				if(!is_numeric($value)) {
 					$sql_values .= "'" .$val . "', ";
 				} else {
 					$sql_values .=  $val . ", ";
