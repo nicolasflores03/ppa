@@ -91,172 +91,177 @@ $today = date("m/d/Y H:i");
 		$table = "dbo.R5_BUDGET_MOVEMENT";
 		$condition = "id = '$id'";
 	$isSufficient = false;
-		$updateStats = $crudapp->updateRecord2($conn,$data,$table,$condition);
-		if ($status == "Approved"){
-			$isSufficient = $crudapp->checkBudgetMovementBalance($conn,$id);
-			if($isSufficient){
-				
-				$updateBudget = $crudapp->updateBudgetMovement($conn,$id);
-				if( $updateStats == 1) {
-						//SEND EMAIL
-						
-						/*--
-						Created = Department Head
-						For Review = Other Dept Head
-						Endorsed = Send Finance/Budget Officer
-						Approved = Send Dept Head / Budget Officer
-						--*/
-		
-						if($status == "For Review"){
-						
-						//from
-						$emailfilter = "id = 1";
-						$emailcolumn = $crudapp->readColumn($conn,"R5_EMAIL_TEMPLATE");
-						$emailinfo = $crudapp->listTable($conn,"R5_EMAIL_TEMPLATE",$emailcolumn,$emailfilter);
-						$subject = @$emailinfo[0]['subject'];
-						$body = @$emailinfo[0]['body'];
-		
-						$content = "This is to inform you that there is a Budget Movement Request that is subject $status as of $today";
-						$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>ID #: $id<br>";
-						
-						$body = str_replace("\$content",$content,$body);
-					
-						//EMAIL Receiver
-						$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$frm_mrc' AND ORG_CODE = '$ORG_CODE' AND DH = 1) AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$frm_mrc'";
-						$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
-						$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
-						$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
-						
-						$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
-						
-						//to
-						
-						//EMAIL Receiver
-						$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$to_mrc' AND ORG_CODE = '$ORG_CODE' AND DH = 1) AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$to_mrc'";
-						$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
-						$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
-						$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
-						
-						$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
-						
-						
-						}else if ($status == "Endorsed"){
-						
-						//finance
-						$emailfilter = "id = 1";
-						$emailcolumn = $crudapp->readColumn($conn,"R5_EMAIL_TEMPLATE");
-						$emailinfo = $crudapp->listTable($conn,"R5_EMAIL_TEMPLATE",$emailcolumn,$emailfilter);
-						$subject = @$emailinfo[0]['subject'];
-						$body = @$emailinfo[0]['body'];
-		
-						$content = "This is to inform you that there is a Budget Movement Request that is subject $status as of $today";
-						$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>ID #: $id<br>";
-						
-						$body = str_replace("\$content",$content,$body);
-					
-						//EMAIL Receiver
-						$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE ORG_CODE = '$ORG_CODE' AND FI = 1) AND ORG_CODE = '$ORG_CODE'";
-						$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
-						$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
-						$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
-						
-						$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
-						
-						
-						
-						}else if ($status == "Approved"){
-						
-						/* COMMENT AS PER SIR BOY REQUEST 09-16-2015 4:09PM
-						
-						//Department head
-						$emailfilter = "id = 1";
-						$emailcolumn = $crudapp->readColumn($conn,"R5_EMAIL_TEMPLATE");
-						$emailinfo = $crudapp->listTable($conn,"R5_EMAIL_TEMPLATE",$emailcolumn,$emailfilter);
-						$subject = @$emailinfo[0]['subject'];
-						$body = @$emailinfo[0]['body'];
-		
-						$content = "This is to inform you that there is a Budget Movement Request that was $status as of $today";
-						$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>ID #: $id<br>";
-						
-						$body = str_replace("\$content",$content,$body);
-					
-						//EMAIL Receiver
-						$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$to_mrc' AND ORG_CODE = '$ORG_CODE' AND DH = 1) AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$to_mrc'";
-						$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
-						$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
-						$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
-						
-						$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
-						
-						//Budget Officer
-						
-						//EMAIL Receiver
-						$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$to_mrc' AND ORG_CODE = '$ORG_CODE' AND BO = 1) AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$to_mrc'";
-						$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
-						$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
-						$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
-						
-						$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
-						*/
-										
-						}else{
-						
-						//Department head
-						$emailfilter = "id = 1";
-						$emailcolumn = $crudapp->readColumn($conn,"R5_EMAIL_TEMPLATE");
-						$emailinfo = $crudapp->listTable($conn,"R5_EMAIL_TEMPLATE",$emailcolumn,$emailfilter);
-						$subject = @$emailinfo[0]['subject'];
-						$body = @$emailinfo[0]['body'];
-		
-						$content = "This is to inform you that there is a Budget Movement Request that was $status as of $today";
-						$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>ID #: $id<br>";
-						
-						$body = str_replace("\$content",$content,$body);
-					
-						//EMAIL Receiver
-						$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$to_mrc' AND ORG_CODE = '$ORG_CODE' AND DH = 1) AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$to_mrc'";
-						$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
-						$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
-						$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
-						
-						/*
-						if($cost_center == 'CC8001') {
-							$crudapp->sentEmailCC($conn,"eam@fdcutilities.com",$receiver,$subject,$body);			
-						} else {
-							$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);			
-						}
-						*/
-						
-						$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
-						
-						//Budget Officer
-						$receiverId = $crudapp->GetReceiverId($conn,$id);
-		
-						//EMAIL Receiver
-						$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$to_mrc' AND ORG_CODE = '$ORG_CODE' AND BO = 1 AND USR_CODE = '$receiverId') AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$to_mrc'";
-						$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
-						
-						$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
-						$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
-						$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
-						
-						}
-						
-						
-						sqlsrv_commit( $conn );
-						echo "Transaction committed.<br />";
-					} else {
-						sqlsrv_rollback( $conn );
-						echo "Transaction rolled back.<br />";
-					}
-					header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&ORG_CODE=".$ORG_CODE."&MRC_CODE=".$MRC_CODE."&res=pass&msg=You have successfully updated the status of this records!");
-			}else{
-				$errorMessage = "Insufficient budget!";
-				echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
-			}
-		} else if ($status == "Revision Request"){
-			$updateBudget = $crudapp->updateBudgetMovementRejected($conn,$id);
+	$updateStats = $crudapp->updateRecord2($conn,$data,$table,$condition);
+	if ($status == "Approved"){
+		$isSufficient = $crudapp->checkBudgetMovementBalance($conn,$id);
+		if($isSufficient){
+			$updateBudget = $crudapp->updateBudgetMovement($conn,$id);
+		} else {
+			$errorMessage = "Insufficient budget!";
+			echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
+	
+			sqlsrv_rollback( $conn );
+			header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&ORG_CODE=".$ORG_CODE."&MRC_CODE=".$MRC_CODE."&res=fail&msg=".$errorMessage);
+			exit();
 		}
+	}else if ($status == "Revision Request"){
+		$updateBudget = $crudapp->updateBudgetMovementRejected($conn,$id);
+	}
+	
+		if( $updateStats == 1) {
+			//SEND EMAIL
+			
+			/*--
+			Created = Department Head
+			For Review = Other Dept Head
+			Endorsed = Send Finance/Budget Officer
+			Approved = Send Dept Head / Budget Officer
+			--*/
+
+			if($status == "For Review"){
+			
+			//from
+			$emailfilter = "id = 1";
+			$emailcolumn = $crudapp->readColumn($conn,"R5_EMAIL_TEMPLATE");
+			$emailinfo = $crudapp->listTable($conn,"R5_EMAIL_TEMPLATE",$emailcolumn,$emailfilter);
+			$subject = @$emailinfo[0]['subject'];
+			$body = @$emailinfo[0]['body'];
+
+			$content = "This is to inform you that there is a Budget Movement Request that is subject $status as of $today";
+			$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>ID #: $id<br>";
+			
+			$body = str_replace("\$content",$content,$body);
+		
+			//EMAIL Receiver
+			$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$frm_mrc' AND ORG_CODE = '$ORG_CODE' AND DH = 1) AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$frm_mrc'";
+			$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
+			$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
+			$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
+			
+			$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
+			
+			//to
+			
+			//EMAIL Receiver
+			$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$to_mrc' AND ORG_CODE = '$ORG_CODE' AND DH = 1) AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$to_mrc'";
+			$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
+			$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
+			$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
+			
+			$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
+			
+			
+			}else if ($status == "Endorsed"){
+			
+			//finance
+			$emailfilter = "id = 1";
+			$emailcolumn = $crudapp->readColumn($conn,"R5_EMAIL_TEMPLATE");
+			$emailinfo = $crudapp->listTable($conn,"R5_EMAIL_TEMPLATE",$emailcolumn,$emailfilter);
+			$subject = @$emailinfo[0]['subject'];
+			$body = @$emailinfo[0]['body'];
+
+			$content = "This is to inform you that there is a Budget Movement Request that is subject $status as of $today";
+			$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>ID #: $id<br>";
+			
+			$body = str_replace("\$content",$content,$body);
+		
+			//EMAIL Receiver
+			$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE ORG_CODE = '$ORG_CODE' AND FI = 1) AND ORG_CODE = '$ORG_CODE'";
+			$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
+			$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
+			$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
+			
+			$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
+			
+			
+			
+			}else if ($status == "Approved"){
+			
+			/* COMMENT AS PER SIR BOY REQUEST 09-16-2015 4:09PM
+			
+			//Department head
+			$emailfilter = "id = 1";
+			$emailcolumn = $crudapp->readColumn($conn,"R5_EMAIL_TEMPLATE");
+			$emailinfo = $crudapp->listTable($conn,"R5_EMAIL_TEMPLATE",$emailcolumn,$emailfilter);
+			$subject = @$emailinfo[0]['subject'];
+			$body = @$emailinfo[0]['body'];
+
+			$content = "This is to inform you that there is a Budget Movement Request that was $status as of $today";
+			$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>ID #: $id<br>";
+			
+			$body = str_replace("\$content",$content,$body);
+		
+			//EMAIL Receiver
+			$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$to_mrc' AND ORG_CODE = '$ORG_CODE' AND DH = 1) AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$to_mrc'";
+			$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
+			$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
+			$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
+			
+			$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
+			
+			//Budget Officer
+			
+			//EMAIL Receiver
+			$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$to_mrc' AND ORG_CODE = '$ORG_CODE' AND BO = 1) AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$to_mrc'";
+			$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
+			$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
+			$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
+			
+			$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
+			*/
+							
+			}else{
+			
+			//Department head
+			$emailfilter = "id = 1";
+			$emailcolumn = $crudapp->readColumn($conn,"R5_EMAIL_TEMPLATE");
+			$emailinfo = $crudapp->listTable($conn,"R5_EMAIL_TEMPLATE",$emailcolumn,$emailfilter);
+			$subject = @$emailinfo[0]['subject'];
+			$body = @$emailinfo[0]['body'];
+
+			$content = "This is to inform you that there is a Budget Movement Request that was $status as of $today";
+			$content .= "<br><b>Details:</b><br>Organization: $ORG_CODE<br>ID #: $id<br>";
+			
+			$body = str_replace("\$content",$content,$body);
+		
+			//EMAIL Receiver
+			$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$to_mrc' AND ORG_CODE = '$ORG_CODE' AND DH = 1) AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$to_mrc'";
+			$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
+			$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
+			$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
+			
+			/*
+			if($cost_center == 'CC8001') {
+				$crudapp->sentEmailCC($conn,"eam@fdcutilities.com",$receiver,$subject,$body);			
+			} else {
+				$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);			
+			}
+			*/
+			
+			$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
+			
+			//Budget Officer
+			$receiverId = $crudapp->GetReceiverId($conn,$id);
+
+			//EMAIL Receiver
+			$receiverfilter = "USR_CODE COLLATE Latin1_General_CI_AS IN (SELECT USR_CODE FROM R5_CUSTOM_SAM WHERE MRC_CODE = '$to_mrc' AND ORG_CODE = '$ORG_CODE' AND BO = 1 AND USR_CODE = '$receiverId') AND ORG_CODE = '$ORG_CODE' AND MRC_CODE = '$to_mrc'";
+			$receivercolumn = $crudapp->readColumn($conn,"R5_VIEW_USERINFO");
+			
+			$receiverinfo = $crudapp->listTable($conn,"R5_VIEW_USERINFO",$receivercolumn,$receiverfilter);
+			$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
+			$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
+			
+			}
+			
+			
+			sqlsrv_commit( $conn );
+			echo "Transaction committed.<br />";
+		} else {
+			sqlsrv_rollback( $conn );
+			echo "Transaction rolled back.<br />";
+		}
+		header("Location:".$_SERVER['PHP_SELF']."?login=".$user."&year=".$year."&ORG_CODE=".$ORG_CODE."&MRC_CODE=".$MRC_CODE."&res=pass&msg=You have successfully updated the status of this records!");
+	
 	}else{
 		echo '<script>alert("Validation Error:\n\n'.$errorMessage.'");</script>';
 	}
