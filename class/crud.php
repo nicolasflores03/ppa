@@ -1213,7 +1213,7 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 
 /*-------Generic CRUD-------*/
 	/* Insert Record to Table*/
-	    public function insertRecord($conn,$data,$table)
+	        public function insertRecord($conn,$data,$table)
     {			
 		
 		// Extract value of array $data and store to variables
@@ -1221,33 +1221,21 @@ $SES_EXPIRES2 = new DateTime($SES_EXPIRES2);
 		$values = "";
 		$cnt = count($data);
 		$ctr = 1;
-	
+		
 		foreach ($data as $key => $value){
 			if ($cnt != $ctr){
 				$fields .= $key.", ";
-				
-				if(!is_numeric($value)) {
-					$values .= "'$value', ";
-				} else {
-					$values .= "$value, ";
-				}
+				$values .= "'$value', ";
 			}else{
 				$fields .= $key;
-				// $values .= "'$value'";
-				if(!is_numeric($value) ) {
-					$values .= "'$value' ";
-				} else {
-					$values .= "$value";
-				}
+				$values .= "'$value'";
 			}			
 			$ctr++;
 		}
 
-		$values .= rtrim($values,", ");
-
 		$sql = "INSERT INTO $table($fields) 
 		VALUES($values)"; 
-		
+				
 		$result = sqlsrv_query($conn,$sql);
 		
 		if( $result === false) {
