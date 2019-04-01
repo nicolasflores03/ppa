@@ -1365,7 +1365,7 @@ $("#destination_tb").change(function(e) {
 						<td class="textLabel">Change Status:</td>
 						<td>
 						<select name="status" id="status">
-							<option value="">-- Please select --</option>
+							<option value="For Review">For Review</option>
 							<option value="Rejected">Rejected</option>
 						</select>
 						</td>

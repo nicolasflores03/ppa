@@ -177,7 +177,7 @@ $today = date("m/d/Y H:i");
 			
 			}else if ($status == "Approved"){
 			
-			/* COMMENT AS PER SIR BOY REQUEST 09-16-2015 4:09PM
+			// COMMENT AS PER SIR BOY REQUEST 09-16-2015 4:09PM
 			
 			//Department head
 			$emailfilter = "id = 1";
@@ -208,7 +208,7 @@ $today = date("m/d/Y H:i");
 			$receiver = @$receiverinfo[0]['PER_EMAILADDRESS'];
 			
 			$crudapp->sentEmail($conn,"eam@fdcutilities.com",$receiver,$subject,$body);	
-			*/
+			
 							
 			}else{
 			
@@ -587,7 +587,7 @@ if(res !=""){
 	
 			
 				<td class="textLabel"></td>
-				<td class="textField" colspan="3"></td>	
+				<td class="textField" colspfan="3"></td>	
 			</tr>
 		</tbody>
 	</table>
